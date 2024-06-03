@@ -1,5 +1,5 @@
-<nav class="sidebar sidebar-offcanvas" id="sidebar" style="background-color: #fdeb3d;" >
-        <ul class="nav">
+<nav class="sidebar sidebar-offcanvas" id="sidebar" style="background-color: #773697;" >
+        <ul class="nav text-light">
           <li class="nav-item nav-profile">
             <div class="nav-link">
               <div class="user-wrapper">
@@ -7,50 +7,50 @@
                   <img src="">
                 </div>
                 <div class="text-wrapper">
-                  <p class="profile-name">{{user.username | upper}} </p>
+                  <p class="profile-name text-light">{{user.username | upper}} </p>
                   <div>
                     <small class="designation text-muted">Administrator</small>
                     <span class="status-indicator online"></span>
                   </div>
                 </div>
               </div>
-              <a href="{% url 'hrms:employee_new' %}" class="btn btn-block" style="background-color: #773697;">New Staff
+              <a href="{% url 'hrms:employee_new' %}" class="btn btn-block" style="background-color: #fdeb3d;">New Staff
                 <i class="mdi mdi-plus"></i>
               </a>
             </div>
           </li>
-          <li class="nav-item">
+          <li class="nav-item text-light">
             <a class="nav-link" href="{% url 'hrms:dashboard' %}">
-              <i class="fa  fa-dashboard"></i>
-              <span class="menu-title">&emsp;Dashboard</span>
+              <i class="fa  fa-dashboard text-light"></i>
+              <span class="menu-title text-light">&emsp;Dashboard</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
-              <i class="fa fa-user text-dark"></i>
-              <span class="menu-title">&emsp;Employee</span>
+              <i class="fa fa-user text-light"></i>
+              <span class="menu-title text-light  ">&emsp;Employee</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
-              <i class="fa fa-calendar"></i>
-              <span class="menu-title">&emsp;Attendance</span>
+              <i class="fa fa-calendar text-light"></i>
+              <span class="menu-title text-light">&emsp;Attendance</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:leave_new' %}">
-              <i class="fa fa-sign-out "></i>
-              <span class="menu-title">&emsp;Leave</span>
+              <i class="fa fa-sign-out text-light"></i>
+              <span class="menu-title text-light">&emsp;Leave</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-              <i class="fa fa-folder "></i>
-              <span class="menu-title">&emsp;Department</span>
-              <i class="menu-arrow"></i>
+              <i class="fa fa-folder text-light "></i>
+              <span class="menu-title text-light">&emsp;Department</span>
+              <i class="menu-arrow text-light"></i>
             </a>
-              <a class="nav-link" href="{% url 'hrms:dept_new' %}"><i class="fa fa-plus"></i>&emsp;New Department</a>
+              <a class="nav-link text-light" href="{% url 'hrms:dept_new' %}"><i class="fa fa-plus text-light"></i>&emsp;New Department</a>
               
             <hr>
 
@@ -68,15 +68,15 @@
 
           <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:recruitmentall' %}">
-              <i class="fa fa-database"></i>
-              <span class="menu-title">&emsp;Recruitment</span>
+              <i class="fa fa-database text-light"></i>
+              <span class="menu-title text-light">&emsp;Recruitment</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:payroll' %}">
-              <i class="fa fa-usd"></i>
-              <span class="menu-title">&emsp;Payroll</span>
+              <i class="fa fa-usd text-light"></i>
+              <span class="menu-title text-light">&emsp;Payroll</span>
             </a>
           </li>
 
@@ -84,8 +84,8 @@
 
           <li class="nav-item">
             <a class="nav-link" href="pages/icons/font-awesome.html">
-              <i class="fa  fa-gears"></i>
-              <span class="menu-title">&emsp;Settings</span>
+              <i class="fa  fa-gears text-light"></i>
+              <span class="menu-title text-light">&emsp;Settings</span>
             </a>
           </li> {% endcomment %}
         </ul>
