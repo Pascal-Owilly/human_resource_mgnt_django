@@ -1,0 +1,49 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Title Here{% endblock %}</title>
+    <!-- Add your CSS links here -->
+    {% block css %}
+    <link rel="stylesheet" href="{% static 'hrms/css/style.css'%}">
+    <style>
+        .body-bg {
+            background: url('https://images.unsplash.com/photo-1556228987-8f6724e22d24') no-repeat center center fixed; /* Add background image */
+            background-size: contain;
+            height: 100%;
+        }
+        /* Your other CSS styles */
+    </style>
+    {% endblock %}
+</head>
+<body class='body-bg'>
+
+    <!-- Navbar section -->
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'hrms:dashboard' %}">
+                <img src="{% if user.thumb %}{{ user.thumb.url }}{% else %}{% static 'hrms/images/jawabu_logo.jpeg' %}{% endif %}" 
+                    class="brand-logo" alt="Company Logo" style="width: 100px;"/>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="UserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Hello, {{ user.username | upper }}!
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="UserDropdown">
+                            <a class="dropdown-item" href="{% url 'hrms:logout' %}">Log Out</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}

@@ -1,0 +1,16 @@
+{% load static %}
+
+<footer class="footer bg-dark text-white">
+  <div class="container-fluid clearfix">
+    <span id="copyright" class="text-muted d-block text-center text-sm-center d-sm-inline-block">Copyright ©
+      2024 Jawabu Best Limited. All rights reserved.</span>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var currentYear = new Date().getFullYear();
+    var copyright = document.getElementById("copyright");
+    copyright.textContent = "Copyright © " + currentYear + " All rights reserved.";
+  });
+</script>
