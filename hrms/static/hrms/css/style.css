@@ -14190,7 +14190,7 @@ html {
   overflow: auto !important; }
 
 .page-body-wrapper {
-  min-height: calc(100vh - 63px);
+  min-height: 100vh ;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: row;
@@ -14198,7 +14198,8 @@ html {
   padding-left: 0;
   padding-right: 0; }
   .page-body-wrapper:not(.auth-page) {
-    padding-top: 63px; }
+    padding-top: 1px;
+   }
   .page-body-wrapper.full-page-wrapper {
     width: 100%;
     min-height: 100vh; }

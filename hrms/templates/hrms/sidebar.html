@@ -14,9 +14,14 @@
                   </div>
                 </div>
               </div>
-              <a href="{% url 'hrms:employee_new' %}" class="btn btn-block" style="background-color: #fdeb3d;">New Staff
-                <i class="mdi mdi-plus"></i>
-              </a>
+              <div class="d-flex justify-content-between wrap">
+                <a href="{% url 'hrms:employee_new' %}" class="btn mx-2 btn-sm me-2 " style="background-color: #fdeb3d;font-size: 12px;">
+                  New Staff <i class="mdi mdi-plus"></i>
+                </a>
+                <a href="{% url 'hrms:employee_new' %}" class="btn btn-sm" style="background-color: #fdeb3d;font-size: 12px;">
+                  Multiple <i class="mdi mdi-plus"></i>
+                </a>
+              </div>
             </div>
           </li>
           <li class="nav-item text-light">
@@ -50,23 +55,24 @@
               <span class="menu-title text-light">&emsp;Department</span>
               <i class="menu-arrow text-light"></i>
             </a>
-              <a class="nav-link text-light" href="{% url 'hrms:dept_new' %}"><i class="fa fa-plus text-light"></i>&emsp;New Department</a>
-              
-            <hr>
+          </li>
 
+            <hr>
+            <li class="nav-item">
+              <a class="nav-link text-light" href="{% url 'hrms:dept_new' %}"><i class="fa fa-plus text-light"></i>&emsp;New Department</a>
+            </li>
             <div class="collapse" id="ui-basic">
               <ul class="nav flex-column sub-menu">
               {% for dept in depts  %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{{dept.get_absolute_url}}">{{dept.name}}</a>
+                <li class="nav-item bg-light">
+                  <a class="nav-link text-dark " href="{{dept.get_absolute_url}}">{{dept.name}}</a>
                 </li>
               {% endfor %}
               </ul>
             </div>
-          </li>
 
 
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:recruitmentall' %}">
               <i class="fa fa-database text-light"></i>
               <span class="menu-title text-light">&emsp;Recruitment</span>
@@ -78,7 +84,7 @@
               <i class="fa fa-usd text-light"></i>
               <span class="menu-title text-light">&emsp;Payroll</span>
             </a>
-          </li>
+          </li> -->
 
           {% comment %} <li class="nav-item">
 

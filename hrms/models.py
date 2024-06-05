@@ -11,9 +11,9 @@ class User(AbstractUser):
 # Create your models here.
 class Department(models.Model):
     name = models.CharField(max_length=70, null=False, blank=False)
-    history = models.TextField(max_length=1000,null=True,blank=True, default='No History')
+    department = models.TextField(max_length=1000,null=True,blank=True, default='No Description')
+    branch = models.CharField(max_length=100, null=True, blank=True)
     
-
     def __str__(self):
         return self.name
 
@@ -62,7 +62,7 @@ class Kin(models.Model):
     
 
 class Attendance (models.Model):
-    STATUS = (('PRESENT', 'PRESENT'), ('ABSENT', 'ABSENT'),('UNAVAILABLE', 'UNAVAILABLE'))
+    STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))
     date = models.DateField(auto_now_add=True)
     first_in = models.TimeField()
     last_out = models.TimeField(null=True)
