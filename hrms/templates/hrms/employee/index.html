@@ -25,7 +25,7 @@
                       <thead>
                         <tr>
                           <th>
-                            Thumbnail
+                            Picture
                           </th>
                           <th>
                             First name
@@ -48,19 +48,19 @@
                       {% for employee in employees  %}
                         <tr>
                           <td class="font-weight-medium">
-                            <img src="{{employee.thumb.url}}" class='rounded img-fluid' alt="">
+                            <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class='img-fluid rounded-circle' alt="">
                           </td>
                           <td>
-                            {{employee.first_name}}
+                            {{employee.employee.first_name}}
                           </td>
                           <td>
-                            {{employee.last_name}}
+                            {{employee.employee.last_name}}
                           </td>
                           <td>
-                           {{employee.mobile}}
+                           {{employee.employee.mobile}}
                           </td>
                           <td class="text-danger"> 
-                            {{employee.email}}
+                            {{employee.employee.email}}
                           </td>
                           <td>
                           

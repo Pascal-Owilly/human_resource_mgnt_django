@@ -4,14 +4,13 @@ from django.urls import reverse
 from django.utils import timezone
 import time
 from django.contrib.auth.models import AbstractUser
-
-class User(AbstractUser):
-    thumb = models.ImageField()
+from phonenumber_field.modelfields import PhoneNumberField
+import uuid
+import string
 
 # Create your models here.
 class Department(models.Model):
     name = models.CharField(max_length=70, null=False, blank=False)
-    department = models.TextField(max_length=1000,null=True,blank=True, default='No Description')
     branch = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
@@ -20,27 +19,69 @@ class Department(models.Model):
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
     
+def generate_short_id(prefix, model_class, field_name, length=4):
+    while True:
+        new_id = prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+        if not model_class.objects.filter(**{field_name: new_id}).exists():
+            return new_id
 
-class Employee(models.Model):
-    LANGUAGE = (('english','ENGLISH'),('yoruba','YORUBA'),('hausa','HAUSA'),('french','FRENCH'))
-    GENDER = (('male','MALE'), ('female', 'FEMALE'),('other', 'OTHER'))
-    emp_id = models.CharField(max_length=70, default='emp'+str(random.randrange(100,999,1)))
+def generate_emp_id():
+    return generate_short_id('emp-', User, 'emp_id')
+
+def generate_mng_id():
+    return generate_short_id('mng-', User, 'mng_id')
+
+class User(AbstractUser):
+    SUPERUSER = 'superuser'
+    EMPLOYEE= 'employee'
+    MANAGER = 'manager'
+    CLIENT = 'client'
+    NO_ROLE = 'no_role'
+
+    ROLE_CHOICES = [
+        (SUPERUSER, 'Superuser'),
+        (EMPLOYEE, 'Employee'),
+        (MANAGER, 'Manager'),
+        (CLIENT, 'Client'),
+        (NO_ROLE, 'No Role'),
+    ]
+
+    LANGUAGE = (('english','ENGLISH'), ('french','FRENCH'), ('yoruba','YORUBA'),('hausa','HAUSA'))
+    GENDER = (('male','MALE'), ('female', 'FEMALE'))
+
+    role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)  # Default role can be changed
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=30 , blank=True, null=True)
+    username = models.CharField(max_length=30, unique=True)
     thumb = models.ImageField(blank=True,null=True)
-    first_name = models.CharField(max_length=50, null=False)
-    last_name = models.CharField(max_length=50, null=False)
-    mobile = models.CharField(max_length=15)
-    email = models.EmailField(max_length=125, null=False)
-    address = models.TextField(max_length=100, default='')
-    emergency = models.CharField(max_length=11)
-    gender = models.CharField(choices=GENDER, max_length=10)
-    department = models.ForeignKey(Department,on_delete=models.SET_NULL, null=True)
-    joined = models.DateTimeField(default=timezone.now)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    mobile = PhoneNumberField(null=True, blank=True)
+    address = models.CharField(max_length=100, null=True, blank=True)  # New field for address
+
+    emp_id = models.CharField(max_length=70, default=generate_emp_id, unique=True, editable=False)
+    mng_id = models.CharField(max_length=70, default=generate_mng_id, unique=True, editable=False)
+    emergency = models.CharField(max_length=11, null=True, blank=True)
+    gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
+    department = models.ForeignKey(Department,on_delete=models.SET_NULL, null=True, blank=True)
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
     nuban = models.CharField(max_length=10, default='0123456789')
-    bank = models.CharField(max_length=25, default='First Bank Plc')
+    bank = models.CharField(max_length=25, default='Equity')
     salary = models.CharField(max_length=16,default='00,000.00')      
+    
     def __str__(self):
-        return self.first_name
+            return f'{self.first_name} {self.last_name} '
+
+
+    def get_absolute_url(self):
+        return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
+    
+
+class Employee(models.Model):
+    employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.employee.first_name} {self.employee.last_name}'
         
     def get_absolute_url(self):
         return reverse("hrms:employee_view", kwargs={"pk": self.pk})

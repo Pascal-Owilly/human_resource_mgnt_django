@@ -16,16 +16,16 @@
                 </nav>
                     <div class="card">
                         <div class="card-body">
-                           <h4 class="text-center text-primary"><i class="fa fa-address-book-o">&emsp; Employee's Profile</i></h4><hr>   
+                           <h4 class="text-center text-primary"><i class="fa fa-address-book-o">&emsp; {{employee.employee.first_name}}'s Profile</i></h4><hr>   
                            <div class="row">
                                 <div class="col-lg-2 col-md-2 d-flex align-items-stretch grid-margin">
 
                                     <div class="card border-top border-bottom border-success">
                                         <div class="card-body">
-                                            <img src="{{employee.thumb.url}}" alt="" class="img-fluid" width='200px' height='200px'>
-                                            <p class="lead mt-2 text-center"> 
-                                            {{employee.emp_id | capfirst}} <br>
-                                            <small class='text-center text-secondary'>( ID )</small>
+                                            <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class='img-fluid rounded-circle' alt="">
+                                            <p class="lead mt-2 text-center" style="font-size: 16px;"> 
+                                            <small class='text-center text-secondary'>( ID )</small> <br />
+                                            {{employee.employee.emp_id | upper}} <br>
                                              </p>
                                             
                                         </div>
@@ -40,48 +40,36 @@
                                         <table class="table">
                                         <tr>
                                             <th style="width:50%">First Name:</th>
-                                            <td>{{employee.first_name}}</td>
+                                            <td>{{employee.employee.first_name}}</td>
                                         </tr>
                                         <tr>
                                             <th>Last Name</th>
-                                            <td>{{employee.last_name}}</td>
+                                            <td>{{employee.employee.last_name}}</td>
                                         </tr>
                                         <tr>
                                             <th>Mobile:</th>
-                                            <td>{{employee.mobile}}</td>
+                                            <td>{{employee.employee.mobile}}</td>
                                         </tr>
                                         <tr>
                                             <th>Email:</th>
-                                            <td>{{employee.email}}</td>
+                                            <td>{{employee.employee.email}}</td>
                                         </tr>
                                          <tr>
                                             <th>Gender:</th>
-                                            <td>{{employee.gender}}</td>
+                                            <td>{{employee.employee.gender}}</td>
                                         </tr>
                                         <tr>
                                             <th>Department:</th>
-                                            <td>{{employee.department}} Unit</td>
+                                            <td>{{employee.employee.department}} </td>
                                         </tr>
                                         <tr>
                                             <th>Language:</th>
-                                            <td>{{employee.language | capfirst}}</td>
+                                            <td>{{employee.employee.language | capfirst}}</td>
                                         </tr>
-                                         <tr>
-                                            <th>Monthly Salary:</th>
-                                            <td>#{{employee.salary}}</td>
-                                        </tr>
+                                        
                                          <tr>
                                             <th>Enrollment Date:</th>
-                                            <td>{{employee.joined}} </td>
-                                        </tr>
-                                        <tr>
-                                            <th>NUBAN:</th>
-                                            <td>{{employee.nuban}} </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Bank:</th>
-                                            <td>{{employee.bank}} </td>
-                                            
+                                            <td>{{employee.created_at}} </td>
                                         </tr>
                                         
                                         </table>

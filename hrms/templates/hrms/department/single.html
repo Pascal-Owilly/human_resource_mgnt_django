@@ -15,9 +15,9 @@
                                     <div class="col-lg-5">
                                         <div class="card border-left border-info shadow-sm">
                                             <div class="card-body">
-                                                <p class="lead">Brief History</p>
+                                                <p class="lead">Branch</p>
                                                 <p class='text-justify'>
-                                                    {{dept.history}}
+                                                    {{dept.branch}}
                                                 </p>
                                             </div>
                                         </div>
@@ -34,9 +34,9 @@
                                                             <div class="card border-bottom border-top border-info">
                                                                 <div class="card-body">
                                                                     <div class='text-center'>
-                                                                        <img class='img-fluid' src="{{employee.thumb.url}}" width='100' height='100' alt="{{employee.first_name}}">
-                                                                        <p>{{employee.last_name|capfirst}}.{{employee.first_name|slice:1}}</p>
-                                                                        <p>({{employee.emp_id|capfirst}})</p>
+                                                                        <img class='img-fluid' src="{{employee.employee.thumb.url}}" width='100' height='100' alt="{{employee.first_name}}">
+                                                                        <p>{{employee.employee.last_name|capfirst}}.{{employee.first_name|slice:1}}</p>
+                                                                        <p>({{employee.employee.emp_id|capfirst}})</p>
                                                                         <div>
                                                                             <a href="{% url 'hrms:employee_view' pk=employee.pk %}" class=" badge badge-info">view profile</a>
                                                                         </div>

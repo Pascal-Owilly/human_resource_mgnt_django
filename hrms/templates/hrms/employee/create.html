@@ -1,6 +1,6 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
-{% block title %} New Employee | ITSC-HRMS {% endblock title %}
+{% block title %} New Employee | JBL {% endblock title %}
 
 {% block content %}
 
@@ -13,7 +13,7 @@
                            <h4 class="text-center text-primary"><i class="fa fa-plus">&emsp; New Employee </i></h4><hr>
                                 <form enctype="multipart/form-data" action="{% url 'hrms:employee_new' %}" class="form-group" method="POST">
                                     {% csrf_token %}
-                                    <small class="mb-5">** All Fields are required</small>
+                                    <small class="mb-5">** All Fields are required</small> <br /><br />
                                         {{form.as_p}}
                                     <div class="text-center mt-3">
                                         <button class="btn btn-outline-success"><i class="mdi mdi-file-document"></i>Add Employee</button></button>

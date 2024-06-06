@@ -81,7 +81,7 @@
                         <tr>
                           
                           <th>
-                            Image
+                            Picture
                           </th>
                           <th>
                             First name
@@ -99,13 +99,14 @@
                       {% for worker in workers %}
                         <tr>
                           <td class="font-weight-medium">
-                            <img src="{{worker.thumb.url}}" class='img-fluid rounded-circle' alt="">
+                            <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class='img-fluid rounded-circle' alt="">
+                        </td>
+                        
+                          <td>
+                            {{worker.employee.first_name}}
                           </td>
                           <td>
-                            {{worker.first_name}}
-                          </td>
-                          <td>
-                            {{worker.last_name}}
+                            {{worker.employee.last_name}}
                           </td>
                           <td>
                             {{worker.mobile}} &emsp;<span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span>
