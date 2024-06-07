@@ -23,6 +23,7 @@ from django.template.loader import render_to_string
 
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.views.generic import TemplateView
+from datetime import datetime
 
 # Create your views here.
 class Index(TemplateView):
@@ -332,29 +333,130 @@ class Department_Update(LoginRequiredMixin,UpdateView):
 
 #Attendance View
 
-class Attendance_New (LoginRequiredMixin,CreateView):
-    model = Attendance
-    form_class = AttendanceForm
-    login_url = 'hrms:login'
-    template_name = 'hrms/attendance/create.html'
-    success_url = reverse_lazy('hrms:attendance_new')
+from django.utils import timezone
+from datetime import datetime
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["today"] = timezone.localdate()
-        pstaff = Attendance.objects.filter(Q(status='PRESENT') & Q (date=timezone.localdate())) 
-        context['present_staffers'] = pstaff
-        return context
-
-class Attendance_Out(LoginRequiredMixin,View):
+class Attendance_New(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
-    def get(self, request,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        # Get query parameters
+        date = request.GET.get('date')
+        keyword = request.GET.get('keyword')
 
-       user=Attendance.objects.get(Q(staff__id=self.kwargs['pk']) & Q(status='PRESENT')& Q(date=timezone.localdate()))
-       user.last_out=timezone.localtime()
-       user.save()
-       return redirect('hrms:attendance_new')   
+        # Retrieve attendance records based on the provided date
+        if date:
+            try:
+                selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+                present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date))
+            except ValueError:
+                selected_date = None
+                present_staffers = Attendance.objects.none()
+        else:
+            selected_date = timezone.localdate()
+            present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date))
+
+        # Perform search if keyword is provided
+        if keyword:
+            present_staffers = present_staffers.filter(
+                Q(staff__employee__first_name__icontains=keyword) |
+                Q(staff__employee__last_name__icontains=keyword)
+            )
+
+        context = {
+            'today': timezone.localdate(),
+            'present_staffers': present_staffers,
+            'selected_date': selected_date,
+            'keyword': keyword
+        }
+        return render(request, 'hrms/attendance/create.html', context)
+
+    def post(self, request, *args, **kwargs):
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+    
+        # Retrieve the Employee instance associated with the logged-in user
+        employee = Employee.objects.get(employee=request.user)
+        status = 'PRESENT'  # Default status
+
+        # Check if the staff member is already clocked in
+        clocked_in = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).exists()
+        
+        if clocked_in:
+            # Clocking out
+            attendance = Attendance.objects.get(staff=employee, date=timezone.localdate(), last_out__isnull=True)
+            attendance.last_out = timezone.localtime()
+            attendance.save()
+            messages.success(request, 'Clock-out successful!')
+        else:
+            # Clocking in
+            Attendance.objects.create(
+                staff=employee,
+                status=status,
+                first_in=timezone.localtime(),
+                latitude=latitude,
+                longitude=longitude
+            )
+            messages.success(request, 'Clock-in successful!')
+
+        return redirect('hrms:attendance_new')
+
+
+from geopy.distance import geodesic
+
+class Attendance_Out(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = Attendance.objects.get(
+                Q(staff__id=self.kwargs['pk']) & 
+                Q(status='PRESENT') & 
+                Q(date=timezone.localdate())
+            )
+            user.last_out = timezone.localtime()
+            user.save()
+            return redirect('hrms:attendance_new')
+        except Attendance.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Attendance record not found'})
+        
+class ClockInView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def post(self, request, *args, **kwargs):
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        # Retrieve the logged-in user's employee instance
+        employee = request.user.employee
+
+        # Define the geofence center and radius
+        geofence_center = (40.712776, -74.005974)  # Example: New York City coordinates
+        radius_km = 1.1  # 1.1 km
+
+        employee_location = (float(latitude), float(longitude))
+        if is_within_geofence(employee_location, geofence_center, radius_km):
+            # Check if the employee is already clocked in
+            attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
+            if attendance:
+                # Clocking out
+                attendance.last_out = timezone.localtime()
+                attendance.save()
+                messages.success(request, 'Clock-out successful!')
+            else:
+                # Clocking in
+                Attendance.objects.create(
+                    staff=employee,
+                    latitude=latitude,
+                    longitude=longitude,
+                    first_in=timezone.localtime(),
+                    status='PRESENT'
+                )
+                messages.success(request, 'Clock-in successful!')
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'You are outside the allowed geofence area'})
+
 
 class LeaveNew (LoginRequiredMixin,CreateView, ListView):
     model = Leave

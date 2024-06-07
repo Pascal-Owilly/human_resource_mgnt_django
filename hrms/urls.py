@@ -34,6 +34,8 @@ urlpatterns = [
 #Attendance Routes
     path('dashboard/attendance/in/', views.Attendance_New.as_view(), name='attendance_new'),
     path('dashboard/attendance/<int:pk>/out/', views.Attendance_Out.as_view(), name='attendance_out'),
+    path('dashboard/attendance/out/', views.Attendance_Out.as_view(), name='attendance_out'),
+    path('dashboard/attendance/clock_in/', views.ClockInView.as_view(), name='clock_in'),
 
 #Leave Routes
 

@@ -109,11 +109,16 @@ class Attendance (models.Model):
     last_out = models.TimeField(null=True)
     status = models.CharField(choices=STATUS, max_length=15 )
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
-
-    def save(self,*args, **kwargs):
-        self.first_in = timezone.localtime()
-        super(Attendance,self).save(*args, **kwargs)
+    latitude = models.FloatField(null=True, blank=True) 
+    longitude = models.FloatField(null=True, blank=True)
     
+    def save(self, *args, **kwargs):
+        if not self.pk:  # If it's a new object (i.e., first in)
+            self.first_in = timezone.localtime()
+        else:  # If it's an existing object being updated (i.e., last out)
+            self.last_out = timezone.localtime()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return 'Attendance -> '+str(self.date) + ' -> ' + str(self.staff)
 

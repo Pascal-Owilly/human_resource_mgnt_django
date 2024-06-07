@@ -83,4 +83,23 @@ def process_uploaded_file(file_path):
         # Send password reset email
         send_password_reset_email(user, uidb64, token)
 
+# Attendance utility
+from geopy.distance import geodesic
+
+def is_within_geofence(employee_location, geofence_center, radius_km):
+    """
+    Check if the given employee location is within the geofence area.
+    
+    Args:
+    - employee_location (tuple): (latitude, longitude) of the employee
+    - geofence_center (tuple): (latitude, longitude) of the geofence center
+    - radius_km (float): Radius of the geofence in kilometers
+
+    Returns:
+    - bool: True if within geofence, False otherwise
+    """
+    distance = geodesic(geofence_center, employee_location).km
+    return distance <= radius_km
+
+
 

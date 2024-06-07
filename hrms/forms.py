@@ -89,11 +89,12 @@ class DepartmentForm(forms.ModelForm):
         fields = '__all__'
 
 class AttendanceForm(forms.ModelForm):
-    status = forms.ChoiceField(choices=Attendance.STATUS,widget=forms.Select(attrs={'class':'form-control w-50'}))
-    staff = forms.ModelChoiceField(Employee.objects.filter(Q(attendance__status=None) | ~Q(attendance__date = timezone.localdate())), widget=forms.Select(attrs={'class':'form-control w-50'}))
+    status = forms.ChoiceField(choices=Attendance.STATUS, widget=forms.Select(attrs={'class': 'form-control w-50'}))
+
     class Meta:
         model = Attendance
-        fields = ['status','staff']
+        fields = ['status']
+
 
 class LeaveForm (forms.ModelForm):
 
