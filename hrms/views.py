@@ -245,7 +245,7 @@ class Employee_All(LoginRequiredMixin,ListView):
     paginate_by  = 5
     
 class Employee_View(LoginRequiredMixin,DetailView):
-    queryset = Employee.objects.select_related('employee__department')
+    queryset = Employee.objects.select_related('employee__department').order_by('-id')
     template_name = 'hrms/employee/single.html'
     context_object_name = 'employee'
     login_url = 'hrms:login'
@@ -336,6 +336,8 @@ class Department_Update(LoginRequiredMixin,UpdateView):
 from django.utils import timezone
 from datetime import datetime
 
+from django.core.paginator import Paginator
+
 class Attendance_New(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
@@ -343,18 +345,19 @@ class Attendance_New(LoginRequiredMixin, View):
         # Get query parameters
         date = request.GET.get('date')
         keyword = request.GET.get('keyword')
+        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
 
         # Retrieve attendance records based on the provided date
         if date:
             try:
                 selected_date = datetime.strptime(date, '%Y-%m-%d').date()
-                present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date))
+                present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date)).order_by('-id')
             except ValueError:
                 selected_date = None
                 present_staffers = Attendance.objects.none()
         else:
             selected_date = timezone.localdate()
-            present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date))
+            present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date)).order_by('-id')
 
         # Perform search if keyword is provided
         if keyword:
@@ -363,12 +366,30 @@ class Attendance_New(LoginRequiredMixin, View):
                 Q(staff__employee__last_name__icontains=keyword)
             )
 
+        # Calculate distance for each present staffer
+        for staff in present_staffers:
+            if staff.latitude and staff.longitude:
+                staff.distance = geodesic((staff.latitude, staff.longitude), geofence_center).meters
+            else:
+                staff.distance = None
+
+        # Pagination
+        paginator = Paginator(present_staffers, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        employee = Employee.objects.get(employee=request.user)
+
+        clocked_in = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).exists()
+
         context = {
             'today': timezone.localdate(),
-            'present_staffers': present_staffers,
+            'present_staffers': page_obj,
             'selected_date': selected_date,
-            'keyword': keyword
+            'keyword': keyword,
+            'page_obj': page_obj,
+            'clocked_in': clocked_in  # Add this line
         }
+
         return render(request, 'hrms/attendance/create.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -400,8 +421,7 @@ class Attendance_New(LoginRequiredMixin, View):
             messages.success(request, 'Clock-in successful!')
 
         return redirect('hrms:attendance_new')
-
-
+        
 from geopy.distance import geodesic
 
 class Attendance_Out(LoginRequiredMixin, View):
@@ -426,23 +446,27 @@ class ClockInView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
+        print('latitude', latitude)
+        print('longitude', longitude)
 
         # Retrieve the logged-in user's employee instance
         employee = request.user.employee
 
         # Define the geofence center and radius
-        geofence_center = (40.712776, -74.005974)  # Example: New York City coordinates
-        radius_km = 1.1  # 1.1 km
+        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
+        radius_km = 0.1  # 100 meters
 
         employee_location = (float(latitude), float(longitude))
-        if is_within_geofence(employee_location, geofence_center, radius_km):
+        distance = geodesic(employee_location, geofence_center).km
+
+        if distance <= radius_km:
             # Check if the employee is already clocked in
             attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
             if attendance:
                 # Clocking out
                 attendance.last_out = timezone.localtime()
                 attendance.save()
-                messages.success(request, 'Clock-out successful!')
+                messages.success(request, f'Clock-out successful! Distance from geofence center: {distance:.2f} km')
             else:
                 # Clocking in
                 Attendance.objects.create(
@@ -452,10 +476,10 @@ class ClockInView(LoginRequiredMixin, View):
                     first_in=timezone.localtime(),
                     status='PRESENT'
                 )
-                messages.success(request, 'Clock-in successful!')
-            return JsonResponse({'status': 'success'})
+                messages.success(request, f'Clock-in successful! Distance from geofence center: {distance:.2f} km')
+            return JsonResponse({'status': 'success', 'distance': distance})
         else:
-            return JsonResponse({'status': 'error', 'message': 'You are outside the allowed geofence area'})
+            return JsonResponse({'status': 'error', 'message': f'You are outside the allowed geofence area. Distance from geofence center: {distance:.2f} km'})
 
 
 class LeaveNew (LoginRequiredMixin,CreateView, ListView):
