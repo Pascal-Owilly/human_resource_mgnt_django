@@ -33,10 +33,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
-EMAIL_HOST_USER = 'intellima.tech@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
+# EMAIL_HOST_USER = 'intellima.tech@gmail.com'  # Your email address
+# EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
 # EMAIL_HOST_USER = 'pascalouma54@gmail.com'
 # EMAIL_HOST_PASSWORD = 'jcfgolmahddantnv'
+EMAIL_HOST_USER = 'pascal.owilly@student.moringaschool.com'
+EMAIL_HOST_PASSWORD = 'ymxllqbalildvjri'
+
+
 EMAIL_USE_SSL = False
 
 BASE_URL = '127.0.0.1:8000'
@@ -145,7 +149,3 @@ LOGIN_REDIRECT_URL = 'hrms:dashboard'
 # LOGIN_URL = 'hrms:login'
 MEDIA_URL = '/media/'  # This is just for URL i.e https://l.me/media/l.jpg
 MEDIA_ROOT = BASE_DIR / 'media'  # This is the folder the image will be uploaded
-
-# Uncomment the following lines if you are using Heroku
-# import django_heroku
-# django_heroku.settings(locals())

@@ -1,46 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Excel File</title>
-</head>
-<body>
-    
-</body>
-</html>
+
 
 {% extends 'hrms/layout.html' %}
 {% load static %}
 {% block title %} New Employee | JBL {% endblock title %}
 
 {% block content %}
-
     <div class="main-panel">
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-lg-12 grid-margin">
                     <div class="card">
                         <div class="card-body">
-                           <h4 class="text-center text-primary"><i class="fa fa-plus">&emsp; New Employee </i></h4><hr>
-                                <form enctype="multipart/form-data" action="{% url 'hrms:employee_bulk_register' %}" class="form-group" method="POST">
-                                    {% csrf_token %}
-                                    <h5>Upload Excel File</h5>
-                                        <form method="post" enctype="multipart/form-data">
-                                            {% csrf_token %}
-                                            {{ form.as_p }}
-                                            <div class="text-center mt-3">
-                                                <button class="btn btn-outline-success"><i class="mdi mdi-file-document"></i>Upload</button></button>
-                                                
-                                            </div> 
-                                                                               </form>
-                                   
-                                </form>
-                        
-                                           
+                            <h4 class="text-center text-primary">
+                                <i class="fa fa-plus">&emsp; New Employee </i>
+                            </h4>
+                            <hr>
+                            <form enctype="multipart/form-data" action="{% url 'hrms:employee_bulk_register' %}" class="form-group" method="POST">
+                                {% csrf_token %}
+                                <h5>Upload Excel File</h5>
+                                <p>Please ensure your Excel file has the following columns:</p>
+                                <!-- <ul class="d-flex justify-content-between">
+                                    <li>First Name</li>
+                                    <li>Last Name</li>
+                                    <li>Email</li>
+                                    <li>Username</li>
+                                    <li>Mobile</li>
+                                    <li>Address</li>
+                                    <li>Emergency Contact</li>
+                                    <li>Gender</li>
+                                    <li>Thumb (optional)</li>
+                                </ul> -->
+                                <p>Example:</p>
+                                <table class="table table-bordered table-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th style="font-size: 12px;">First Name</th>
+                                            <th style="font-size: 12px;">Last Name</th>
+                                            <th style="font-size: 12px;">Email</th>
+                                            <th style="font-size: 12px;">Username</th>
+                                            <th style="font-size: 12px;">Mobile</th>
+                                            <th style="font-size: 12px;">Address</th>
+                                            <th style="font-size: 12px;">Emergency Contact</th>
+                                            <th style="font-size: 12px;">Gender</th>
+                                            <th style="font-size: 12px;">Thumb</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="font-size: 11px;">John</td>
+                                            <td style="font-size: 11px;">Doe</td>
+                                            <td style="font-size: 11px;">john.doe@example.com</td>
+                                            <td style="font-size: 11px;">johndoe</td>
+                                            <td style="font-size: 11px;">+257123456789</td>
+                                            <td style="font-size: 11px;">123 Elm St</td>
+                                            <td style="font-size: 11px;">Jane Doe</td>
+                                            <td style="font-size: 11px;">Male</td>
+                                            <td style="font-size: 11px;">(optional)</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-size: 11px;">Jane</td>
+                                            <td style="font-size: 11px;">Smith</td>
+                                            <td style="font-size: 11px;">jane.smith@example.com</td>
+                                            <td style="font-size: 11px;">janesmith</td>
+                                            <td style="font-size: 11px;">0987654321</td>
+                                            <td style="font-size: 11px;">456 Oak St</td>
+                                            <td style="font-size: 11px;">John Smith</td>
+                                            <td style="font-size: 11px;">Female</td>
+                                            <td style="font-size: 11px;">(optional image)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- <p><a href="{% static 'employee_upload_template.xlsx' %}" class="btn btn-info">Download Sample Excel File</a> -->
+                                </p>
+                                {{ form.as_p }}
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-success">
+                                        <i class="mdi mdi-file-document"></i> Upload
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 {% endblock content %}
+
+

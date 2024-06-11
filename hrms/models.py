@@ -49,28 +49,47 @@ class User(AbstractUser):
     LANGUAGE = (('english','ENGLISH'), ('french','FRENCH'), ('yoruba','YORUBA'),('hausa','HAUSA'))
     GENDER = (('male','MALE'), ('female', 'FEMALE'))
 
-    role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)  # Default role can be changed
+    role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)
     first_name = models.CharField(max_length=30, blank=True, null=True)
-    last_name = models.CharField(max_length=30 , blank=True, null=True)
+    last_name = models.CharField(max_length=30, blank=True, null=True)
     username = models.CharField(max_length=30, unique=True)
-    thumb = models.ImageField(blank=True,null=True)
+    thumb = models.ImageField(blank=True, null=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     mobile = PhoneNumberField(null=True, blank=True)
-    address = models.CharField(max_length=100, null=True, blank=True)  # New field for address
+    address = models.CharField(max_length=100, null=True, blank=True)
 
-    emp_id = models.CharField(max_length=70, default=generate_emp_id, unique=True, editable=False)
-    mng_id = models.CharField(max_length=70, default=generate_mng_id, unique=True, editable=False)
+    emp_id = models.CharField(max_length=70, unique=True, editable=False)
+    mng_id = models.CharField(max_length=70, unique=True, editable=False)
     emergency = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
-    department = models.ForeignKey(Department,on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
     nuban = models.CharField(max_length=10, default='0123456789')
     bank = models.CharField(max_length=25, default='Equity')
-    salary = models.CharField(max_length=16,default='00,000.00')      
-    
-    def __str__(self):
-            return f'{self.first_name} {self.last_name} '
+    salary = models.CharField(max_length=16, default='00,000.00')
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+    def save(self, *args, **kwargs):
+        if not self.emp_id:
+            self.emp_id = self.generate_emp_id()
+        if not self.mng_id:
+            self.mng_id = self.generate_mng_id()
+        super().save(*args, **kwargs)
+
+    def generate_emp_id(self):
+        return self.generate_short_id('emp-', 'emp_id')
+
+    def generate_mng_id(self):
+        return self.generate_short_id('mng-', 'mng_id')
+        
+    # check if the user is available to avoid errors 
+    def generate_short_id(self, prefix, field_name, length=4):
+        while True:
+            new_id = prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+            if not User.objects.filter(**{field_name: new_id}).exists():
+                return new_id
 
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
