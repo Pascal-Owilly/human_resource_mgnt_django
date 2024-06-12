@@ -38,7 +38,7 @@ class User(AbstractUser):
     MANAGER = 'manager'
     CLIENT = 'client'
     CAN_CLOCK_IN_ANYWHERE = 'can_clockin_anywhere'
-    NO_PRIVILEGES = 'no_clockin_privileges'
+    NO_PRIVILEGES = 'Within the organization'
     NO_ROLE = 'no_role'
 
     ROLE_CHOICES = [

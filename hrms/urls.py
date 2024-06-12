@@ -19,7 +19,7 @@ urlpatterns = [
 
 # Users
     path('dashboard/user-list/', views.UserListView.as_view(), name='user_list'),
-    path('dashboard/user-detail/<int:pk>/', views.UserDetailView.as_view(), name='user_detail'),
+    path('dashboard/user-detail/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
 
 # Employee Routes
     path('dashboard/employee/', views.Employee_All.as_view(), name='employee_all'),
@@ -40,9 +40,7 @@ urlpatterns = [
 #Attendance Routes
     path('dashboard/attendance/in/', views.Attendance_New.as_view(), name='attendance_new'),
     path('dashboard/attendance/<int:pk>/out/', views.Attendance_Out.as_view(), name='attendance_out'),
-    path('dashboard/attendance/out/', views.Attendance_Out.as_view(), name='attendance_out'),
     path('dashboard/attendance/clock_in/', views.ClockInView.as_view(), name='clock_in'),
-
 #Leave Routes
 
     path("dashboard/leave/new/", views.LeaveNew.as_view(), name="leave_new"),

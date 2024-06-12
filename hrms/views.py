@@ -49,10 +49,20 @@ class UserListView(View):
 
         return render(request, self.template_name, {'users': users})
 
-class UserDetailView(DetailView):
-    model = User
+class UserDetailView(View):
     template_name = 'hrms/users/user_detail.html'
-    context_object_name = 'user'
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+        return render(request, self.template_name, {'user': user})
+
+    def post(self, request, user_id):  # Ensure the method signature includes user_id
+        user = get_object_or_404(User, pk=user_id)
+        clockin_privileges = request.POST.get('clockin_privileges')
+        if clockin_privileges:
+            user.clockin_privileges = clockin_privileges
+            user.save()
+        return redirect('hrms:user_detail', user_id=user_id)
 
 class Index(TemplateView):
     
@@ -525,7 +535,7 @@ class Attendance_New(LoginRequiredMixin, View):
             return redirect('hrms:attendance_new')
         else:
             # Check if the employee is within the geofence area
-            if distance_km <= geofence_radius_km:
+            if distance_km > geofence_radius_km:
                 # Clocking in
                 Attendance.objects.create(
                     staff=employee,
@@ -534,6 +544,7 @@ class Attendance_New(LoginRequiredMixin, View):
                     first_in=timezone.localtime(),
                     status='PRESENT'
                 )
+                
                 # Check if the clock-in time is after 8:30 AM
                 attendance_time = timezone.localtime()
                 if attendance_time.time() > datetime.strptime('08:30', '%H:%M').time():
@@ -572,7 +583,7 @@ class Attendance_Out(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             user = Attendance.objects.get(
-                Q(staff__id=self.kwargs['pk']) & 
+                Q(staff__id=self.kwargs['user_id']) & 
                 Q(status='PRESENT') & 
                 Q(date=timezone.localdate())
             )
@@ -600,21 +611,20 @@ class ClockInView(LoginRequiredMixin, View):
             return JsonResponse({'status': 'error', 'message': 'Latitude and Longitude are required.'})
 
         # Retrieve the logged-in user's employee instance
-        employee = request.user.employee
+        try:
+            employee = Employee.objects.get(employee=request.user)
+        except Employee.DoesNotExist:
+            messages.error(request, 'Employee record not found.')
+            return JsonResponse({'status': 'error', 'message': 'Employee record not found.'})
 
         # Define the geofence center and radius
         geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
         geofence_radius_km = 0.2  # 200 meters (0.2 km)
-        print(f"Latitude: {latitude}, Longitude: {longitude}")
-        print(f"Calculated Distance: {distance_km} km")
-
+        
         try:
             # Calculate the distance from the geofence center
             employee_location = (float(latitude), float(longitude))
             distance_km = geodesic(employee_location, geofence_center).km
-
-            print(f"Latitude: {latitude}, Longitude: {longitude}")
-            print(f"Calculated Distance: {distance_km} km")
 
         except ValueError:
             messages.error(request, 'Invalid latitude or longitude.')
@@ -639,12 +649,12 @@ class ClockInView(LoginRequiredMixin, View):
                     status='PRESENT'
                 )
                 messages.success(request, f'Clock-in successful! Distance from geofence center: {distance_km:.2f} km')
-            return JsonResponse({'status': 'success', 'distance': distance_km})
         else:
             # Notify the employee about being outside the geofence area
             messages.error(request, f'You are outside the allowed geofence area. Distance from geofence center: {distance_km:.2f} km')
-            return JsonResponse({'status': 'error', 'message': f'You are outside the allowed geofence area. Distance from geofence center: {distance_km:.2f} km'})
 
+        return JsonResponse({'status': 'success'})  # Return a JsonResponse to indicate success
+            
 class LeaveNew (LoginRequiredMixin,CreateView, ListView):
     model = Leave
     template_name = 'hrms/leave/create.html'

@@ -10,12 +10,14 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Profile Picture</th>
+                            <th>Profile </th>
                             <th>Username</th>
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Email</th>
                             <th>View</th>
+                            <th>Action</th>
+
 
                         </tr>
                     </thead>
@@ -29,7 +31,25 @@
                                 <td>{{ user.email }}</td>
                                 <td>
                                     <a href="{% url 'hrms:user_detail' user.id %}" class="btn mx-2 btn-sm me-2 " style="background-color: #fdeb3d;font-size: 12px;">
-                                        View <i class="mdi mdi-plus"></i>                                    </a></td>
+                                        View <i class="mdi mdi-plus"></i> 
+                                </a></td>
+                                <td>
+                                    <form action="{% url 'hrms:user_detail' user.id %}" method="post">
+                                        {% csrf_token %}
+                                        <!-- Add a dropdown menu for clockin_privileges -->
+                                        <div class="form-group">
+                                            <label for="clockin_privileges">Clock-in Privileges:</label>
+                                            <select class="form-control" id="clockin_privileges" name="clockin_privileges">
+                                                {% for choice in user.PRIVILEGE_CHOICES %}
+                                                    <option value="{{ choice.0 }}" {% if user.clockin_privileges == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <!-- Add a submit button -->
+                                        <button type="submit" class="btn btn-sm btn-primary" style="font-size: 14px;">Save</button>
+                                    </form>
+                                                                    </td>
+
                             </tr>
                         {% endfor %}
                     </tbody>
