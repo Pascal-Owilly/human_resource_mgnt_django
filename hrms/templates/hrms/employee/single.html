@@ -18,26 +18,24 @@
                         <div class="card-body">
                            <h4 class="text-center text-primary"><i class="fa fa-address-book-o">&emsp; {{employee.employee.first_name}}'s Profile</i></h4><hr>   
                            <div class="row">
-                                <div class="col-lg-2 col-md-2 d-flex align-items-stretch grid-margin">
-
-                                    <div class="card border-top border-bottom border-success">
-                                        <div class="card-body">
-                                            <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class='img-fluid rounded-circle' alt="">
-                                            <p class="lead mt-2 text-center" style="font-size: 16px;"> 
-                                            <small class='text-center text-secondary'>( ID )</small> <br />
-                                            {{employee.employee.emp_id | upper}} <br>
-                                             </p>
-                                            
-                                        </div>
+                            <!-- Picture Column -->
+                            <div class="col-lg-2 col-md-2 d-flex align-items-stretch grid-margin">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class="img-fluid rounded-circle" alt="">
+                                        <p class="lead mt-2 text-center" style="font-size: 16px;"> 
+                                            <small class="text-center text-secondary">( ID )</small><br />
+                                            {{employee.employee.emp_id | upper}}<br>
+                                        </p>
                                     </div>
-
-                                
                                 </div>
-                                    <!-- Second column -->
-                                <div class="col-lg-6 col-md-6">
-                                    <div class="table-responsive border-top border-success table-striped">
-                                        <p class="lead text-center mt-2">Personal Info.</p>
-                                        <table class="table">
+                            </div>
+                        
+                            <!-- First Employee Info Column -->
+                            <div class="col-lg-5 col-md-5">
+                                <div class="table-responsive table-striped">
+                                    <p class="lead text-center mt-2">Personal Info.</p>
+                                    <table class="table">
                                         <tr>
                                             <th style="width:50%">First Name:</th>
                                             <td>{{employee.employee.first_name}}</td>
@@ -51,81 +49,62 @@
                                             <td>{{employee.employee.mobile}}</td>
                                         </tr>
                                         <tr>
+                                            <th>Emergency contact:</th>
+                                            <td>{{employee.employee.emergency}}</td>
+                                        </tr>
+                                        <tr>
                                             <th>Email:</th>
                                             <td>{{employee.employee.email}}</td>
                                         </tr>
-                                         <tr>
+                                        <tr>
                                             <th>Gender:</th>
                                             <td>{{employee.employee.gender}}</td>
                                         </tr>
                                         <tr>
                                             <th>Department:</th>
-                                            <td>{{employee.employee.department}} </td>
+                                            <td>{{employee.employee.department}}</td>
                                         </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        
+                            <!-- Second Employee Info Column -->
+                            <div class="col-lg-5 col-md-5">
+                                <div class="table-responsive table-striped">
+                                    <p class="lead text-center mt-2">Additional Info.</p>
+                                    <table class="table">
                                         <tr>
                                             <th>Language:</th>
                                             <td>{{employee.employee.language | capfirst}}</td>
                                         </tr>
-                                        
-                                         <tr>
+                                        <tr>
                                             <th>Enrollment Date:</th>
-                                            <td>{{employee.created_at}} </td>
+                                            <td>{{employee.created_at}}</td>
                                         </tr>
-                                        
-                                        </table>
-                                        <div class="text-center mt-3">
-                                            <a href=" {% url 'hrms:employee_update' pk=employee.id %}" class="btn btn-lg btn-warning">Update</a>
-                                        </div>
-                                    </div>   
+                                    </table>
+                                    <!-- <div class="text-center mt-3">
+                                        <a href="{% url 'hrms:employee_update' pk=employee.id %}" class="btn btn-lg btn-warning">Update</a>
+                                    </div> -->
                                 </div>
+                                <div class="table-responsive table-striped">
+                                    <p class="lead text-center mt-2">Privileges</p>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Clock-in privileges</th>
+                                            <td>{{employee.employee.clockin_privileges | capfirst}}</td>
+                                        </tr>
+                                       
+                                    </table>
+                                    <!-- <div class="text-center mt-3">
+                                        <a href="{% url 'hrms:employee_update' pk=employee.id %}" class="btn btn-lg btn-warning">Update</a>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+                        
                                 <!-- Third column-->
 
-                                <div class="col-lg-4 col-md-4">
-                                    <div class="table-responsive border-top border-success  table-striped">
-                                    <p class="lead text-center mt-2">Next of Kin</p>
-                                        <table class="table">
-                                        {% if kin %}
-                                            <tr>
-                                                <th style="width:50%">First Name:</th>
-                                                <td>{{kin.first_name}}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Last Name</th>
-                                                <td>{{kin.last_name}}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Mobile:</th>
-                                                <td>{{kin.mobile}}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Address:</th>
-                                                <td>{{kin.address}} </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Occuation:</th>
-                                                <td>{{kin.occupation | capfirst}}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Relative:</th>
-                                                <td>{{kin.employee.first_name}} - {{kin.employee.last_name}} </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td><a href="{% url 'hrms:kin_update' pk=kin.pk id=employee.id %}" class=" btn btn-warning"> Update Next of Kin</a></td>
-                                            </tr>
-                                        {% else %}
-                                            <p class="lead text-center"> 
-                                                OOPs! <br> No Next of kin information Provided.
-                                            </p>
-
-                                            <div class="text-center">
-                                                <a href="{% url 'hrms:kin_add' id=employee.id %}" class='btn btn-danger btn-rounded'> <i class="mdi mdi-upload"></i> Upload Now </a>
-                                            </div>
-
-                                        {% endif %}
-                                        </table>
-                                    </div>   
-                                </div>
+                               
                            </div>                     
                                         
                 </div>

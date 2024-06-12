@@ -1,11 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Success</title>
-</head>
-<body>
-    <h2>File Uploaded Successfully</h2>
-</body>
-</html>
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %}Bulk Registration Success | JBL{% endblock title %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #fdeb3d;">
+                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Bulk Registration Successful</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-users fa-3x text-success mb-4"></i>
+                        <h5>File Uploaded Successfully</h5>
+                        <p class="lead">New employees have been notified to set their passwords to start using the system.</p>
+                        <a href="{% url 'hrms:employee_bulk_register' %}" class="btn mt-3" style="background-color: #773697;"><i class="fas fa-upload"></i> Upload Another File</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock content %}

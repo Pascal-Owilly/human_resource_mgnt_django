@@ -17,6 +17,10 @@ urlpatterns = [
 
     path('dashboard/', views.Dashboard.as_view(), name='dashboard'),
 
+# Users
+    path('dashboard/user-list/', views.UserListView.as_view(), name='user_list'),
+    path('dashboard/user-detail/<int:pk>/', views.UserDetailView.as_view(), name='user_detail'),
+
 # Employee Routes
     path('dashboard/employee/', views.Employee_All.as_view(), name='employee_all'),
     path('dashboard/employee/new/', views.Employee_New.as_view(), name='employee_new'),
@@ -27,6 +31,8 @@ urlpatterns = [
     path('dashboard/employee/<int:id>/kin/<int:pk>/update/', views.Employee_Kin_Update.as_view(), name='kin_update'),
 
 #Department Routes
+    path('dashboard/department/all/', views.DepartmentListView.as_view(), name='depat_all'),
+
     path('dashboard/department/<int:pk>/', views.Department_Detail.as_view(), name='dept_detail'),
     path('dashboard/department/add/', views.Department_New.as_view(), name='dept_new'),
     path('dashboard/department/<int:pk>/update/', views.Department_Update.as_view(), name='dept_update'),

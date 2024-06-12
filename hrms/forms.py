@@ -14,6 +14,7 @@ class SuperuserRegistrationForm (UserCreationForm):
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Password'}))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Confirm Password'}))
     thumb = forms.ImageField(label='Attach a Passport Photograph',required=True,widget=forms.FileInput(attrs={'class':'form-control mt-2'}))
+
     class Meta:
         model = get_user_model()
         fields = ('username','email','password1', 'password2','thumb')
@@ -31,12 +32,15 @@ class EmployeeRegistrationForm(UserCreationForm):
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
     gender = forms.ChoiceField(choices=(('male', 'Male'), ('female', 'Female')), widget=forms.Select(attrs={'class':'form-control'}))
     department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label='Select a department', widget=forms.Select(attrs={'class':'form-control'}))
+    privileges = forms.ChoiceField(choices=get_user_model().PRIVILEGE_CHOICES, widget=forms.Select(attrs={'class':'form-control'}))  # Assuming you have PRIVILEGE_CHOICES in your User model
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'password1', 'password2', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department')
+        fields = ('username', 'email', 'password1', 'password2', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges')
 
 # EmployeeRegistration
+
+
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 

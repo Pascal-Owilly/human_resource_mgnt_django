@@ -32,10 +32,13 @@ def generate_mng_id():
     return generate_short_id('mng-', User, 'mng_id')
 
 class User(AbstractUser):
+
     SUPERUSER = 'superuser'
     EMPLOYEE= 'employee'
     MANAGER = 'manager'
     CLIENT = 'client'
+    CAN_CLOCK_IN_ANYWHERE = 'can_clockin_anywhere'
+    NO_PRIVILEGES = 'no_clockin_privileges'
     NO_ROLE = 'no_role'
 
     ROLE_CHOICES = [
@@ -43,13 +46,22 @@ class User(AbstractUser):
         (EMPLOYEE, 'Employee'),
         (MANAGER, 'Manager'),
         (CLIENT, 'Client'),
-        (NO_ROLE, 'No Role'),
+        (CAN_CLOCK_IN_ANYWHERE, 'Can clock in from anywhere'),
+        (NO_PRIVILEGES, 'Cannot clock in from anywhere'),
+        (NO_ROLE, 'No role'),
+
+    ]
+
+    PRIVILEGE_CHOICES = [
+        (NO_PRIVILEGES, 'No privileges'),
+        (CAN_CLOCK_IN_ANYWHERE, 'Can clock in from anywhere'),
     ]
 
     LANGUAGE = (('english','ENGLISH'), ('french','FRENCH'), ('yoruba','YORUBA'),('hausa','HAUSA'))
     GENDER = (('male','MALE'), ('female', 'FEMALE'))
 
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)
+    clockin_privileges = models.CharField(max_length=255, choices=PRIVILEGE_CHOICES, default=NO_PRIVILEGES)
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
     username = models.CharField(max_length=30, unique=True)
@@ -123,7 +135,7 @@ class Kin(models.Model):
 
 class Attendance (models.Model):
     STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(auto_now_add=True, null=True, blank=True)
     first_in = models.TimeField()
     last_out = models.TimeField(null=True)
     status = models.CharField(choices=STATUS, max_length=15 )

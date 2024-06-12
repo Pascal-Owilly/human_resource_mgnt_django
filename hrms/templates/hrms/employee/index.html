@@ -1,6 +1,6 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
-{% block title %} All Employees | ITSC-HRMS {% endblock title %}
+{% block title %} All Employees | JBL {% endblock title %}
       <!--  MAIN BODY START HERE -->
           {% block content %}
 
@@ -70,11 +70,11 @@
                               <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{% url 'hrms:employee_view' pk=employee.pk %}">
                                   <i class="fa fa-eye text-success fa-fw"></i>View</a>
-                                <a class="dropdown-item" href="{% url 'hrms:employee_update' pk=employee.pk %}">
+                                <!-- <a class="dropdown-item" href="{% url 'hrms:employee_update' pk=employee.pk %}">
                                   <i class="fa fa-edit text-info fa-fw"></i>Edit</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'hrms:employee_delete' pk=employee.pk %}">
-                                  <i class="fa fa-trash text-danger fa-fw"></i>Delete</a>
+                                <div class="dropdown-divider"></div> -->
+                                <!-- <a class="dropdown-item" href="{% url 'hrms:employee_delete' pk=employee.pk %}">
+                                  <i class="fa fa-trash text-danger fa-fw"></i>Delete</a> -->
                               </div>
                             </div>                  
                           </td>

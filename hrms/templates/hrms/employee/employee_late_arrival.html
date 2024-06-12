@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #773697;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            background-color: #fdeb3d;
+            color: #773697;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+        .btn {
+            background-color: #773697;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #5b2a75;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Late Arrival Notification</h1>
+        </div>
+        <div class="content">
+            <p>Dear Admin,</p>
+            <p>Employee <strong>{{ first_name }} {{ last_name }}</strong> ({{ username }}) clocked in late at <strong>{{ clock_in_time }}</strong>.</p>
+            <p>Please take the necessary actions.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ current_year }} Jawabu Best Limited. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

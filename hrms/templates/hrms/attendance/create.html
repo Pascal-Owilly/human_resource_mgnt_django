@@ -15,6 +15,18 @@
             <div class="col-lg-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
+                        <!-- Messages block -->
+                        <div id="messages" class="my-3">
+                            <div id="messages" class="my-3">
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                        </div>
+                        
                         <form class="form-group" method="POST" action="{% url 'hrms:attendance_new' %}">
                             {% csrf_token %}
                             {{ form.errors }}
@@ -32,7 +44,6 @@
                                     <button type="submit" class="btn btn-rounded btn-outline-success"><i class="mdi mdi-check"></i> Clock In</button>
                                 </form>
                             {% endif %}
-                            
                             </div>
                         </form>
                         <br>
@@ -41,9 +52,10 @@
                         
                         <form class="form-inline mb-3 justify-content-between" method="GET">
                             <div class="form-group">
+                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Date</span>
                                 <input type="date" class="form-control" id="date" name="date" value="{{ selected_date|default:today|date:'Y-m-d' }}">
-                                <button type="submit" class="btn btn-primary ml-2">Filter by Date</button>
                             </div>
+                            
                             <div class="form-group">
                                 <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by name" value="{{ keyword|default:'' }}">
                                 <button type="submit" id="search-btn" class="btn btn-primary ml-2">Search</button>
@@ -59,9 +71,7 @@
                                             <th>First-In (Arrival)</th>
                                             <th>Last-Out (Departure)</th>
                                             <th>Name</th>
-                                        
                                             <th>Distance (m)</th>
-
                                             <th>Action(s)</th>
                                         </tr>
                                     </thead>
@@ -72,9 +82,7 @@
                                                 <td><strong>{{ ps.first_in }}</strong></td>
                                                 <td><strong>{{ ps.last_out }}</strong></td>
                                                 <td>{{ ps.staff.employee.first_name }} {{ ps.staff.employee.last_name }}</td>
-                                              
                                                 <td>{{ ps.distance|default_if_none:'N/A'|floatformat:2 }} m</td>
-
                                                 <td>
                                                     {% if ps.last_out %}
                                                         <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
@@ -100,59 +108,69 @@
                                                 </a>
                                             </li>
                                             <li class="page-item">
-                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Previous">
-                                                    <span aria-hidden="true">&laquo;</span>
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                        {% for num in paginator.page_range %}
-                                            {% if page_obj.number == num %}
-                                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">{{ num }}</a></li>
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if page_obj.has_next %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Next">
-                                                    <span aria-hidden="true">&raquo;</span>
-                                                </a>
-                                            </li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ paginator.num_pages }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Last">
-                                                    <span aria-hidden="true">&raquo;&raquo;</span>
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                    </ul>
-                                </nav>
-                            </div>
-                        {% else %}
-                            <p class="lead">No employees data</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</div>
-<script>
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            console.log("Latitude:", position.coords.latitude);
-            console.log("Longitude:", position.coords.longitude);
-            document.getElementById('latitude').value = position.coords.latitude;
-            document.getElementById('longitude').value = position.coords.longitude;
-        });
-    } else {
-        alert('Geolocation is not supported by this browser.');
-    }
-
-    // Add event listener to the date input
-    document.getElementById('date').addEventListener('change', function() {
-        // Submit the form when the date is changed
-        this.form.submit();
-    });
-</script>
-{% endblock content %}
+                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif%}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Previous">
+                                                    <span aria-hidden="true">«</span>
+                                                    </a>
+                                                    </li>
+                                                    {% endif %}
+                                                    {% for num in paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% if page_obj.has_next %}
+                                                    <li class="page-item">
+                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Next">
+                                                    <span aria-hidden="true">»</span>
+                                                    </a>
+                                                    </li>
+                                                    <li class="page-item">
+                                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}" aria-label="Last">
+                                                    <span aria-hidden="true">»»</span>
+                                                    </a>
+                                                    </li>
+                                                    {% endif %}
+                                                    </ul>
+                                                    </nav>
+                                                    </div>
+                                                    {% else %}
+                                                    <p class="lead">No employees data</p>
+                                                    {% endif %}
+                                                    </div>
+                                                    </div>
+                                                    </div>
+                                                    </div>
+                                                    </div>
+                                                    
+                                                    </div>
+                                                    </div>
+                                                    <!-- Script for toastr messages -->
+                                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+                                                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+                                                    <!-- Include Bootstrap CSS and JS if not already included -->
+                                                    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+                                                    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+                                                    
+                                                    <script>
+                                                        if (navigator.geolocation) {
+                                                            navigator.geolocation.getCurrentPosition(function (position) {
+                                                                console.log("Latitude:", position.coords.latitude);
+                                                                console.log("Longitude:", position.coords.longitude);
+                                                                document.getElementById('latitude').value = position.coords.latitude;
+                                                                document.getElementById('longitude').value = position.coords.longitude;
+                                                            });
+                                                        } else {
+                                                            alert('Geolocation is not supported by this browser.');
+                                                        }
+                                                    
+                                                        // Add event listener to the date input
+                                                        document.getElementById('date').addEventListener('change', function() {
+                                                            // Submit the form when the date is changed
+                                                            this.form.submit();
+                                                        });
+                                                    
+                                                
+                                                    </script>
+                                                    {% endblock content %}
