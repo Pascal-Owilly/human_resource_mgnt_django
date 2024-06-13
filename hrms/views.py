@@ -538,7 +538,7 @@ class ClockInView(LoginRequiredMixin, View):
             distance_km = geodesic(employee_location, geofence_center).km
 
         except ValueError:
-            messages.error(request, 'Invalid latitude or longitude.')
+            messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
             return redirect('hrms:attendance_new')
 
         # Check if the employee is within the geofence area
@@ -617,7 +617,7 @@ class ClockInView(LoginRequiredMixin, View):
             employee_location = (float(latitude), float(longitude))
             distance_km = geodesic(employee_location, geofence_center).km
         except ValueError:
-            messages.error(request, 'Invalid latitude or longitude.')
+            messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
             return redirect('hrms:attendance_new')
 
         # Check if the user has the privilege to clock in from anywhere
