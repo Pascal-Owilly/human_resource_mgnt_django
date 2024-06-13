@@ -10,10 +10,7 @@
 .brand-logo {
   width: 50px; /* Adjust as needed */
   height: auto;
-}
-
-.navbar-nav .nav-link {
-  padding: 10px 15px;
+  border-radius: 10px;
 }
 
 .dropdown-menu {
@@ -36,29 +33,124 @@
 .navbar-toggler-icon {
   background-color: #fff; /* Hamburger icon color */
 }
+
+/* Modal styles */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1001; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; 
+  max-width: 400px; 
+}
+
+.modal-header, .modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding-top: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-dark " style="background-color: #773697;">
+
+<style>
+/* Include the CSS here */
+</style>
+
+<nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #773697;">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'hrms:dashboard' %}">
       <img src="{% if user.thumb %}{{ user.thumb.url }}{% else %}{% static 'hrms/images/jawabu_logo.jpeg' %}{% endif %}" 
            class="brand-logo" alt="Logo" />
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="UserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Hello, {{ user.username | upper }}!
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="UserDropdown">
-            <a class="dropdown-item" href="{% url 'hrms:logout' %}">Log Out</a>
-          </div>
+        <li class="nav-item">
+          <a class="nav-link dropdown-toggle" href="#" id="logoutLink">Hello, {{ user.username | upper }}!</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
+
+<!-- Modal -->
+<div id="logoutModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Confirm Logout</h5>
+      <span class="close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to log out?</p>
+    </div>
+    <div class="modal-footer">
+      <a href="{% url 'hrms:logout' %}" class="btn btn-danger">Log Out</a>
+      <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// JavaScript for modal functionality
+document.addEventListener("DOMContentLoaded", function() {
+    const logoutLink = document.getElementById("logoutLink");
+    const logoutModal = document.getElementById("logoutModal");
+    const closeModalElements = document.querySelectorAll(".close, #cancelBtn");
+
+    logoutLink.addEventListener("click", function(event) {
+        event.preventDefault();
+        logoutModal.style.display = "block";
+    });
+
+    closeModalElements.forEach(element => {
+        element.addEventListener("click", function() {
+            logoutModal.style.display = "none";
+        });
+    });
+
+    window.addEventListener("click", function(event) {
+        if (event.target == logoutModal) {
+            logoutModal.style.display = "none";
+        }
+    });
+});
+</script>
+
 {% endblock %}
