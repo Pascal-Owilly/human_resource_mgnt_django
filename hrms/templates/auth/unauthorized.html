@@ -1,0 +1,13 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Unauthorised | JBL {% endblock title %}
+
+{% block title %} Unauthorized Access {% endblock %}
+
+{% block content %}
+    <h3>Oops! <span style="font-size: 17px;">You've reached the land of 'Nope'!"</span></h3>
+
+    <p>You are not allowed to acess this page.</p>
+    
+    <p><a href="javascript:history.back()">Back </a></p>
+{% endblock %}

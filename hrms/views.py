@@ -68,6 +68,11 @@ class Index(TemplateView):
     
    template_name = 'hrms/home/home.html'
 
+def unauthorized(request):
+    return render(request, 'auth/unauthorized.html')
+
+
+
 def send_password_reset_email(uidb64, token, email):
     # Encode the user ID to bytes
     uid = force_bytes(uidb64)
@@ -178,7 +183,14 @@ class Logout_View(View):
         return redirect ('hrms:login',permanent=True)
     
     
- # Main Board   
+
+    return render(request, 'export_management.html')
+
+# def export_management_dashboard(request):
+#     if request.user.role != 'seller' and not request.user.is_superuser:
+#         return redirect('unauthorized')
+#     return render(request, 'export_management.html')
+
 class Dashboard(LoginRequiredMixin,ListView):
     template_name = 'hrms/dashboard/index.html'
     login_url = 'hrms:login'
