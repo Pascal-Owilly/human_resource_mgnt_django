@@ -40,7 +40,6 @@ EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
 # EMAIL_HOST_USER = 'pascal.owilly@student.moringaschool.com'
 # EMAIL_HOST_PASSWORD = 'ymxllqbalildvjri'
 
-
 EMAIL_USE_SSL = False
 
 BASE_URL = '127.0.0.1:8000'

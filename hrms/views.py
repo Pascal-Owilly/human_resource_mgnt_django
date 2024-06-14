@@ -136,11 +136,20 @@ class CustomPasswordResetDoneView(TemplateView):
     template_name = 'auth/password_reset_done.html'
 
 #   Authentication
-class Register (CreateView):
+class Register(CreateView):
     model = get_user_model()
-    form_class  = SuperuserRegistrationForm
+    form_class = SuperuserRegistrationForm
     template_name = 'hrms/registrations/register.html'
     success_url = reverse_lazy('hrms:login')
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save()
+        return redirect(self.success_url)
+
+        
 
 # def register_employee(request):
 #     if request.method == 'POST':
@@ -665,7 +674,7 @@ class ClockInView(LoginRequiredMixin, View):
             })
             plain_message = strip_tags(html_message)
             from_email = settings.DEFAULT_FROM_EMAIL
-            to_email = 'pascalouma54@gmail.com'
+            to_email = 'bollo.j@jawabubest.co.ke'
 
             send_mail(
                 subject,
@@ -676,6 +685,99 @@ class ClockInView(LoginRequiredMixin, View):
                 fail_silently=False,
             )
         
+
+import io
+from django.http import HttpResponse
+from django.template.loader import get_template
+from django.views import View
+from xhtml2pdf import pisa
+import openpyxl
+from .models import Attendance
+from django.utils import timezone
+
+class DownloadPDF(View):
+    def get(self, request, *args, **kwargs):
+        date = request.GET.get('date', timezone.localdate())
+        keyword = request.GET.get('keyword', '')
+
+        attendances = Attendance.objects.filter(
+            date=date
+        )
+
+        if keyword:
+            attendances = attendances.filter(
+                Q(staff__employee__first_name__icontains=keyword) |
+                Q(staff__employee__last_name__icontains=keyword)
+            )
+
+        template = get_template('hrms/attendance/download_data/pdf_template.html')
+        context = {
+            'attendances': attendances,
+            'date': date,
+            'keyword': keyword,
+        }
+        html = template.render(context)
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="attendance.pdf"'
+
+        pisa_status = pisa.CreatePDF(
+            io.BytesIO(html.encode('UTF-8')),
+            dest=response,
+        )
+
+        if pisa_status.err:
+            return HttpResponse('We had some errors with your request', status=500)
+        return response
+
+class DownloadExcel(View):
+    def get(self, request, *args, **kwargs):
+        date = request.GET.get('date', timezone.localdate())
+        keyword = request.GET.get('keyword', '')
+
+        attendances = Attendance.objects.filter(
+            date=date
+        )
+
+        if keyword:
+            attendances = attendances.filter(
+                Q(staff__employee__first_name__icontains=keyword) |
+                Q(staff__employee__last_name__icontains=keyword)
+            )
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename="attendance.xlsx"'
+
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.active
+        worksheet.title = 'Attendance'
+
+        columns = ['Date', 'First-In (Arrival)', 'Last-Out (Departure)', 'Name', 'Distance (m)']
+        row_num = 1
+
+        for col_num, column_title in enumerate(columns, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.value = column_title
+
+        for attendance in attendances:
+            row_num += 1
+            row = [
+                attendance.date,
+                attendance.first_in,
+                attendance.last_out,
+                f"{attendance.staff.employee.first_name} {attendance.staff.employee.last_name}",
+                # f"{attendance.distance if attendance.distance else 'N/A'} m",
+            ]
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num, column=col_num)
+                cell.value = cell_value
+
+        workbook.save(response)
+        return response
+
+
 class LeaveNew (LoginRequiredMixin,CreateView, ListView):
     model = Leave
     template_name = 'hrms/leave/create.html'

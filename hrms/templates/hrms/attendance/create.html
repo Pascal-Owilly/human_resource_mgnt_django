@@ -40,7 +40,16 @@
                         
                         <br>
                         <h4 class="text-primary"><i class="fa fa-sign-in"></i>&emsp; List of employee(s) that clocked-in today</h4>
+                        <div class="d-flex justify-content-end mb-3">
+                            <!-- <button class="btn btn-primary mr-2" onclick="window.print()">Print</button> -->
+                            <a href="{% url 'hrms:download_pdf' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-danger btn-sm mr-2" style="font-size: 12px;">Download PDF</a>
+                            <!-- <a href="{% url 'hrms:download_excel' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-success">Download Excel</a> -->
+                        </div>
                         <hr>
+                        <!-- downloads -->
+                        <!-- Add buttons for printing and downloading -->
+
+
                         
                         <form class="form-inline mb-3 justify-content-between" method="GET">
                             <div class="form-group">

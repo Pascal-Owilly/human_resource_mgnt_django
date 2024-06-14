@@ -94,8 +94,8 @@
 
 <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #773697;">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'hrms:dashboard' %}">
-      <img src="{% if user.thumb %}{{ user.thumb.url }}{% else %}{% static 'hrms/images/jawabu_logo.jpeg' %}{% endif %}" 
+    <a class="navbar-brand" href="/">
+      <img src="{% static 'hrms/images/jawabu_logo.jpeg' %}" 
            class="brand-logo" alt="Logo" />
     </a>
 
@@ -121,8 +121,8 @@
       <p>Are you sure you want to log out?</p>
     </div>
     <div class="modal-footer">
-      <a href="{% url 'hrms:logout' %}" class="btn btn-danger">Log Out</a>
-      <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      <a href="{% url 'hrms:logout' %}" class="btn btn-sm" style="background-color: #773697;color: white;">Log Out</a>
+      <button type="button" class="btn btn-sm btn-secondary" id="cancelBtn">Cancel</button>
     </div>
   </div>
 </div>

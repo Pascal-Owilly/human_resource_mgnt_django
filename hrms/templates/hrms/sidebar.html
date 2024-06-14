@@ -8,6 +8,8 @@
     <style>
 /* General sidebar styles */
 .sidebar {
+    background: linear-gradient(90deg, #773697, #773697); /* Adjust the angle and colors as needed */
+
     width: 250px;
     /* position: fixed; */
     top: auto;
@@ -64,7 +66,7 @@ body {
 <button id="toggleBtn" class="toggle-btn">></button>
 
 <!-- Sidebar -->
-<nav class="sidebar sidebar-offcanvas" id="sidebar" style="background-color: #773697;">
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav text-light">
         <li class="nav-item nav-profile">
             <div class="nav-link">
@@ -75,24 +77,31 @@ body {
                     <div class="text-wrapper">
                         <p class="profile-name text-light">{{user.username | upper}}</p>
                         <div>
-                            <small class="designation text-muted" style="text-transform: capitalize;">{{user.role}}</small>
-                            <span class="status-indicator online"></span>
+                            {% if user.is_superuser %}
+                            <small class="designation text-muted">Admin</small>
+                        {% else %}
+                            <small class="designation text-muted" style="text-transform: capitalize;">{{ user.role }}</small>
+                        {% endif %}
+                                                    <span class="status-indicator online"></span>
                         </div>
                     </div>
                 </div>
                 {% if request.user.is_superuser %}
                 <div class="d-flex justify-content-between wrap">
   
-                  <a href="{% url 'hrms:employee_new' %}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 12px;">
-                        New Staff <i class="mdi mdi-plus"></i>
+                  <a href="{% url 'hrms:employee_new' %}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 10px;">
+                    New employee <i class="mdi mdi-plus"></i>
                     </a>
-                    <a href="{% url 'hrms:employee_bulk_register' %}" class="btn btn-sm" style="background-color: #fdeb3d;font-size: 12px;">
+                    <a href="{% url 'hrms:employee_bulk_register' %}" class="btn btn-sm" style="background-color: #fdeb3d;font-size: 10px;">
                         Multiple <i class="mdi mdi-plus"></i>
                     </a>
                 </div>
+                <br>
+              
                 {% endif %}
             </div>
         </li>
+        <hr style="background-color: #d1c62a;">
         {% if request.user.is_superuser %}
         <li class="nav-item text-light">
             <a class="nav-link" href="{% url 'hrms:dashboard' %}">
@@ -111,17 +120,18 @@ body {
         {% endif %}
         {% if request.user.role == 'employee' or request.user.is_superuser %}
         <li class="nav-item">
+            <a class="nav-link" href="/">
+                <i class="fa fa-sign-out text-light"></i>
+                <span class="menu-title text-light">&emsp;Home</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
                 <i class="fa fa-calendar text-light"></i>
                 <span class="menu-title text-light">&emsp;Attendance</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'hrms:leave_new' %}">
-                <i class="fa fa-sign-out text-light"></i>
-                <span class="menu-title text-light">&emsp;Leave</span>
-            </a>
-        </li>
+
         {% endif %}
         {% if request.user.is_superuser %}
         <li class="nav-item">
@@ -137,6 +147,10 @@ body {
         <li class="nav-item">
             <a class="nav-link text-light" href="{% url 'hrms:dept_new' %}">
                 <i class="fa fa-plus text-light"></i>&emsp;New Department</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" href="{% url 'hrms:reg' %}">
+                <i class="fa fa-plus text-light"></i>&emsp; Register Admin</a>
         </li>
         {% endif %}
         <div class="collapse" id="ui-basic">

@@ -15,11 +15,12 @@
                         <li class="breadcrumb-item active" aria-current="page">All</li>
                     </ol>
                 </nav>
+
+        <div class="row">
             <div class="col-lg-12 grid-margin">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title">All Employees<a href="{% url 'hrms:employee_new' %}" class="btn btn-sm btn-success mb-3 float-right">Add New +</a></h4>
-                    
+                  <h4 class="card-title">All Employees</h4>
                   <div class="table-responsive">
                     <table class="table table-bordered">
                       <thead>
@@ -82,7 +83,7 @@
                         {% endfor %}
                       </tbody>
                     </table>
-
+                      </div></div>
                     {% if is_paginated %}
                       <nav aria-label="Page navigation example" class='mt-4'>
                         <ul class="pagination">
@@ -108,6 +109,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
         {% block noty %}
         <script>
