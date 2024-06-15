@@ -27,8 +27,6 @@ from django.views.generic import TemplateView
 from datetime import datetime
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
-
-
 class UserListView(View):
     template_name = 'hrms/users/user_list.html'
     paginate_by = 8  # Number of users per page
@@ -71,6 +69,10 @@ class Index(TemplateView):
 def unauthorized(request):
     return render(request, 'auth/unauthorized.html')
 
+def employee_dashboard(request):
+    if request.user.role != 'employee' and not request.user.is_superuser:
+        return redirect('unauthorized')
+    return render(request, 'hrms/employees/employee_dashboard.html')
 
 
 def send_password_reset_email(uidb64, token, email):
@@ -148,8 +150,6 @@ class Register(CreateView):
         user.is_staff = True
         user.save()
         return redirect(self.success_url)
-
-        
 
 # def register_employee(request):
 #     if request.method == 'POST':
@@ -674,7 +674,7 @@ class ClockInView(LoginRequiredMixin, View):
             })
             plain_message = strip_tags(html_message)
             from_email = settings.DEFAULT_FROM_EMAIL
-            to_email = 'bollo.j@jawabubest.co.ke'
+            to_email = 'pascalouma55@gmail.com'
 
             send_mail(
                 subject,

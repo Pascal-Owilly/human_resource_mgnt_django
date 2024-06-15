@@ -11,7 +11,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 import os
-from .models import Employee
+from .models import Employee, User
 
 def generate_random_password(length=12):
     letters = string.ascii_letters
@@ -65,7 +65,9 @@ def process_uploaded_file(file_path):
             address=address,
             emergency=emergency,
             gender=gender,
-            password=make_password(password)
+            password=make_password(password),
+            role=User.EMPLOYEE  
+
         )
 
         if pd.notnull(thumb):  # Check if thumb is not null

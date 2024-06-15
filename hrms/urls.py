@@ -14,6 +14,7 @@ urlpatterns = [
     path('password_reset/done/', views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/complete/', views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('unauthorized/', views.unauthorized, name='unauthorized'),
 
     path('dashboard/', views.Dashboard.as_view(), name='dashboard'),
 
@@ -41,8 +42,8 @@ urlpatterns = [
     path('dashboard/attendance/in/', views.Attendance_New.as_view(), name='attendance_new'),
     path('dashboard/attendance/<int:pk>/out/', views.Attendance_Out.as_view(), name='attendance_out'),
     path('dashboard/attendance/clock_in/', views.ClockInView.as_view(), name='clock_in'),
-    path('download_pdf/', viewsDownloadPDF.as_view(), name='download_pdf'),
-    path('download_excel/', DownloadExcel.as_view(), name='download_excel'),
+    path('download_pdf/', views.DownloadPDF.as_view(), name='download_pdf'),
+    path('download_excel/', views.DownloadExcel.as_view(), name='download_excel'),
 #Leave Routes
 
     path("dashboard/leave/new/", views.LeaveNew.as_view(), name="leave_new"),
