@@ -67,12 +67,12 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     thumb = models.ImageField(blank=True, null=True)
     email = models.EmailField(unique=True, null=True, blank=True)
-    mobile = PhoneNumberField(null=True, blank=True)
+    phone_number = models.CharField(max_length=11, null=True, blank=True)
     address = models.CharField(max_length=100, null=True, blank=True)
 
     emp_id = models.CharField(max_length=70, unique=True, editable=False)
     mng_id = models.CharField(max_length=70, unique=True, editable=False)
-    emergency = models.CharField(max_length=11, null=True, blank=True)
+    emergency_contact = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
@@ -117,6 +117,16 @@ class Employee(models.Model):
     def get_absolute_url(self):
         return reverse("hrms:employee_view", kwargs={"pk": self.pk})
     
+class Admin(models.Model):
+    admin = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.admin.first_name} {self.admin.last_name}'
+        
+    def get_absolute_url(self):
+        return reverse("hrms:admin_view", kwargs={"pk": self.pk})
+    
 
 class Kin(models.Model):
     first_name = models.CharField(max_length=20)
@@ -140,6 +150,7 @@ class Attendance (models.Model):
     last_out = models.TimeField(null=True)
     status = models.CharField(choices=STATUS, max_length=15 )
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
+    admin = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True)
     latitude = models.FloatField(null=True, blank=True) 
     longitude = models.FloatField(null=True, blank=True)
     

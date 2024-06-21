@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path('register/', views.Register.as_view(), name='reg'),
     path('register/employees/', views.upload_file, name='employee_bulk_register'),
-    path('login/', views.Login_View.as_view(), name='login'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.Logout_View.as_view(), name='logout'),
     path('password_reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
     path('password_reset/done/', views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
@@ -16,14 +16,19 @@ urlpatterns = [
     path('reset/complete/', views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('unauthorized/', views.unauthorized, name='unauthorized'),
 
-    path('dashboard/', views.Dashboard.as_view(), name='dashboard'),
-
 # Users
     path('dashboard/user-list/', views.UserListView.as_view(), name='user_list'),
     path('dashboard/user-detail/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
 
+# Admin routes
+    path('dashboard/admin/', views.AdminDashboard.as_view(), name='admin_dashboard'),
+    path('dashboard/admin-list/', views.AdminListView.as_view(), name='admin_list'),
+    path('dashboard/admin/<int:pk>/view/', views.Admin_View.as_view(), name='admin_single_view'),
+
 # Employee Routes
-    path('dashboard/employee/', views.Employee_All.as_view(), name='employee_all'),
+    path('dashboard/employee/', views.EmployeeDashboard.as_view(), name='employee_dashboard'),
+
+    path('dashboard/employee/all', views.Employee_All.as_view(), name='employee_all'),
     path('dashboard/employee/new/', views.Employee_New.as_view(), name='employee_new'),
     path('dashboard/employee/<int:pk>/view/', views.Employee_View.as_view(), name='employee_view'),
     path('dashboard/employee/<int:pk>/update/', views.Employee_Update.as_view(), name='employee_update'),
@@ -39,9 +44,14 @@ urlpatterns = [
     path('dashboard/department/<int:pk>/update/', views.Department_Update.as_view(), name='dept_update'),
 
 #Attendance Routes
-    path('dashboard/attendance/in/', views.Attendance_New.as_view(), name='attendance_new'),
+    path('dashboard/attendance/in/admin/', views.Attendance_Admin.as_view(), name='attendance_new'),
+    path('dashboard/attendance/emp/', views.Attendance_Employee.as_view(), name='attendance_employee'),
+
     path('dashboard/attendance/<int:pk>/out/', views.Attendance_Out.as_view(), name='attendance_out'),
-    path('dashboard/attendance/clock_in/', views.ClockInView.as_view(), name='clock_in'),
+    path('dashboard/attendance/<int:pk>/out_emp/', views.Attendance_Out_Emp.as_view(), name='attendance_out_emp'),
+
+    path('dashboard/attendance/clock_in/', views.AdminClockInView.as_view(), name='clock_in'),
+    path('dashboard/attendance/clock_in_emp/', views.EmployeeClockInView.as_view(), name='clock_in_emp'),
     path('download_pdf/', views.DownloadPDF.as_view(), name='download_pdf'),
     path('download_excel/', views.DownloadExcel.as_view(), name='download_excel'),
 #Leave Routes

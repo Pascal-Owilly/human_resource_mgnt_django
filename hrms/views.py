@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect, resolve_url,reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User
+from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User, Admin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -26,13 +26,15 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmVie
 from django.views.generic import TemplateView
 from datetime import datetime
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.contrib.auth import authenticate, login
+from datetime import datetime, timedelta
 
 class UserListView(View):
     template_name = 'hrms/users/user_list.html'
     paginate_by = 8  # Number of users per page
 
     def get(self, request):
-        users_list = User.objects.all()
+        users_list = User.objects.all().order_by('-id')
         paginator = Paginator(users_list, self.paginate_by)
         page_number = request.GET.get('page')
 
@@ -63,7 +65,7 @@ class UserDetailView(View):
         return redirect('hrms:user_detail', user_id=user_id)
 
 class Index(TemplateView):
-    
+
    template_name = 'hrms/home/home.html'
 
 def unauthorized(request):
@@ -139,6 +141,12 @@ class CustomPasswordResetDoneView(TemplateView):
 
 #   Authentication
 class Register(CreateView):
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
     model = get_user_model()
     form_class = SuperuserRegistrationForm
     template_name = 'hrms/registrations/register.html'
@@ -146,9 +154,12 @@ class Register(CreateView):
 
     def form_valid(self, form):
         user = form.save(commit=False)
+        user.role = User.SUPERUSER
         user.is_superuser = True
         user.is_staff = True
         user.save()
+        Admin.objects.create(admin=user)
+
         return redirect(self.success_url)
 
 # def register_employee(request):
@@ -175,42 +186,131 @@ class Register(CreateView):
 #     else:
 #         form = EmployeeRegistrationForm()
 #     return render(request, 'hrms/employee/create.html', {'form': form})
-    
+
+class CustomLoginView(LoginView):
+    template_name = 'hrms/registrations/login.html'
+    authentication_form = LoginForm
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        user = authenticate(self.request, username=username, password=password)
+
+        if user is not None:
+            login(self.request, user)
+            # Determine user's role and redirect accordingly
+            if user.role == User.SUPERUSER:
+                return redirect('/dashboard/admin/')  # Redirect admin users to admin page
+            elif user.role == User.EMPLOYEE:
+                return redirect('/dashboard/attendance/emp/')  # Redirect employees to employee dashboard
+            else:
+                # Handle other roles or scenarios
+                return redirect('/')  # Redirect to a generic dashboard
+        else:
+            # Add a non-field error to the form indicating invalid username or password
+            form.add_error(None, 'Invalid username or password.')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        # This method is called when the form is invalid
+        return render(self.request, self.template_name, {'form': form})
+
 class Login_View(LoginView):
     model = get_user_model()
     form_class = LoginForm
     template_name = 'hrms/registrations/login.html'
 
-    def get_success_url(self):
-        url = resolve_url('hrms:dashboard')
-        return url
+    def get_success_url(request):
+        url = resolve_url('/')
+
+        if user.role == User.SUPERUSER:
+            url = resolve_url(request, 'hrms:admin_dashboard')
+
+        elif user.role == User.EMPLOYEE:
+            url = resolve_url(request, 'hrms:employee_dashboard')
+        else:
+            return url
 
 class Logout_View(View):
 
     def get(self,request):
         logout(self.request)
         return redirect ('hrms:login',permanent=True)
-    
-    
+
+
 # def export_management_dashboard(request):
 #     if request.user.role != 'seller' and not request.user.is_superuser:
 #         return redirect('unauthorized')
 #     return render(request, 'export_management.html')
 
-class Dashboard(LoginRequiredMixin,ListView):
-    template_name = 'hrms/dashboard/index.html'
+class AdminDashboard(LoginRequiredMixin, ListView):
     login_url = 'hrms:login'
     model = get_user_model()
-    context_object_name = 'qset'            
+    template_name = 'hrms/dashboard/index.html'
+    context_object_name = 'qset'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs) 
+        context = super().get_context_data(**kwargs)
         context['emp_total'] = Employee.objects.all().count()
         context['dept_total'] = Department.objects.all().count()
-        context['admin_count'] = get_user_model().objects.all().count()
+        context['users_count'] = get_user_model().objects.all().count()
+        context['admin_count'] = Admin.objects.all().count()
         context['workers'] = Employee.objects.order_by('-id')
         return context
 
-# Employee's 
+class AdminListView(View):
+    template_name = 'hrms/admin/admin_list.html'
+    paginate_by = 8  # Number of users per page
+
+    def get(self, request):
+        admin_list = Admin.objects.all().order_by('-id')
+        paginator = Paginator(admin_list, self.paginate_by)
+        page_number = request.GET.get('page')
+
+        try:
+            admins = paginator.page(page_number)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page
+            admins = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results
+            admins = paginator.page(paginator.num_pages)
+
+        return render(request, self.template_name, {'admins': admins})
+
+class Admin_View(LoginRequiredMixin,DetailView):
+    queryset = Admin.objects.select_related('admin__department').order_by('-id')
+    template_name = 'hrms/admin/single.html'
+    context_object_name = 'amin'
+    login_url = 'hrms:login'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            query = Kin.objects.get(admin=self.object.pk)
+            context["kin"] = query
+            return context
+        except ObjectDoesNotExist:
+            return context
+
+class EmployeeDashboard(LoginRequiredMixin, ListView):
+    login_url = 'hrms:login'
+    model = get_user_model()
+    template_name = 'hrms/employee/employee_dashboard.html'
+    context_object_name = 'qset'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.role != 'employee' and not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+# Employee's
 
 import string
 import random
@@ -259,7 +359,7 @@ class Employee_New(LoginRequiredMixin, CreateView):
         user.role = User.EMPLOYEE
         user.set_password(password)  # Set the random password
         user.save()
-        
+
         # Get the department from the form
         department = form.cleaned_data.get('department')
 
@@ -313,13 +413,19 @@ class Employee_All(LoginRequiredMixin,ListView):
     login_url = 'hrms:login'
     context_object_name = 'employees'
     paginate_by  = 5
-    
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+
 class Employee_View(LoginRequiredMixin,DetailView):
     queryset = Employee.objects.select_related('employee__department').order_by('-id')
     template_name = 'hrms/employee/single.html'
     context_object_name = 'employee'
     login_url = 'hrms:login'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
@@ -328,12 +434,12 @@ class Employee_View(LoginRequiredMixin,DetailView):
             return context
         except ObjectDoesNotExist:
             return context
-        
+
 
 class Employee_Update(LoginRequiredMixin, View):
     template_name = 'hrms/employee/edit.html'
     login_url = 'hrms:login'
-    
+
     def get(self, request, pk, *args, **kwargs):
         employee = Employee.objects.get(pk=pk)
         form = EmployeeRegistrationForm(instance=employee)
@@ -346,7 +452,7 @@ class Employee_Update(LoginRequiredMixin, View):
             form.save()
             return redirect('success_url')  # Replace 'success_url' with your desired redirect URL
         return render(request, self.template_name, {'form': form})
-    
+
 class Employee_Delete(LoginRequiredMixin,DeleteView):
     pass
 
@@ -355,7 +461,7 @@ class Employee_Kin_Add (LoginRequiredMixin,CreateView):
     form_class = KinForm
     template_name = 'hrms/employee/kin_add.html'
     login_url = 'hrms:login'
-   
+
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -374,11 +480,11 @@ class Employee_Kin_Update(LoginRequiredMixin,UpdateView):
 
     def get_initial(self):
         initial = super(Employee_Kin_Update,self).get_initial()
-        
+
         if 'id' in self.kwargs:
             emp =  Employee.objects.get(pk=self.kwargs['id'])
             initial['employee'] = emp.pk
-            
+
             return initial
 
 #Department views
@@ -387,7 +493,7 @@ class DepartmentListView(View):
     paginate_by = 5  # Number of users per page
 
     def get(self, request):
-        department_list = Department.objects.all()
+        department_list = Department.objects.all().order_by('-id')
         paginator = Paginator(department_list, self.paginate_by)
         page_number = request.GET.get('page')
 
@@ -406,7 +512,7 @@ class Department_Detail(LoginRequiredMixin, ListView):
     context_object_name = 'employees'
     template_name = 'hrms/department/single.html'
     login_url = 'hrms:login'
-    
+
     def get_queryset(self):
         department_pk = self.kwargs.get('pk')
         queryset = Employee.objects.filter(employee__department_id=department_pk)
@@ -418,7 +524,7 @@ class Department_Detail(LoginRequiredMixin, ListView):
         department = get_object_or_404(Department, pk=department_pk)
         context["dept"] = department
         return context
-    
+
 class Department_New (LoginRequiredMixin,CreateView):
     model = Department
     template_name = 'hrms/department/create.html'
@@ -439,8 +545,14 @@ from datetime import datetime
 
 from django.core.paginator import Paginator
 
-class Attendance_New(LoginRequiredMixin, View):
+class Attendance_Admin(LoginRequiredMixin, View):
     login_url = 'hrms:login'
+
+    def dispatch(self, request, *args, **kwargs):
+            if not request.user.is_superuser:
+                return render(request, 'auth/unauthorized.html')
+            return super().dispatch(request, *args, **kwargs)
+
 
     def get(self, request, *args, **kwargs):
         # Get query parameters
@@ -463,8 +575,8 @@ class Attendance_New(LoginRequiredMixin, View):
         # Perform search if keyword is provided
         if keyword:
             present_staffers = present_staffers.filter(
-                Q(staff__employee__first_name__icontains=keyword) |
-                Q(staff__employee__last_name__icontains=keyword)
+                Q(staff__admin__first_name__icontains=keyword) |
+                Q(staff__admin__last_name__icontains=keyword)
             )
 
         # Calculate distance for each present staffer
@@ -478,9 +590,9 @@ class Attendance_New(LoginRequiredMixin, View):
         paginator = Paginator(present_staffers, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        employee = Employee.objects.get(employee=request.user)
+        admin = Admin.objects.get(admin=request.user)
 
-        clocked_in = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).exists()
+        clocked_in = Attendance.objects.filter(admin=admin, date=timezone.localdate(), last_out__isnull=True).exists()
 
         context = {
             'today': timezone.localdate(),
@@ -493,98 +605,92 @@ class Attendance_New(LoginRequiredMixin, View):
 
         return render(request, 'hrms/attendance/create.html', context)
 
-    
-                
-from geopy.distance import geodesic
 
-class Attendance_Out(LoginRequiredMixin, View):
+class Attendance_Employee(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
     def get(self, request, *args, **kwargs):
-        try:
-            user = Attendance.objects.get(
-                Q(staff__id=self.kwargs['user_id']) & 
-                Q(status='PRESENT') & 
-                Q(date=timezone.localdate())
-            )
-            user.last_out = timezone.localtime()
-            user.save()
-            return redirect('hrms:attendance_new')
-        except Attendance.DoesNotExist:
-            return redirect('hrms:attendance_new')
-        
-from django.contrib import messages
-from django.http import JsonResponse
-from django.utils import timezone
-from geopy.distance import geodesic
-from .models import Attendance, Employee  # Ensure your models are imported
-
-class ClockInView(LoginRequiredMixin, View):
-    login_url = 'hrms:login'
-
-    def post(self, request, *args, **kwargs):
-        latitude = request.POST.get('latitude')
-        longitude = request.POST.get('longitude')
-        
-        if latitude is None or longitude is None:
-            messages.error(request, 'Latitude and Longitude are required.')
-            return redirect('hrms:attendance_new')
-
-        # Retrieve the logged-in user's employee instance
-        try:
-            employee = Employee.objects.get(employee=request.user)
-        except Employee.DoesNotExist:
-            messages.error(request, 'Employee record not found.')
-            return redirect('hrms:attendance_new')
-
-        # Define the geofence center and radius
+        # Get query parameters
+        date_emp = request.GET.get('date')
+        keyword = request.GET.get('keyword')
         geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
-        geofence_radius_km = 0.1  # 200 meters (0.2 km)
-        
-        try:
-            # Calculate the distance from the geofence center
-            employee_location = (float(latitude), float(longitude))
-            distance_km = geodesic(employee_location, geofence_center).km
 
-        except ValueError:
-            messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
-            return redirect('hrms:attendance_new')
+        # Retrieve the logged-in employee
+        employee = Employee.objects.get(employee=request.user)
 
-        # Check if the employee is within the geofence area
-        if distance_km <= geofence_radius_km:
-            # Check if the employee is already clocked in
-            attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
-            if attendance:
-                # Clocking out
-                attendance.last_out = timezone.localtime()
-                attendance.save()
-                messages.success(request, f'Clock-out successful! Distance from geofence center: {distance_km:.2f} km')
-            else:
-                # Clocking in
-                Attendance.objects.create(
-                    staff=employee,
-                    latitude=latitude,
-                    longitude=longitude,
-                    first_in=timezone.localtime(),
-                    status='PRESENT'
-                )
-                messages.success(request, f'Clock-in successful! Distance from geofence center: {distance_km:.2f} km')
+        # Determine the start and end of the current week (Monday to Friday)
+        today_emp = timezone.localdate()
+        start_of_week = today_emp - timedelta(days=today_emp.weekday())  # Monday
+        end_of_week = start_of_week + timedelta(days=4)  # Friday
+
+        # Retrieve attendance records for the logged-in employee within the current week
+        if date_emp:
+            try:
+                selected_date = datetime.strptime(date_emp, '%Y-%m-%d').date()
+                present_employees = Attendance.objects.filter(
+                    Q(status='PRESENT') & Q(date=selected_date) & Q(staff=employee)
+                ).order_by('-id')
+            except ValueError:
+                selected_date = None
+                present_employees = Attendance.objects.none()
         else:
-            # Notify the employee about being outside the geofence area
-            messages.error(request, f'You are outside the allowed geofence area. Distance from geofence center: {distance_km:.2f} km')
+            selected_date = None
+            present_employees = Attendance.objects.filter(
+                Q(status='PRESENT') & Q(date__range=(start_of_week, end_of_week)) & Q(staff=employee)
+            ).order_by('-id')
 
-            return redirect('hrms:attendance_new')
-                
+        # Perform search if keyword is provided
+        if keyword:
+            present_employees = present_employees.filter(
+                Q(staff__employee__first_name__icontains=keyword) |
+                Q(staff__employee__last_name__icontains=keyword)
+            )
+
+        # Calculate distance for each present staffer
+        for staff in present_employees:
+            if staff.latitude and staff.longitude:
+                staff.distance = geodesic((staff.latitude, staff.longitude), geofence_center).meters
+            else:
+                staff.distance = None
+
+        # Pagination
+        paginator = Paginator(present_employees, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        # Check if the logged-in employee is clocked in
+        clocked_in = Attendance.objects.filter(
+            staff=employee, date=timezone.localdate(), last_out__isnull=True
+        ).exists()
+
+        context = {
+            'today_emp': today_emp,
+            'present_employees': page_obj,
+            'selected_date': selected_date,
+            'keyword': keyword,
+            'page_obj': page_obj,
+            'clocked_in': clocked_in
+        }
+
+        return render(request, 'hrms/employee/employee_dashboard.html', context)
+
+
 from geopy.distance import geodesic
 
 class Attendance_Out(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+
     def get(self, request, *args, **kwargs):
         try:
             user = Attendance.objects.get(
-                Q(staff__id=self.kwargs['user_id']) & 
-                Q(status='PRESENT') & 
+                Q(staff__id=self.kwargs['user_id']) &
+                Q(status='PRESENT') &
                 Q(date=timezone.localdate())
             )
             user.last_out = timezone.localtime()
@@ -592,88 +698,128 @@ class Attendance_Out(LoginRequiredMixin, View):
             return redirect('hrms:attendance_new')
         except Attendance.DoesNotExist:
             return redirect('hrms:attendance_new')
-        
+
+class Attendance_Out_Emp(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = Attendance.objects.get(
+                Q(staff__id=self.kwargs['user_id']) &
+                Q(status='PRESENT') &
+                Q(date=timezone.localdate())
+            )
+            user.last_out = timezone.localtime()
+            user.save()
+            return redirect('hrms:attendance_employee')
+        except Attendance.DoesNotExist:
+            return redirect('hrms:attendance_employee')
+
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from geopy.distance import geodesic
 from .models import Attendance, Employee  # Ensure your models are imported
 
-class ClockInView(LoginRequiredMixin, View):
+class AdminClockInView(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
     def post(self, request, *args, **kwargs):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
-        
+        print(f"Received coordinates: latitude={latitude}, longitude={longitude}")
+
         if latitude is None or longitude is None:
             messages.error(request, 'Latitude and Longitude are required.')
-            return redirect('hrms:attendance_new')
+            return redirect('hrms:attendance_employee')
 
         # Retrieve the logged-in user's employee instance
         try:
-            employee = Employee.objects.get(employee=request.user)
-        except Employee.DoesNotExist:
-            messages.error(request, 'Employee record not found.')
+            admin = Admin.objects.get(admin=request.user)
+        except Admin.DoesNotExist:
+            messages.error(request, 'You are not an admin')
             return redirect('hrms:attendance_new')
 
         # Define the geofence center and radius
-        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
-        geofence_radius_km = 0.1  # 200 meters (0.2 km)
+        # geofence_center = (-1.2540381172761967, 36.71374983009918)  # Example: main institution coordinates
+        geofence_center = (-1.2504447, 36.7150981)
+        # main office onesmus phone -1.33220199, 36.8622648
+
+        # marials phone -1.2974781588016533, 36.76480694390815
+        # my phone coordinates -1.2504447, 36.7150981
+        # marials coordinates -1.2975869, 36.7649746
+        # -1.2558260124069696, 36.69340338379849 Kinoo jacmin
+        # geofence_center = (-1.2829549455322522, 36.82593840499116)  # Example: Nairobi odeon coordinates
+        # Naivas uthiru coperation (-1.2606487526706478, 36.709970821254515)
+        # Retrieve attendance records based on the provided date
+        # Uthiru chiefs camp -1.2540381172761967, 36.71374983009918
+        # Kisumu international airport -0.08182281166829138, 34.72939625715378
+        # kabete national polytechnic -1.263690553734057, 36.72265660553466
+        # Mombasa -4.0454093873302055, 39.65720790666958
+
+        # Kangemi -1.2710588266841318, 36.739521489451775
+        # kinoo hse -1.2841, 36.8155
+        # ABC PLACE -1.2584232411933278, 36.77113775720258
+        # Westlands -1.2676956311569731, 36.81221729528121
+        # Riara road -1.297610, 36.764904
+
+        geofence_radius_km = 0.3  # 200 meters (0.2 km)
 
         try:
-            # Calculate the distance from the geofence center
-            employee_location = (float(latitude), float(longitude))
-            distance_km = geodesic(employee_location, geofence_center).km
+            admin_location = (float(latitude), float(longitude))
+            distance_km = geodesic(admin_location, geofence_center).km
+            print(f"Calculated distance: {distance_km} km")
         except ValueError:
             messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
             return redirect('hrms:attendance_new')
 
         # Check if the user has the privilege to clock in from anywhere
         if request.user.clockin_privileges == User.CAN_CLOCK_IN_ANYWHERE:
-            self.clock_in(employee, latitude, longitude, distance_km, request)
+            self.clock_in(admin, latitude, longitude, distance_km, request)
             return redirect('hrms:attendance_new')
         else:
             # Check if the employee is within the geofence area
             if distance_km <= geofence_radius_km:
-                self.clock_in(employee, latitude, longitude, distance_km, request)
+                self.clock_in(admin, latitude, longitude, distance_km, request)
             else:
-                messages.error(request, f'You are outside the allowed geofence area. Distance from geofence center: {distance_km:.2f} km')
-        
+                messages.error(request, f'You are outside the allowed geofence area. Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
         return redirect('hrms:attendance_new')
 
-    def clock_in(self, employee, latitude, longitude, distance_km, request):
+    def clock_in(self, admin, latitude, longitude, distance_km, request):
         # Check if the employee is already clocked in
-        attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
+        attendance = Attendance.objects.filter(admin=admin, date=timezone.localdate(), last_out__isnull=True).first()
         if attendance:
             # Clocking out
             attendance.last_out = timezone.localtime()
             attendance.save()
-            messages.success(request, f'Clock-out successful! Distance from geofence center: {distance_km:.2f} km')
+            messages.success(request, f'Clock-out successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
         else:
             # Clocking in
             Attendance.objects.create(
-                staff=employee,
+                admin=admin,
                 latitude=latitude,
                 longitude=longitude,
                 first_in=timezone.localtime(),
                 status='PRESENT'
             )
-            self.send_late_arrival_notification(employee, request)
-            messages.success(request, f'Clock-in successful! Distance from geofence center: {distance_km:.2f} km')
+            self.send_late_arrival_notification(admin, request)
+            messages.success(request, f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
 
-    def send_late_arrival_notification(self, employee, request):
+    def send_late_arrival_notification(self, admin, request):
         attendance_time = timezone.localtime()
         if attendance_time.time() > datetime.strptime('08:30', '%H:%M').time():
-            subject = 'Late Arrival Notification'
+            subject = 'Late Clock-in Notification'
             html_message = render_to_string('hrms/employee/employee_late_arrival.html', {
-                'first_name': employee.employee.first_name,
-                'last_name': employee.employee.last_name,
-                'username': employee.employee.username,
+                'first_name': admin.admin.first_name,
+                'last_name': admin.admin.last_name,
+                'username': admin.admin.username,
                 'clock_in_time': attendance_time.strftime("%H:%M:%S")
             })
             plain_message = strip_tags(html_message)
             from_email = settings.DEFAULT_FROM_EMAIL
+            # to_email = 'bollo.j@jawabubest.co.ke'
             to_email = 'pascalouma55@gmail.com'
 
             send_mail(
@@ -684,7 +830,125 @@ class ClockInView(LoginRequiredMixin, View):
                 html_message=html_message,
                 fail_silently=False,
             )
-        
+
+class EmployeeClockInView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def post(self, request, *args, **kwargs):
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        print(f"Received coordinates: latitude={latitude}, longitude={longitude}")
+
+        if latitude is None or longitude is None:
+            messages.error(request, 'Latitude and Longitude are required.')
+            return redirect('hrms:attendance_employee')
+
+        # Retrieve the logged-in user's employee instance
+        try:
+            employee = Employee.objects.get(employee=request.user)
+        except Employee.DoesNotExist:
+            messages.error(request, 'You are not an employee')
+            return redirect('hrms:attendance_employee')
+
+        # Define the geofence center and radius
+        # geofence_center = (-1.315638, 36.862129)  # Example: main institution coordinates
+        geofence_center = (-1.2504447, 36.7150981)
+        # james phone -1.3319954, 36.8622605
+        # marials phone -1.2974781588016533, 36.76480694390815
+        # my phones -1.2514447, 36.7150981
+        # marialsplace -1.2975869, 36.7649746   
+        # my place -1.2841, 36.8155
+        # -1.2558260124069696, 36.69340338379849 Kinoo jacmin
+        # geofence_center = (-1.2829549455322522, 36.82593840499116)  # Example: Nairobi odeon coordinates
+        # Naivas uthiru coperation (-1.2606487526706478, 36.709970821254515)
+        # Retrieve attendance records based on the provided date
+        # Uthiru chiefs camp -1.2540381172761967, 36.71374983009918
+        # Kisumu international airport -0.08182281166829138, 34.72939625715378
+        # kabete national polytechnic -1.263690553734057, 36.72265660553466
+        # Mombasa -4.0454093873302055, 39.65720790666958
+
+        # Kangemi -1.2710588266841318, 36.739521489451775
+        # kinoo hse -1.2841, 36.8155
+        # ABC PLACE -1.2584232411933278, 36.77113775720258
+        # Westlands -1.2676956311569731, 36.81221729528121
+
+        geofence_radius_km = 0.1  # 200 meters (0.2 km)
+
+        try:
+            employee_location = (float(latitude), float(longitude))
+            distance_km = geodesic(employee_location, geofence_center).km
+            print(f"Calculated distance: {distance_km} km")
+        except ValueError:
+            messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
+            return redirect('hrms:attendance_employee')
+
+        # Check if the user has the privilege to clock in from anywhere
+        if request.user.clockin_privileges == User.CAN_CLOCK_IN_ANYWHERE:
+            self.clock_in(employee, latitude, longitude, distance_km, request)
+            return redirect('hrms:attendance_employee')
+        else:
+            # Check if the employee is within the geofence area
+            if distance_km <= geofence_radius_km:
+                self.clock_in(employee, latitude, longitude, distance_km, request)
+            else:
+                messages.error(request, f'You are outside the allowed geofence area. Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+        return redirect('hrms:attendance_employee')
+
+    def clock_in(self, employee, latitude, longitude, distance_km, request):
+        # Check if the employee is already clocked in
+        attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
+        if attendance:
+            # Clocking out
+            attendance.last_out = timezone.localtime()
+            attendance.save()
+            messages.success(request, f'Clock-out successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+        else:
+            # Clocking in
+            Attendance.objects.create(
+                staff=employee,
+                latitude=latitude,
+                longitude=longitude,
+                first_in=timezone.localtime(),
+                status='PRESENT'
+            )
+            self.send_late_arrival_notification(employee, request)
+            messages.success(request, f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+
+    def send_late_arrival_notification(self, employee, request):
+        attendance_time = timezone.localtime()
+        if attendance_time.time() > datetime.strptime('08:30', '%H:%M').time():
+            subject = 'Late Clock-in Notification'
+            html_message = render_to_string('hrms/employee/employee_late_arrival.html', {
+                'first_name': employee.employee.first_name,
+                'last_name': employee.employee.last_name,
+                'username': employee.employee.username,
+                'clock_in_time': attendance_time.strftime("%H:%M:%S")
+            })
+            plain_message = strip_tags(html_message)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            # to_email = 'bollo.j@jawabubest.co.ke'
+            to_email = 'pascalouma55@gmail.com'
+
+            send_mail(
+                subject,
+                plain_message,
+                from_email,
+                [to_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
+
+from geopy.distance import geodesic
+
+from django.contrib import messages
+from django.http import JsonResponse
+from django.utils import timezone
+from geopy.distance import geodesic
+from .models import Attendance, Employee
 
 import io
 from django.http import HttpResponse

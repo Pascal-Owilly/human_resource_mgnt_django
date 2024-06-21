@@ -96,15 +96,14 @@ body {
                         Multiple <i class="mdi mdi-plus"></i>
                     </a>
                 </div>
-                <br>
-              
+                <br> 
                 {% endif %}
             </div>
         </li>
         <hr style="background-color: #d1c62a;">
         {% if request.user.is_superuser %}
         <li class="nav-item text-light">
-            <a class="nav-link" href="{% url 'hrms:dashboard' %}">
+            <a class="nav-link" href="{% url 'hrms:admin_dashboard' %}">
                 <i class="fa fa-dashboard text-light"></i>
                 <span class="menu-title text-light">&emsp;Dashboard</span>
             </a>
@@ -118,7 +117,17 @@ body {
             </a>
         </li>
         {% endif %}
-        {% if request.user.role == 'employee' or request.user.is_superuser %}
+        {% if request.user.is_superuser %}
+        
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
+                <i class="fa fa-calendar text-light"></i>
+                <span class="menu-title text-light">&emsp;Attendance</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% if request.user.role == 'employee' %}
         <li class="nav-item">
             <a class="nav-link" href="/">
                 <i class="fa fa-sign-out text-light"></i>
@@ -126,13 +135,13 @@ body {
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
+            <a class="nav-link" href="{% url 'hrms:attendance_employee' %}">
                 <i class="fa fa-calendar text-light"></i>
                 <span class="menu-title text-light">&emsp;Attendance</span>
-            </a>
+            </a>    
         </li>
-
         {% endif %}
+
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">

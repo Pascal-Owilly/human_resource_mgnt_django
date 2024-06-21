@@ -10,6 +10,9 @@ from django import forms
 
 class SuperuserRegistrationForm (UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Username'}))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'First Name'}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Last Name'}))
+    mobile = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'+254712345678'}))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class':'form-control','placeholder':'Valid Email is required'}))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Password'}))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Confirm Password'}))
@@ -17,9 +20,10 @@ class SuperuserRegistrationForm (UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username','email','password1', 'password2','thumb')
+        fields = ('username','email','password1', 'password2','thumb', 'first_name', 'last_name', 'mobile')
 
 class EmployeeRegistrationForm(UserCreationForm):
+    # Your existing fields
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Username'}))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class':'form-control','placeholder':'Valid Email is required'}))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Password'}))
@@ -36,10 +40,15 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'password1', 'password2', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges')
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges' , 'password1', 'password2',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "Username"
+        self.fields['email'].label = "Email"
+        # You can add more custom labels or other customization if needed
 
 # EmployeeRegistration
-
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()

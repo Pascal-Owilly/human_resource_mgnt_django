@@ -12,7 +12,8 @@
                         <tr>
                             <th>Name</th>
                             <th>Branch</th>
-                        
+                            <th>Details</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -20,6 +21,9 @@
                             <tr>
                                 <td>{{ department.name }}</td>
                                 <td>{{ department.branch }}</td>
+                                <td><a href="{{department.get_absolute_url}}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 10px;">
+                                    View <i class="mdi mdi-plus"></i>
+                                    </a></td>
                                  </tr>
                         {% endfor %}
                     </tbody>

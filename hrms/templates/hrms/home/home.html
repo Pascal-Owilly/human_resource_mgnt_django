@@ -43,7 +43,7 @@
 <body class='body-bg'>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'hrms:dashboard' %}">
+            <a class="navbar-brand" href="/">
                 <img src="{% if user.thumb %}{{ user.thumb.url }}{% else %}{% static 'hrms/images/jawabu_logo.jpeg' %}{% endif %}" 
                     class="brand-logo" alt="Company Logo" style="width: 50px;"/>
             </a>

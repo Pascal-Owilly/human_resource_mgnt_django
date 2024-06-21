@@ -1,13 +1,29 @@
 {% extends 'hrms/layout.html' %}
-{% load static %}
-{% block title %} Unauthorised | JBL {% endblock title %}
 
-{% block title %} Unauthorized Access {% endblock %}
+{% load static %}
+
+{% block title %} Unauthorized Access |  JBL {% endblock %}
 
 {% block content %}
-    <h3>Oops! <span style="font-size: 17px;">You've reached the land of 'Nope'!"</span></h3>
+<div class="container justify-content-between">
 
-    <p>You are not allowed to acess this page.</p>
+<div class="jumbotron mt-3">
+    <div class="container">
+        <div class="col-md-8">
+            <h3>Oops! <span style="font-size: 17px;display:block"> <hr> You've reached the land of 'Nope'!"</span></h3>
+
+        </div>
+        <div class="col-md-8">
+            <p>Shh!. No humans allowed!</p>
+
+        </div>
+        <div class="col-md-8">
+            <p><a href="javascript:history.back()">Back 👋</a></p>
+
+        </div>
+    </div>
+</div>
+</div>
+
     
-    <p><a href="javascript:history.back()">Back </a></p>
 {% endblock %}
