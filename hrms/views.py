@@ -1,12 +1,12 @@
 from django.shortcuts import render,redirect, resolve_url,reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User, Admin
+from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User, Admin, Client
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import FormView, CreateView,View,DetailView,TemplateView,ListView,UpdateView,DeleteView
-from .forms import SuperuserRegistrationForm,EmployeeRegistrationForm,LoginForm,KinForm,DepartmentForm,AttendanceForm, LeaveForm, RecruitmentForm
+from .forms import SuperuserRegistrationForm,EmployeeRegistrationForm,LoginForm,KinForm,DepartmentForm,AttendanceForm, LeaveForm, RecruitmentForm, ClientForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.utils import timezone
@@ -78,37 +78,32 @@ def employee_dashboard(request):
 
 
 def send_password_reset_email(uidb64, token, email):
-    # Encode the user ID to bytes
-    uid = force_bytes(uidb64)
-
-    # Construct the reset password URL
     reset_url = f"{settings.BASE_URL}{reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})}"
-
-    # Construct the email message
     subject = 'Set Your Password'
     message = f'Please click the following link to set your password: {reset_url}'
     sender_email = settings.DEFAULT_FROM_EMAIL
 
-    # Send the email
     send_mail(subject, message, sender_email, [email])
 
 class CustomPasswordResetView(PasswordResetView):
     email_template_name = 'auth/password_reset_email.html'
     subject_template_name = 'auth/password_reset_subject.txt'
     template_name = 'auth/password_reset_form.html'
-    success_url = reverse_lazy('hrms:password_reset_done')
+    success_url = reverse_lazy('password_reset_done')
+    html_email_template_name = 'auth/password_reset_email.html'
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
         subject = render_to_string(subject_template_name, context)
         subject = ''.join(subject.splitlines())
         body = render_to_string(email_template_name, context)
+        html_body = render_to_string(html_email_template_name, context)
 
-        send_mail(subject, body, from_email, [to_email])
+        send_mail(subject, body, from_email, [to_email], html_message=html_body)
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
         user = get_user_model().objects.get(email=email)
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))  
         token = default_token_generator.make_token(user)
         context = {
             'email': email,
@@ -125,7 +120,9 @@ class CustomPasswordResetView(PasswordResetView):
             context,
             settings.DEFAULT_FROM_EMAIL,
             email,
+            self.html_email_template_name,
         )
+        
         return super().form_valid(form)
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
@@ -221,17 +218,21 @@ class Login_View(LoginView):
     form_class = LoginForm
     template_name = 'hrms/registrations/login.html'
 
-    def get_success_url(request):
-        url = resolve_url('/')
+    def get_success_url(self):
+        user = self.request.user
+        url = '/'
 
         if user.role == User.SUPERUSER:
-            url = resolve_url(request, 'hrms:admin_dashboard')
-
+            url = reverse_lazy('hrms:admin_dashboard')
+        elif user.role == User.ACCOUNT_MANAGER:
+            url = reverse_lazy('hrms:account_manager_dashboard')
         elif user.role == User.EMPLOYEE:
-            url = resolve_url(request, 'hrms:employee_dashboard')
-        else:
-            return url
+            if User.ACCOUNT_MANAGER in user.roles.split(','):
+                url = reverse_lazy('hrms:account_manager_dashboard')
+            else:
+                url = reverse_lazy('hrms:employee_dashboard')
 
+        return url
 class Logout_View(View):
 
     def get(self,request):
@@ -259,6 +260,7 @@ class AdminDashboard(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['emp_total'] = Employee.objects.all().count()
         context['dept_total'] = Department.objects.all().count()
+        context['client_total'] = Client.objects.all().count()
         context['users_count'] = get_user_model().objects.all().count()
         context['admin_count'] = Admin.objects.all().count()
         context['workers'] = Employee.objects.order_by('-id')
@@ -298,6 +300,74 @@ class Admin_View(LoginRequiredMixin,DetailView):
             return context
         except ObjectDoesNotExist:
             return context
+
+from .forms import AccountManagerRegistrationForm
+from .models import AccountManager
+
+class AccountManager_New(LoginRequiredMixin, CreateView):
+    model = AccountManager
+    form_class = AccountManagerRegistrationForm
+    template_name = 'hrms/employee/create.html'
+    login_url = 'hrms:login'
+    redirect_field_name = 'redirect:'
+    success_url = reverse_lazy('hrms:employee_all')  # URL to redirect to after a successful registration
+
+    @staticmethod
+    def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
+        # Construct the reset password URL
+        reset_url = f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/"
+
+        # Construct the email message
+        subject = 'Set Your Password'
+        context = {
+            'reset_url': reset_url,
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'theme_color': '#fdeb3d',
+            'secondary_color': '#773697',
+        }
+        html_message = render_to_string('auth/password_reset_email.html', context)
+        sender_email = settings.EMAIL_HOST_USER
+
+        # Send the email
+        send_mail(subject, None, sender_email, [email], html_message=html_message)
+
+    def form_valid(self, form):
+
+        # Generate a random password
+        password = generate_random_password()
+
+        # Save the form data
+        user = form.save(commit=False)
+        user.role = User.EMPLOYEE
+        user.set_password(password)  # Set the random password
+        user.save()
+
+        # Get the department from the form
+        department = form.cleaned_data.get('department')
+
+        # Generate uidb64 and token for password reset email
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        # Get user details
+        first_name = form.cleaned_data.get('first_name')
+        last_name = form.cleaned_data.get('last_name')
+        username = form.cleaned_data.get('username')
+
+        # Send password reset email
+        self.send_password_reset_email(uidb64, token, user.email, first_name, last_name, username)
+
+        # Create a new Employee instance and associate the user with it
+        Employee.objects.create(employee=user)
+
+        return redirect(self.success_url)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()
+        return context
 
 class EmployeeDashboard(LoginRequiredMixin, ListView):
     login_url = 'hrms:login'
@@ -487,7 +557,7 @@ class Employee_Kin_Update(LoginRequiredMixin,UpdateView):
 
             return initial
 
-#Department views
+# Department views
 class DepartmentListView(View):
     template_name = 'hrms/department/department_list.html'
     paginate_by = 5  # Number of users per page
@@ -537,6 +607,74 @@ class Department_Update(LoginRequiredMixin,UpdateView):
     form_class = DepartmentForm
     login_url = 'hrms:login'
     success_url = reverse_lazy('hrms:dashboard')
+
+# Client views 
+
+class ClientListView(View):
+    template_name = 'hrms/client/client_list.html'
+    paginate_by = 5  # Number of users per page
+
+    def get(self, request):
+        client_list = Client.objects.all().order_by('-id')
+        paginator = Paginator(client_list, self.paginate_by)
+        page_number = request.GET.get('page')
+
+        try:
+            clients = paginator.page(page_number)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page
+            clients = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results
+            clients = paginator.page(paginator.num_pages)
+
+        return render(request, self.template_name, {'clients': clients})
+
+class Client_Detail(LoginRequiredMixin, ListView):
+    context_object_name = 'clients'
+    template_name = 'hrms/client/single.html'
+    login_url = 'hrms:login'
+
+    def get_queryset(self):
+        department_pk = self.kwargs.get('pk')
+        queryset = Client.objects.filter(department_id=department_pk)
+        return queryset
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        client_pk = self.kwargs.get('pk')
+        client = get_object_or_404(Client, pk=client_pk)
+        context["clnt"] = Client
+        return context
+
+class Client_New(LoginRequiredMixin, CreateView):
+    model = Client
+    template_name = 'hrms/client/create.html'
+    form_class = ClientForm
+    login_url = 'hrms:login'
+
+    def form_valid(self, form):
+        # Add debugging output
+        print("Form is valid. Cleaned data:", form.cleaned_data)
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Add debugging output
+        print("Form is invalid. Errors:", form.errors)
+        return super().form_invalid(form)
+
+class Client_Update(LoginRequiredMixin,UpdateView):
+    model = Client
+    template_name = 'hrms/client/edit.html'
+    form_class = ClientForm
+    login_url = 'hrms:login'
+    success_url = reverse_lazy('hrms:dashboard')
+
+    def get_object(self, queryset=None):
+        # handle case where client does not exist
+        return get_object_or_404(Client, pk=self.kwargs.get('pk'))
+
 
 #Attendance View
 

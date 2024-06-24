@@ -111,6 +111,27 @@ body {
         {% endif %}
         {% if request.user.is_superuser %}
         <li class="nav-item">
+            <a class="nav-link" data-toggle="collapse" href="#client-basic" aria-expanded="false" aria-controls="client-basic">
+                <i class="fa fa-folder text-light"></i>
+                <span class="menu-title text-light">&emsp;Client</span>
+                <i class="menu-arrow text-light"></i>
+            </a>
+        </li>
+        <div class="collapse mx-1 mt-1" id="client-basic" >
+            <ul class="nav flex-column sub-menu" style="border-radius: 30px;">
+                <li class="nav-item bg-light">
+                    <a class="nav-link text-dark" href="{% url 'hrms:clnt_all' %}">View All Clients</a>
+                </li>
+                <li class="nav-item bg-light ">
+                    <a class="nav-link text-dark" href="{% url 'hrms:clnt_new' %}">
+                        <i class="fa fa-plus text-dark"></i>&emsp;New Client</a>
+                </li>
+            </ul>
+
+        </div>
+        {% endif %}
+        {% if request.user.is_superuser %}
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
                 <i class="fa fa-user text-light"></i>
                 <span class="menu-title text-light">&emsp;Employee</span>
@@ -146,31 +167,45 @@ body {
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
                 <i class="fa fa-folder text-light"></i>
-                <span class="menu-title text-light">&emsp;Department</span>
+                <span class="menu-title text-light">&emsp;Departments</span>
                 <i class="menu-arrow text-light"></i>
             </a>
         </li>
+        <div class="collapse mt-1 mx-1" id="ui-basic">
+            <ul class="nav flex-column sub-menu" style="border-radius: 30px;">
+                <li class="nav-item bg-light">
+                    <a class="nav-link text-dark" href="{% url 'hrms:depat_all' %}">View all Departments</a>
+                </li>
+                <li class="nav-item bg-light">
+                    <a class="nav-link text-dark" href="{% url 'hrms:dept_new' %}">
+                        <i class="fa fa-plus text-dark"></i>&emsp;New Department</a>
+                </li>
+            </ul>
+        </div>
+   
         {% endif %}
-        <hr>
+ 
         {% if request.user.is_superuser %}
         <li class="nav-item">
-            <a class="nav-link text-light" href="{% url 'hrms:dept_new' %}">
-                <i class="fa fa-plus text-light"></i>&emsp;New Department</a>
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic_registration" aria-expanded="false" aria-controls="ui-basic">
+                <i class="fa fa-folder text-light"></i>
+                <span class="menu-title text-light">&emsp;Registration</span>
+                <i class="menu-arrow text-light"></i>
+            </a>
         </li>
+        <div class="collapse mt-1 mx-1" id="ui-basic_registration">
+
         <li class="nav-item">
             <a class="nav-link text-light" href="{% url 'hrms:reg' %}">
                 <i class="fa fa-plus text-light"></i>&emsp; Register Admin</a>
         </li>
-        {% endif %}
-        <div class="collapse" id="ui-basic">
-            <ul class="nav flex-column sub-menu">
-                {% for dept in depts %}
-                <li class="nav-item bg-light">
-                    <a class="nav-link text-dark" href="{{dept.get_absolute_url}}">{{dept.name}}</a>
-                </li>
-                {% endfor %}
-            </ul>
+         
+        <li class="nav-item">
+            <a class="nav-link text-light" href="{% url 'hrms:account_manager_register' %}">
+                <i class="fa fa-plus text-light"></i>&emsp; Register Account Manager</a>
+        </li>
         </div>
+        {% endif %}
         {% comment %} <li class="nav-item">
         <li class="nav-item">
             <a class="nav-link" href="pages/icons/font-awesome.html">

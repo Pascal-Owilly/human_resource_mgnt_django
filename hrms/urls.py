@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path('register/', views.Register.as_view(), name='reg'),
     path('register/employees/', views.upload_file, name='employee_bulk_register'),
+    path('register/account_manager/', views.AccountManager_New.as_view(), name='account_manager_register'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.Logout_View.as_view(), name='logout'),
     path('password_reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
@@ -27,7 +28,6 @@ urlpatterns = [
 
 # Employee Routes
     path('dashboard/employee/', views.EmployeeDashboard.as_view(), name='employee_dashboard'),
-
     path('dashboard/employee/all', views.Employee_All.as_view(), name='employee_all'),
     path('dashboard/employee/new/', views.Employee_New.as_view(), name='employee_new'),
     path('dashboard/employee/<int:pk>/view/', views.Employee_View.as_view(), name='employee_view'),
@@ -38,10 +38,15 @@ urlpatterns = [
 
 #Department Routes
     path('dashboard/department/all/', views.DepartmentListView.as_view(), name='depat_all'),
-
     path('dashboard/department/<int:pk>/', views.Department_Detail.as_view(), name='dept_detail'),
     path('dashboard/department/add/', views.Department_New.as_view(), name='dept_new'),
     path('dashboard/department/<int:pk>/update/', views.Department_Update.as_view(), name='dept_update'),
+
+#Client Routes
+    path('dashboard/client/all/', views.ClientListView.as_view(), name='clnt_all'),
+    path('dashboard/client/<int:pk>/', views.Client_Detail.as_view(), name='clnt_detail'),
+    path('dashboard/client/add/', views.Client_New.as_view(), name='clnt_new'),
+    path('dashboard/client/<int:pk>/update/', views.Client_Update.as_view(), name='client_update'),
 
 #Attendance Routes
     path('dashboard/attendance/in/admin/', views.Attendance_Admin.as_view(), name='attendance_new'),

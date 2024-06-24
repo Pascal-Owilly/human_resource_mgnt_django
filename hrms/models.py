@@ -8,7 +8,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 import uuid
 import string
 
-# Create your models here.
 class Department(models.Model):
     name = models.CharField(max_length=70, null=False, blank=False)
     branch = models.CharField(max_length=100, null=True, blank=True)
@@ -18,6 +17,17 @@ class Department(models.Model):
 
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
+
+class Client(models.Model):
+    name = models.CharField(max_length=70, null=False, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    branch = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("hrms:clnt_detail", kwargs={"pk": self.pk})
     
 def generate_short_id(prefix, model_class, field_name, length=4):
     while True:
@@ -35,7 +45,7 @@ class User(AbstractUser):
 
     SUPERUSER = 'superuser'
     EMPLOYEE= 'employee'
-    MANAGER = 'manager'
+    ACCOUNT_MANAGER = 'account_manager'
     CLIENT = 'client'
     CAN_CLOCK_IN_ANYWHERE = 'can_clockin_anywhere'
     NO_PRIVILEGES = 'Within the organization'
@@ -44,7 +54,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         (SUPERUSER, 'Superuser'),
         (EMPLOYEE, 'Employee'),
-        (MANAGER, 'Manager'),
+        (ACCOUNT_MANAGER, 'Account Manager'),
         (CLIENT, 'Client'),
         (CAN_CLOCK_IN_ANYWHERE, 'Can clock in from anywhere'),
         (NO_PRIVILEGES, 'Cannot clock in from anywhere'),
@@ -75,6 +85,7 @@ class User(AbstractUser):
     emergency_contact = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
     nuban = models.CharField(max_length=10, default='0123456789')
     bank = models.CharField(max_length=25, default='Equity')
@@ -106,7 +117,6 @@ class User(AbstractUser):
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
     
-
 class Employee(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -116,6 +126,16 @@ class Employee(models.Model):
         
     def get_absolute_url(self):
         return reverse("hrms:employee_view", kwargs={"pk": self.pk})
+
+class AccountManager(models.Model):
+    account_manager = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.account_manager.first_name} {self.account_manager.last_name}'
+        
+    def get_absolute_url(self):
+        return reverse("hrms:account_manager_view", kwargs={"pk": self.pk})
     
 class Admin(models.Model):
     admin = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

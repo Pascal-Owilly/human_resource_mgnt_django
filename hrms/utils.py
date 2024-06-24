@@ -76,7 +76,7 @@ def process_uploaded_file(file_path):
 
         # Create an Employee instance and associate the user with it
         Employee.objects.create(employee=user)
-
+    
 
         # Generate uidb64 and token for password reset email
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
