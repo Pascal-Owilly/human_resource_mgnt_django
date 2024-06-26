@@ -1,0 +1,97 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+
+{% block title %} Unarchive User | HRMS {% endblock title %}
+
+{% block content %}
+<style>
+    .main-panel {
+        margin-top: 20px;
+    }
+
+    .confirm-box {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 30px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        text-align: center;
+    }
+
+    .confirm-box h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .confirm-box p {
+        margin-bottom: 20px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .confirm-box .btn-group {
+        display: flex;
+        justify-content: center;
+    }
+
+    .confirm-box .btn {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .confirm-box .btn-submit {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .confirm-box .btn-cancel {
+        background-color: #d9d9d9;
+        border: none;
+    }
+
+    .confirm-box .btn-cancel a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .confirm-box .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-12 grid-margin">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="confirm-box">
+                                <h2>Unarchive User</h2>
+                                <p>Are you sure you want to unarchive {{ user.first_name }} {{ user.last_name }} ({{ user.username }})?</p>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-submit">Yes, Unarchive</button>
+                                    <a href="{% url 'hrms:user_list' %}">
+                                        <button type="button" class="btn btn-sm btn-cancel">Cancel</button>
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+    // Optional: You can add JavaScript to enhance the behavior if needed.
+</script>
+{% endblock extrajs %}

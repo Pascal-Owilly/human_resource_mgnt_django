@@ -86,6 +86,8 @@ class User(AbstractUser):
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
+
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
     nuban = models.CharField(max_length=10, default='0123456789')
     bank = models.CharField(max_length=25, default='Equity')

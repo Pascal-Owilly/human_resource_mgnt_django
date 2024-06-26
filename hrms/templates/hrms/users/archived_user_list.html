@@ -1,23 +1,16 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
-{% block title %} Dashboard | JBL {% endblock title %}
-{% block content %}
-<style>
-    .archive-link {
-    
-    z-index: 1000; /* Ensure it's above other content */
-}
 
-</style>
-    <div class="container">
-        <h4 class="mt-3">User List</h4>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-10"></div>
-                <div class="col-md-2">
-                    <div class="archive-link ">
-                        <a href="{% url 'hrms:archived_user_list' %}" class="btn btn-outline-primary btn-sm " style="margin-left: -20px;">
-                            <i class="fa fa-archive text-danger fa-fw"></i>  Archived Users
+{% block title %} Archived Users | HRMS {% endblock title %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-12 grid-margin">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Archived Users</h4>
                         </a>
                     </div>
                 </div>
@@ -68,7 +61,7 @@
                                                    
                                                 </div>
                                                 <div class="input-group-append">
-                                                    <button type="submit" class="btn btn-sm " style="font-size: 14px; background-color: #773697;color: #f9f9f9;font-size: 10px;padding: 5px 5px 5px 5px;border-radius: 0 30px 30px 0 ;">Save</button>
+                                                    <button type="submit" class="btn btn-sm " style="font-size: 14px; background-color: #fdeb3d; border-color: #f9f9f9;font-size: 10px;">Save</button>
                                                 </div>
                                             </div>
                                            
@@ -90,20 +83,21 @@
                                                                             <a class="dropdown-item" href="{% url 'hrms:user_update' user.pk %}">
                                                                               <i class="fa fa-edit text-info fa-fw"></i>Edit</a>
                                                                             <div class="dropdown-divider"></div> 
-                                                                            <a class="dropdown-item" href="{% url 'hrms:user_archive' pk=user.pk %}">
-                                                                              <i class="fa fa-archive text-danger fa-fw"></i>Archive</a>
+                                                                            <a class="dropdown-item" href="{% url 'hrms:user_unarchive' pk=user.pk %}">
+                                                                                <i class="fa fa-undo text-success fa-fw"></i>Unarchive
+                                                                            </a>
                                                                               <div class="dropdown-divider"></div> 
                                                                             <a class="dropdown-item" href="{% url 'hrms:user_delete' pk=user.pk %}">
                                                                               <i class="fa fa-trash text-danger fa-fw"></i>Delete</a>
                                                                           </div>
                                                                         </div>                  
                                                                       </td>
-                                                                      {% empty %}
-                          <p>
-                              <td colspan="2">No users found.</td>
-                          </p>
 
                             </tr>
+                            {% empty %}
+                            <p>
+                                <td colspan="2">No archived users found.</td>
+                            </p>
                         {% endfor %}
                     </tbody>
                 </table>

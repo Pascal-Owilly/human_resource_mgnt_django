@@ -1,0 +1,54 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+
+{% block title %} Archive User | HRMS {% endblock title %}
+
+{% block content %}
+<style>
+    .archive-link {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+</style>
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-12 grid-margin">
+                <!-- Top right corner div for archive link -->
+                <div class="archive-link">
+                    <a href="{% url 'hrms:user_list' %}?is_archived=true" class="btn btn-outline-primary btn-sm">
+                        View Archived Users
+                    </a>
+                </div>
+                <hr>
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Confirm Archive User: {{ user.username }}</h4>
+                        <p class="card-text">Are you sure you want to archive this user?</p>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="text-center mt-3">
+                                <button type="submit" class="btn btn-danger btn-rounded mr-2">
+                                    <i class="fa fa-archive"></i> Archive User
+                                </button>
+                                <a href="{% url 'hrms:user_list' %}" class="btn btn-secondary btn-rounded">
+                                    <i class="fa fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+    // Optional: You can add JavaScript to enhance the behavior of the archive link if needed.
+</script>
+{% endblock extrajs %}

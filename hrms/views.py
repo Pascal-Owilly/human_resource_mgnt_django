@@ -34,7 +34,7 @@ class UserListView(View):
     paginate_by = 8  # Number of users per page
 
     def get(self, request):
-        users_list = User.objects.all().order_by('-id')
+        users_list = User.objects.filter(is_archived=False).order_by('-id')
         paginator = Paginator(users_list, self.paginate_by)
         page_number = request.GET.get('page')
 
@@ -64,6 +64,60 @@ class UserDetailView(View):
             user.save()
         return redirect('hrms:user_detail', user_id=user_id)
 
+from .forms import UserUpdateForm
+
+# User UpdateView
+
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'hrms/users/user_update.html'
+    success_url = reverse_lazy('hrms:user_list')
+    login_url = 'hrms:login'
+
+class UserArchiveView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+    template_name = 'hrms/users/user_archive_confirm.html'  # Template for confirmation
+    
+    def get(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(User, pk=pk)
+        return render(request, self.template_name, {'user': user})
+    
+    def post(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(User, pk=pk)
+        user.is_archived = True
+        user.save()
+        return redirect(reverse_lazy('hrms:user_list'))
+
+class UserUnarchiveView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+    template_name = 'hrms/users/user_unarchive_confirm.html'  # Template for confirmation
+    
+    def get(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(User, pk=pk)
+        return render(request, self.template_name, {'user': user})
+    
+    def post(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(User, pk=pk)
+        user.is_archived = False
+        user.save()
+        return redirect(reverse_lazy('hrms:user_list'))
+
+class ArchivedUserListView(ListView):
+    template_name = 'hrms/users/archived_user_list.html'
+    paginate_by = 8  # Number of users per page
+    context_object_name = 'users'
+    
+    def get_queryset(self):
+        return User.objects.filter(is_archived=True).order_by('-id')
+
+# User DeleteView
+class UserDeleteView(LoginRequiredMixin, DeleteView):
+    model = User
+    template_name = 'hrms/users/confirm_delete.html'
+    success_url = reverse_lazy('hrms:user_list')
+    login_url = 'hrms:login'
+
 class Index(TemplateView):
 
    template_name = 'hrms/home/home.html'
@@ -78,7 +132,7 @@ def employee_dashboard(request):
 
 
 def send_password_reset_email(uidb64, token, email):
-    reset_url = f"{settings.BASE_URL}{reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})}"
+    reset_url = f"{settings.BASE_URL}{reverse('hrms:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})}"
     subject = 'Set Your Password'
     message = f'Please click the following link to set your password: {reset_url}'
     sender_email = settings.DEFAULT_FROM_EMAIL
@@ -89,8 +143,29 @@ class CustomPasswordResetView(PasswordResetView):
     email_template_name = 'auth/password_reset_email.html'
     subject_template_name = 'auth/password_reset_subject.txt'
     template_name = 'auth/password_reset_form.html'
-    success_url = reverse_lazy('password_reset_done')
+    success_url = reverse_lazy('hrms:password_reset_done')
     html_email_template_name = 'auth/password_reset_email.html'
+
+    @staticmethod
+    def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
+        # Construct the reset password URL
+        reset_url = f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/"
+
+        # Construct the email message
+        subject = 'Set Your Password'
+        context = {
+            'reset_url': reset_url,
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'theme_color': '#fdeb3d',
+            'secondary_color': '#773697',
+        }
+        html_message = render_to_string('auth/password_reset_email.html', context)
+        sender_email = settings.EMAIL_HOST_USER
+
+        # Send the email
+        send_mail(subject, None, sender_email, [email], html_message=html_message)
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
         subject = render_to_string(subject_template_name, context)
@@ -263,11 +338,11 @@ class AdminDashboard(LoginRequiredMixin, ListView):
         context['client_total'] = Client.objects.all().count()
         context['users_count'] = get_user_model().objects.all().count()
         context['admin_count'] = Admin.objects.all().count()
-        context['workers'] = Employee.objects.order_by('-id')
+        context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
         return context
 
 class AdminListView(View):
-    template_name = 'hrms/admin/admin_list.html'
+    template_name = 'admin/admin_list.html'
     paginate_by = 8  # Number of users per page
 
     def get(self, request):
@@ -360,7 +435,7 @@ class AccountManager_New(LoginRequiredMixin, CreateView):
         self.send_password_reset_email(uidb64, token, user.email, first_name, last_name, username)
 
         # Create a new Employee instance and associate the user with it
-        Employee.objects.create(employee=user)
+        AccountManager.objects.create(account_manager=user)
 
         return redirect(self.success_url)
 
@@ -477,18 +552,21 @@ def upload_file(request):
     return render(request, 'auth/employee_bulk_upload.html', {'form': form})
 
 
-class Employee_All(LoginRequiredMixin,ListView):
+class Employee_All(LoginRequiredMixin, ListView):
     template_name = 'hrms/employee/index.html'
     model = Employee
-    login_url = 'hrms:login'
     context_object_name = 'employees'
-    paginate_by  = 5
+    paginate_by = 5
+    login_url = 'hrms:login'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:
             return render(request, 'auth/unauthorized.html')
         return super().dispatch(request, *args, **kwargs)
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(employee__is_archived=False).order_by('-id')
 
 class Employee_View(LoginRequiredMixin,DetailView):
     queryset = Employee.objects.select_related('employee__department').order_by('-id')
@@ -523,8 +601,11 @@ class Employee_Update(LoginRequiredMixin, View):
             return redirect('success_url')  # Replace 'success_url' with your desired redirect URL
         return render(request, self.template_name, {'form': form})
 
-class Employee_Delete(LoginRequiredMixin,DeleteView):
-    pass
+class Employee_Delete(LoginRequiredMixin, DeleteView):
+    model = Employee
+    template_name = 'hrms/employee/confirm_delete.html'
+    success_url = reverse_lazy('hrms:employee_all')  # Replace 'success_url' with your desired redirect URL
+    login_url = 'hrms:login'
 
 class Employee_Kin_Add (LoginRequiredMixin,CreateView):
     model = Kin

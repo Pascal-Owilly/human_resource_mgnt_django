@@ -161,6 +161,10 @@
                             {{worker.mobile}} &emsp;<span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span>
                           </td>
                         </tr>
+                        {% empty %}
+                        <p>
+                            <td colspan="2">No employees found.</td>
+                        </p>
                       {% endfor %}                   
                       </tbody>
                     </table>

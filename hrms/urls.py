@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+
 app_name = 'hrms'
 
 urlpatterns = [
@@ -20,6 +21,11 @@ urlpatterns = [
 # Users
     path('dashboard/user-list/', views.UserListView.as_view(), name='user_list'),
     path('dashboard/user-detail/<int:user_id>/', views.UserDetailView.as_view(), name='user_detail'),
+    path('users/update/<int:pk>/', views.UserUpdateView.as_view(), name='user_update'),
+    path('users/archive/<int:pk>/', views.UserArchiveView.as_view(), name='user_archive'),
+    path('users/archived/', views.ArchivedUserListView.as_view(), name='archived_user_list'),
+    path('user_unarchive/<int:pk>/', views.UserUnarchiveView.as_view(), name='user_unarchive'),
+    path('users/delete/<int:pk>/', views.UserDeleteView.as_view(), name='user_delete'),
 
 # Admin routes
     path('dashboard/admin/', views.AdminDashboard.as_view(), name='admin_dashboard'),

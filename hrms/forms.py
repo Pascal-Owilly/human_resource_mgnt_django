@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client
+from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django import forms
 from django.core import validators
@@ -7,6 +7,31 @@ from django.utils import timezone
 from django.db.models import Q
 import time
 from django import forms
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'role', 'clockin_privileges', 'first_name', 'last_name', 'username', 'thumb',
+            'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department', 'client', 'is_archived'
+        ]
+        widgets = {
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'clockin_privileges': forms.Select(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'thumb': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'emergency_contact': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-control'}),
+            'department': forms.Select(attrs={'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'}),
+            'is_archived': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+
+        }
 
 class SuperuserRegistrationForm (UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Username'}))

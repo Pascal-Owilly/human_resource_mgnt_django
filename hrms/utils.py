@@ -46,9 +46,9 @@ def process_uploaded_file(file_path):
         last_name = str(row.get('Last Name', '')).strip()
         email = str(row.get('Email', '')).strip()
         username = str(row.get('Username', '')).strip()
-        mobile = str(row.get('Mobile', '')).strip()
+        phone_number = str(row.get('Phone Number', '')).strip()
         address = str(row.get('Address', '')).strip()
-        emergency = str(row.get('Emergency', '')).strip()
+        emergency_contact = str(row.get('Emergency Contact', '')).strip()
         gender = str(row.get('Gender', '')).strip()
         thumb = row.get('Thumb')  # Ensure the 'Thumb' column is optional
 
@@ -61,9 +61,9 @@ def process_uploaded_file(file_path):
             first_name=first_name,
             last_name=last_name,
             email=email,
-            mobile=mobile,
+            phone_number=phone_number,
             address=address,
-            emergency=emergency,
+            emergency_contact=emergency_contact,
             gender=gender,
             password=make_password(password),
             role=User.EMPLOYEE  

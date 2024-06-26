@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
     <style>
 /* General sidebar styles */
+
+.nav-item > a:hover{
+    background-color: #fdeb3d !important;
+
+}
+
+ul li > a:hover {
+    background-color: #fdeb3d !important;
+    border-radius: 30px 0 0 30px !important;
+    padding: 10px !important;
+    color: #773697 !important;
+    transition: .5s ease-in-out;
+}
+
+
+ul li > a {
+
+    color: #fff !important;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+
+}
+
+
+
 .sidebar {
     background: linear-gradient(90deg, #773697, #773697); /* Adjust the angle and colors as needed */
 
@@ -104,17 +129,17 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item text-light">
             <a class="nav-link" href="{% url 'hrms:admin_dashboard' %}">
-                <i class="fa fa-dashboard text-light"></i>
-                <span class="menu-title text-light">&emsp;Dashboard</span>
+                <i class="fa fa-dashboard"></i>
+                <span class="menu-title ">&emsp;Dashboard</span>
             </a>
         </li>
         {% endif %}
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#client-basic" aria-expanded="false" aria-controls="client-basic">
-                <i class="fa fa-folder text-light"></i>
-                <span class="menu-title text-light">&emsp;Client</span>
-                <i class="menu-arrow text-light"></i>
+                <i class="fa fa-folder "></i>
+                <span class="menu-title ">&emsp;Client</span>
+                <i class="menu-arrow "></i>
             </a>
         </li>
         <div class="collapse mx-1 mt-1" id="client-basic" >
@@ -133,8 +158,8 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-user text-light"></i>
-                <span class="menu-title text-light">&emsp;Employee</span>
+                <i class="fa fa-user "></i>
+                <span class="menu-title">&emsp;Employee</span>
             </a>
         </li>
         {% endif %}
@@ -142,8 +167,8 @@ body {
         
         <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
-                <i class="fa fa-calendar text-light"></i>
-                <span class="menu-title text-light">&emsp;Attendance</span>
+                <i class="fa fa-calendar "></i>
+                <span class="menu-title ">&emsp;Attendance</span>
             </a>
         </li>
         {% endif %}
@@ -151,14 +176,14 @@ body {
         {% if request.user.role == 'employee' %}
         <li class="nav-item">
             <a class="nav-link" href="/">
-                <i class="fa fa-sign-out text-light"></i>
-                <span class="menu-title text-light">&emsp;Home</span>
+                <i class="fa fa-sign-out "></i>
+                <span class="menu-title ">&emsp;Home</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:attendance_employee' %}">
-                <i class="fa fa-calendar text-light"></i>
-                <span class="menu-title text-light">&emsp;Attendance</span>
+                <i class="fa fa-calendar "></i>
+                <span class="menu-title ">&emsp;Attendance</span>
             </a>    
         </li>
         {% endif %}
@@ -166,9 +191,9 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-folder text-light"></i>
-                <span class="menu-title text-light">&emsp;Departments</span>
-                <i class="menu-arrow text-light"></i>
+                <i class="fa fa-folder "></i>
+                <span class="menu-title ">&emsp;Departments</span>
+                <i class="menu-arrow "></i>
             </a>
         </li>
         <div class="collapse mt-1 mx-1" id="ui-basic">
@@ -188,21 +213,21 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic_registration" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-folder text-light"></i>
-                <span class="menu-title text-light">&emsp;Registration</span>
-                <i class="menu-arrow text-light"></i>
+                <i class="fa fa-folder "></i>
+                <span class="menu-title ">&emsp;Registration</span>
+                <i class="menu-arrow "></i>
             </a>
         </li>
         <div class="collapse mt-1 mx-1" id="ui-basic_registration">
 
         <li class="nav-item">
-            <a class="nav-link text-light" href="{% url 'hrms:reg' %}">
-                <i class="fa fa-plus text-light"></i>&emsp; Register Admin</a>
+            <a class="nav-link " href="{% url 'hrms:reg' %}">
+                <i class="fa fa-plus"></i>&emsp; Register Admin</a>
         </li>
          
         <li class="nav-item">
-            <a class="nav-link text-light" href="{% url 'hrms:account_manager_register' %}">
-                <i class="fa fa-plus text-light"></i>&emsp; Register Account Manager</a>
+            <a class="nav-link " href="{% url 'hrms:account_manager_register' %}">
+                <i class="fa fa-plus "></i>&emsp; Register Account Manager</a>
         </li>
         </div>
         {% endif %}
