@@ -18,13 +18,6 @@ class Department(models.Model):
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
 
-class Client(models.Model):
-    name = models.CharField(max_length=70, null=False, blank=False)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    branch = models.CharField(max_length=100, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
 
     def get_absolute_url(self):
         return reverse("hrms:clnt_detail", kwargs={"pk": self.pk})
@@ -54,7 +47,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         (SUPERUSER, 'Superuser'),
         (EMPLOYEE, 'Employee'),
-        (ACCOUNT_MANAGER, 'Account Manager'),
+        (ACCOUNT_MANAGER, 'AccountManager'),
         (CLIENT, 'Client'),
         (CAN_CLOCK_IN_ANYWHERE, 'Can clock in from anywhere'),
         (NO_PRIVILEGES, 'Cannot clock in from anywhere'),
@@ -85,7 +78,6 @@ class User(AbstractUser):
     emergency_contact = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
     is_archived = models.BooleanField(default=False)
 
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
@@ -118,16 +110,6 @@ class User(AbstractUser):
 
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
-    
-class Employee(models.Model):
-    employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.employee.first_name} {self.employee.last_name}'
-        
-    def get_absolute_url(self):
-        return reverse("hrms:employee_view", kwargs={"pk": self.pk})
 
 class AccountManager(models.Model):
     account_manager = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -138,7 +120,31 @@ class AccountManager(models.Model):
         
     def get_absolute_url(self):
         return reverse("hrms:account_manager_view", kwargs={"pk": self.pk})
+
+class Client(models.Model):
+    name = models.CharField(max_length=70, null=False, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    branch = models.CharField(max_length=100, null=True, blank=True)
+    account_manager = models.ForeignKey(AccountManager, on_delete=models.SET_NULL, null=True, blank=True)
+    employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("hrms:clnt_detail", kwargs={"pk": self.pk})
+
     
+class Employee(models.Model):
+    employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.employee.first_name} {self.employee.last_name}'
+        
+    def get_absolute_url(self):
+        return reverse("hrms:employee_view", kwargs={"pk": self.pk})
+   
 class Admin(models.Model):
     admin = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

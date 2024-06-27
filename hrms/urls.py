@@ -32,6 +32,17 @@ urlpatterns = [
     path('dashboard/admin-list/', views.AdminListView.as_view(), name='admin_list'),
     path('dashboard/admin/<int:pk>/view/', views.Admin_View.as_view(), name='admin_single_view'),
 
+# Account managers
+
+    path('dashboard/account-manager/', views.AccountManagerDashboard.as_view(), name='account_manager_dashboard'),
+    path('dashboard/account-manager/add/', views.AccountManager_New.as_view(), name='account_manager_add'),
+    path('dashboard/account-manager-list/', views.Account_Manager_All.as_view(), name='account_manager_all'),
+    path('dashboard/account-manager/<int:pk>/view/', views.Account_Manager_View.as_view(), name='account_manager_single_view'),
+
+        # For specific clients
+    path('dashboard/account/manager/clients/', views.AccountManagerClientListView.as_view(), name='account_manager_clients'),
+
+
 # Employee Routes
     path('dashboard/employee/', views.EmployeeDashboard.as_view(), name='employee_dashboard'),
     path('dashboard/employee/all', views.Employee_All.as_view(), name='employee_all'),

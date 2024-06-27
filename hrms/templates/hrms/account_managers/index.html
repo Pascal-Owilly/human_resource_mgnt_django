@@ -19,40 +19,20 @@
             }
           </style>
 
-            <div class="main-panel">
+    <div class="main-panel">
+
         <div class="content-wrapper">
-          <div class=" ">
-
-            <div class="card admin-card ">
-              <a href="{% url 'hrms:admin_list' %}" >
-
-
-                <div class="clearfix">
-                  <div class="float-left">
-                    <i class="mdi mdi-account-alert text-warning icon-md"></i>
-                  </div>
-                    <div class="float-right">
-                    <p style="font-size: 10px;" class="mb-0 text-right">Admins</p>
-                    <div class="fluid-container">
-                      <h5 class="font-weight-medium text-right mb-0">{{admin_count}}</h5>
-                    </div>
-                  </div>
-                </div>
-               
-
-            </a>
-
-            </div>
-
-          </div>
-          <br>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'hrms:account_manager_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Manage Accounts </li>
+            </ol>
+        </nav>
           <div class="row">
-
-            
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 grid-margin stretch-card">
 
               <div class="card card-statistics">
-                <a href="{% url 'hrms:account_manager_all' %}" >
+                <a href="{% url 'hrms:account_manager_clients' %}" >
 
                 <div class="card-body">
 
@@ -61,14 +41,14 @@
                       <i class="mdi mdi-account-alert text-warning icon-lg"></i>
                     </div>
                       <div class="float-right">
-                      <p class="mb-0 text-right">Account Managers</p>
+                      <p class="mb-0 text-right">All Clients</p>
                       <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{account_manager_count}}</h3>
+                        <h3 class="font-weight-medium text-right mb-0">{{mng_client_total}}</h3>
                       </div>
                     </div>
                   </div>
                   <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> List
+                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> Managed by you
                   </p>
 
                 </div>
@@ -77,94 +57,37 @@
               </div>
 
             </div>
-           
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
 
-              <div class="card card-statistics">
-                <a href="{% url 'hrms:user_list' %}" >
-
+          
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 grid-margin stretch-card">
+                <div class="card card-statistics">
+                <a href="{% url 'hrms:employee_all' %}" >
                 <div class="card-body">
-
                   <div class="clearfix">
                     <div class="float-left">
                       <i class="mdi mdi-account-alert text-warning icon-lg"></i>
                     </div>
                       <div class="float-right">
-                      <p class="mb-0 text-right">All users</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{users_count}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> Users Total Count
-                  </p>
-
-                </div>
-              </a>
-
-              </div>
-
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-
-                <div class="card-body">
-                  <a class="nav-link" href="{% url 'hrms:clnt_all' %}" aria-expanded="false" aria-controls="ui-basic">
-
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-home text-success icon-lg"></i>
-                    </div>
-                    <div class="float-right">
-                      <p class="mb-0 text-right">Clients</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{client_total}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-calendar mr-1" aria-hidden="true"></i> Available Clients
-                  </p>
-                </a>
-
-                </div>
-
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
-
-                <div class="card-body">
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-multiple text-info icon-lg"></i>
-                    </div>
-                    <div class="float-right">
                       <p class="mb-0 text-right">Employees</p>
                       <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{emp_total}}</h3>
+                        <h3 class="font-weight-medium text-right mb-0">{{mng_emp_total}}</h3>
                       </div>
                     </div>
                   </div>
                   <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Employee's Total Count
+                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> List of employees managed by your clients
                   </p>
                 </div>
               </a>
-
               </div>
             </div>
-          </div>
-
+           </div>
+            
           <div class="row">
             <div class="col-lg-12 grid-margin">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title">New Employees</h4>
+                  <h4 class="card-title">New Clients </h4>
                   <div class="table-responsive">
                     <table class="table table-bordered">
                       <thead>
@@ -214,10 +137,10 @@
               </div>
             </div>
           </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        {% endblock content %}
+            {% endblock content %}

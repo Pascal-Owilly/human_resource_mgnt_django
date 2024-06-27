@@ -234,31 +234,6 @@ class Register(CreateView):
 
         return redirect(self.success_url)
 
-# def register_employee(request):
-#     if request.method == 'POST':
-#         form = EmployeeRegistrationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.role = User.Employee
-#             user.save()
-
-#             # Get the department from the form
-#             department = form.cleaned_data.get('department')
-
-#             # Generate uidb64 and token for password reset email
-#             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-#             token = default_token_generator.make_token(user)
-
-#             # Send password reset email
-#             send_password_reset_email(uidb64, token, user.email)
-
-#             # Create a new Employee instance and associate the user with it
-#             employee = Employee.objects.create(employee=user, department=department)
-#             return redirect('employee_all')
-#     else:
-#         form = EmployeeRegistrationForm()
-#     return render(request, 'hrms/employee/create.html', {'form': form})
-
 class CustomLoginView(LoginView):
     template_name = 'hrms/registrations/login.html'
     authentication_form = LoginForm
@@ -275,7 +250,9 @@ class CustomLoginView(LoginView):
             if user.role == User.SUPERUSER:
                 return redirect('/dashboard/admin/')  # Redirect admin users to admin page
             elif user.role == User.EMPLOYEE:
-                return redirect('/dashboard/attendance/emp/')  # Redirect employees to employee dashboard
+                return redirect('/dashboard/attendance/emp/')
+            elif user.role == User.ACCOUNT_MANAGER:
+                return redirect('/dashboard/account-manager/')  # Redirect employees to employee dashboard
             else:
                 # Handle other roles or scenarios
                 return redirect('/')  # Redirect to a generic dashboard
@@ -288,26 +265,24 @@ class CustomLoginView(LoginView):
         # This method is called when the form is invalid
         return render(self.request, self.template_name, {'form': form})
 
-class Login_View(LoginView):
-    model = get_user_model()
-    form_class = LoginForm
-    template_name = 'hrms/registrations/login.html'
+# class Login_View(LoginView):
+#     model = get_user_model()
+#     form_class = LoginForm
+#     template_name = 'hrms/registrations/login.html'
 
-    def get_success_url(self):
-        user = self.request.user
-        url = '/'
+#     def get_success_url(self):
+#         user = self.request.user
+#         url = '/'
 
-        if user.role == User.SUPERUSER:
-            url = reverse_lazy('hrms:admin_dashboard')
-        elif user.role == User.ACCOUNT_MANAGER:
-            url = reverse_lazy('hrms:account_manager_dashboard')
-        elif user.role == User.EMPLOYEE:
-            if User.ACCOUNT_MANAGER in user.roles.split(','):
-                url = reverse_lazy('hrms:account_manager_dashboard')
-            else:
-                url = reverse_lazy('hrms:employee_dashboard')
+#         if user.role == User.SUPERUSER:
+#             url = reverse_lazy('hrms:admin_dashboard')
+#         elif user.role == User.ACCOUNT_MANAGER:
+#             url = reverse_lazy('hrms:account_manager_dashboard')
+#         elif user.role == User.EMPLOYEE:
+#             url = reverse_lazy('hrms:employee_dashboard')
+        
+#         return url
 
-        return url
 class Logout_View(View):
 
     def get(self,request):
@@ -338,6 +313,7 @@ class AdminDashboard(LoginRequiredMixin, ListView):
         context['client_total'] = Client.objects.all().count()
         context['users_count'] = get_user_model().objects.all().count()
         context['admin_count'] = Admin.objects.all().count()
+        context['account_manager_count'] = AccountManager.objects.all().count()
         context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
         return context
 
@@ -376,16 +352,52 @@ class Admin_View(LoginRequiredMixin,DetailView):
         except ObjectDoesNotExist:
             return context
 
+# Account Mnager views
+
 from .forms import AccountManagerRegistrationForm
 from .models import AccountManager
+
+class AccountManagerDashboard(LoginRequiredMixin, ListView):
+    login_url = 'hrms:login'
+    model = AccountManager  # Adjust model to AccountManager if needed
+    template_name = 'hrms/account_managers/index.html'
+    context_object_name = 'clients'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.role != 'account_manager':
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        try:
+            # Get the account manager instance
+            account_manager = AccountManager.objects.get(account_manager=self.request.user)
+            return account_manager.client_set.all()  # Assuming reverse relation is "client_set"
+        except AccountManager.DoesNotExist:
+            return Client.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Total number of employees (if needed)
+        context['mng_emp_total'] = Employee.objects.all().count()
+        
+        # Total number of clients assigned to the account manager
+        context['mng_client_total'] = self.get_queryset().count()
+        
+        # Other context data (example: workers list)
+        context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
+        
+        return context
+
 
 class AccountManager_New(LoginRequiredMixin, CreateView):
     model = AccountManager
     form_class = AccountManagerRegistrationForm
-    template_name = 'hrms/employee/create.html'
+    template_name = 'hrms/account_managers/create.html'
     login_url = 'hrms:login'
     redirect_field_name = 'redirect:'
-    success_url = reverse_lazy('hrms:employee_all')  # URL to redirect to after a successful registration
+    success_url = reverse_lazy('hrms:account_manager_all')  
 
     @staticmethod
     def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
@@ -415,7 +427,7 @@ class AccountManager_New(LoginRequiredMixin, CreateView):
 
         # Save the form data
         user = form.save(commit=False)
-        user.role = User.EMPLOYEE
+        user.role = User.ACCOUNT_MANAGER
         user.set_password(password)  # Set the random password
         user.save()
 
@@ -434,8 +446,9 @@ class AccountManager_New(LoginRequiredMixin, CreateView):
         # Send password reset email
         self.send_password_reset_email(uidb64, token, user.email, first_name, last_name, username)
 
-        # Create a new Employee instance and associate the user with it
+        # Create a new Account manager and employee instance and associate the user with it
         AccountManager.objects.create(account_manager=user)
+        Employee.objects.create(employee=user)
 
         return redirect(self.success_url)
 
@@ -443,6 +456,39 @@ class AccountManager_New(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form()
         return context
+
+class Account_Manager_All(LoginRequiredMixin, ListView):
+    template_name = 'hrms/account_managers/index.html'
+    model = AccountManager
+    context_object_name = 'account_managers'
+    paginate_by = 5
+    login_url = 'hrms:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(account_manager__is_archived=False).order_by('-id')
+
+class Account_Manager_View(LoginRequiredMixin,DetailView):
+    queryset = Employee.objects.select_related('account_manager__department').order_by('-id')
+    template_name = 'hrms/account_managers/single.html'
+    context_object_name = 'account_manager'
+    login_url = 'hrms:login'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            query = Client.objects.get(account_manager=self.object.pk)
+            context["client"] = query
+            return context
+        except ObjectDoesNotExist:
+            return context
+
+# Employee views
 
 class EmployeeDashboard(LoginRequiredMixin, ListView):
     login_url = 'hrms:login'
@@ -711,23 +757,20 @@ class ClientListView(View):
 
         return render(request, self.template_name, {'clients': clients})
 
-class Client_Detail(LoginRequiredMixin, ListView):
-    context_object_name = 'clients'
+from django.views.generic import DetailView
+from django.shortcuts import get_object_or_404
+from .models import Client
+
+class Client_Detail(LoginRequiredMixin, DetailView):
+    model = Client
+    context_object_name = 'clnt'
     template_name = 'hrms/client/single.html'
     login_url = 'hrms:login'
 
-    def get_queryset(self):
-        department_pk = self.kwargs.get('pk')
-        queryset = Client.objects.filter(department_id=department_pk)
-        return queryset
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_object(self, queryset=None):
         client_pk = self.kwargs.get('pk')
-        client = get_object_or_404(Client, pk=client_pk)
-        context["clnt"] = Client
-        return context
+        return get_object_or_404(Client, pk=client_pk)
+
 
 class Client_New(LoginRequiredMixin, CreateView):
     model = Client
@@ -756,6 +799,21 @@ class Client_Update(LoginRequiredMixin,UpdateView):
         # handle case where client does not exist
         return get_object_or_404(Client, pk=self.kwargs.get('pk'))
 
+class AccountManagerClientListView(LoginRequiredMixin, ListView):
+    model = Client
+    template_name = 'hrms/account_managers/account_manager_clients.html'
+    context_object_name = 'clients'
+
+    def get_queryset(self):
+        try:
+            # Get the AccountManager instance for the logged-in user
+            account_manager = AccountManager.objects.get(account_manager=self.request.user)
+
+            # Filter clients associated with the account manager
+            return Client.objects.filter(account_manager=account_manager)
+        except AccountManager.DoesNotExist:
+            # Handle case where AccountManager instance does not exist for the logged-in user
+            return Client.objects.none()  # Return an empty queryset
 
 #Attendance View
 

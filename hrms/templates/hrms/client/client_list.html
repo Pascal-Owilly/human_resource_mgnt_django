@@ -2,18 +2,18 @@
 {% load static %}
 {% block title %} Client | JBL {% endblock title %}
 {% block content %}
-    <div class="container">
-        <h4 class="mt-3">Client List</h4>
-        <hr>
-        <div class="row">
-            <div class="col-md-12">
+<div class="container">
+    <h4 class="mt-3">Client List</h4>
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            {% if clients %}
                 <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Branch</th>
                             <th>Details</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -21,27 +21,36 @@
                             <tr>
                                 <td>{{ client.name }}</td>
                                 <td>{{ client.branch }}</td>
-                                <td><a href="{{client.get_absolute_url}}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 10px;">
+                                <td><a href="{{ client.get_absolute_url }}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d; font-size: 10px;">
                                     View <i class="mdi mdi-plus"></i>
                                     </a></td>
-                                 </tr>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if client.has_other_pages %}
+                {% if clients.has_other_pages %}
                     <ul class="pagination">
-                        {% if client.has_previous %}
+                        {% if clients.has_previous %}
                             <li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ client.previous_page_number }}">{{ client.previous_page_number }}</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ clients.previous_page_number }}">{{ clients.previous_page_number }}</a></li>
                         {% endif %}
-                        <li class="page-item active"><span class="page-link">{{ client.number }}</span></li>
-                        {% if client.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ client.next_page_number }}">{{ client.next_page_number }}</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ client.paginator.num_pages }}">&raquo;</a></li>
+                        <li class="page-item active"><span class="page-link">{{ clients.number }}</span></li>
+                        {% if clients.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ clients.next_page_number }}">{{ clients.next_page_number }}</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ clients.paginator.num_pages }}">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 {% endif %}
-            </div>
+            {% else %}
+                <div class="text-center">
+                    <div class="text-center">
+                        <svg width="150" height="150" style="margin-top: 50px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-11h2v2h-2V9zm0 4h2v6h-2v-6z" fill="#cccccc"/>
+                        </svg>
+                        <h5 class="mt-3">No clients assigned yet</h5>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

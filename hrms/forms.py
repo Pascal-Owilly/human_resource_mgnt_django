@@ -13,7 +13,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = [
             'role', 'clockin_privileges', 'first_name', 'last_name', 'username', 'thumb',
-            'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department', 'client', 'is_archived'
+            'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department', 'is_archived'
         ]
         widgets = {
             'role': forms.Select(attrs={'class': 'form-control'}),
@@ -28,7 +28,6 @@ class UserUpdateForm(forms.ModelForm):
             'emergency_contact': forms.TextInput(attrs={'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-control'}),
             'department': forms.Select(attrs={'class': 'form-control'}),
-            'client': forms.Select(attrs={'class': 'form-control'}),
             'is_archived': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
 
         }

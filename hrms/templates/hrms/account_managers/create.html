@@ -1,0 +1,161 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} New Account Manager | JBL {% endblock title %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-12 grid-margin">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- Header -->
+                        <h4 class="text-center text-primary"><i class="fa fa-plus">&emsp; New Account Manager </i></h4>
+                        <hr>
+                        
+                        <form enctype="multipart/form-data" action="{% url 'hrms:account_manager_register' %}" class="form-group" method="POST">
+                            {% csrf_token %}
+                            <small class="mb-5">** All Fields are required</small> <br /><br />
+
+                            <div class="row">
+                                <!-- First Column (Personal Details) -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.first_name.label_tag }}
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.first_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.last_name.label_tag }}
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.last_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.email.label_tag }}
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="text-danger">
+                                                {{ form.email.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.mobile.label_tag }}
+                                        {{ form.mobile }}
+                                        {% if form.mobile.errors %}
+                                            <div class="text-danger">
+                                                {{ form.mobile.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.gender.label_tag }}
+                                        {{ form.gender }}
+                                        {% if form.gender.errors %}
+                                            <div class="text-danger">
+                                                {{ form.gender.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Second Column (Personal Details) -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.address.label_tag }}
+                                        {{ form.address }}
+                                        {% if form.address.errors %}
+                                            <div class="text-danger">
+                                                {{ form.address.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.emergency.label_tag }}
+                                        {{ form.emergency }}
+                                        {% if form.emergency.errors %}
+                                            <div class="text-danger">
+                                                {{ form.emergency.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.thumb.label_tag }}
+                                        {{ form.thumb }}
+                                        {% if form.thumb.errors %}
+                                            <div class="text-danger">
+                                                {{ form.thumb.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Third Column (Other Details) -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.username.label_tag }}
+                                        {{ form.username }}
+                                        {% if form.username.errors %}
+                                            <div class="text-danger">
+                                                {{ form.username.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.password1.label_tag }}
+                                        {{ form.password1 }}
+                                        {% if form.password1.errors %}
+                                            <div class="text-danger">
+                                                {{ form.password1.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.password2.label_tag }}
+                                        {{ form.password2 }}
+                                        {% if form.password2.errors %}
+                                            <div class="text-danger">
+                                                {{ form.password2.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.department.label_tag }}
+                                        {{ form.department }}
+                                        {% if form.department.errors %}
+                                            <div class="text-danger">
+                                                {{ form.department.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.privileges.label_tag }}
+                                        {{ form.privileges }}
+                                        {% if form.privileges.errors %}
+                                            <div class="text-danger">
+                                                {{ form.privileges.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-success"><i class="mdi mdi-file-document"></i> Add Employee</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
