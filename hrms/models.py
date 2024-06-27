@@ -18,10 +18,20 @@ class Department(models.Model):
     def get_absolute_url(self):
         return reverse("hrms:dept_detail", kwargs={"pk": self.pk})
 
+class Client(models.Model):
+    name = models.CharField(max_length=70, null=False, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    branch = models.CharField(max_length=100, null=True, blank=True)
+    account_manager = models.ForeignKey('hrms.AccountManager', on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
     def get_absolute_url(self):
         return reverse("hrms:clnt_detail", kwargs={"pk": self.pk})
-    
+
+
 def generate_short_id(prefix, model_class, field_name, length=4):
     while True:
         new_id = prefix + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
@@ -39,6 +49,7 @@ class User(AbstractUser):
     SUPERUSER = 'superuser'
     EMPLOYEE= 'employee'
     ACCOUNT_MANAGER = 'account_manager'
+    HUMAN_RESOURCE_MANAGER = 'human_resource_manager'
     CLIENT = 'client'
     CAN_CLOCK_IN_ANYWHERE = 'can_clockin_anywhere'
     NO_PRIVILEGES = 'Within the organization'
@@ -48,6 +59,7 @@ class User(AbstractUser):
         (SUPERUSER, 'Superuser'),
         (EMPLOYEE, 'Employee'),
         (ACCOUNT_MANAGER, 'AccountManager'),
+        (HUMAN_RESOURCE_MANAGER, 'Human resource manager'),
         (CLIENT, 'Client'),
         (CAN_CLOCK_IN_ANYWHERE, 'Can clock in from anywhere'),
         (NO_PRIVILEGES, 'Cannot clock in from anywhere'),
@@ -78,6 +90,8 @@ class User(AbstractUser):
     emergency_contact = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+
     is_archived = models.BooleanField(default=False)
 
     language = models.CharField(choices=LANGUAGE, max_length=10, default='english')
@@ -120,20 +134,6 @@ class AccountManager(models.Model):
         
     def get_absolute_url(self):
         return reverse("hrms:account_manager_view", kwargs={"pk": self.pk})
-
-class Client(models.Model):
-    name = models.CharField(max_length=70, null=False, blank=False)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    branch = models.CharField(max_length=100, null=True, blank=True)
-    account_manager = models.ForeignKey(AccountManager, on_delete=models.SET_NULL, null=True, blank=True)
-    employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse("hrms:clnt_detail", kwargs={"pk": self.pk})
-
     
 class Employee(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -144,7 +144,17 @@ class Employee(models.Model):
         
     def get_absolute_url(self):
         return reverse("hrms:employee_view", kwargs={"pk": self.pk})
-   
+
+class HumanResourceManager(models.Model):
+    human_resource_manager = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.human_resource_manager.first_name} {self.human_resource_manager.last_name}'
+        
+    def get_absolute_url(self):
+        return reverse("hrms:human_resource_manager_view", kwargs={"pk": self.pk})
+  
 class Admin(models.Model):
     admin = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -179,6 +189,8 @@ class Attendance (models.Model):
     status = models.CharField(choices=STATUS, max_length=15 )
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
     admin = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True)
+    account_manager = models.ForeignKey(AccountManager, on_delete=models.SET_NULL, null=True)
+
     latitude = models.FloatField(null=True, blank=True) 
     longitude = models.FloatField(null=True, blank=True)
     

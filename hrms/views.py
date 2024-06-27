@@ -253,6 +253,8 @@ class CustomLoginView(LoginView):
                 return redirect('/dashboard/attendance/emp/')
             elif user.role == User.ACCOUNT_MANAGER:
                 return redirect('/dashboard/account-manager/')  # Redirect employees to employee dashboard
+            elif user.role == User.HUMAN_RESOURCE_MANAGER:
+                return redirect('/dashboard/human-resource/')  # Redirect employees to employee dashboard
             else:
                 # Handle other roles or scenarios
                 return redirect('/')  # Redirect to a generic dashboard
@@ -309,6 +311,7 @@ class AdminDashboard(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['emp_total'] = Employee.objects.all().count()
+        context['hr_count'] = HumanResourceManager.objects.all().count()
         context['dept_total'] = Department.objects.all().count()
         context['client_total'] = Client.objects.all().count()
         context['users_count'] = get_user_model().objects.all().count()
@@ -458,7 +461,7 @@ class AccountManager_New(LoginRequiredMixin, CreateView):
         return context
 
 class Account_Manager_All(LoginRequiredMixin, ListView):
-    template_name = 'hrms/account_managers/index.html'
+    template_name = 'hrms/account_managers/account_managers_list.html'
     model = AccountManager
     context_object_name = 'account_managers'
     paginate_by = 5
@@ -505,10 +508,157 @@ class EmployeeDashboard(LoginRequiredMixin, ListView):
 
 import string
 import random
+from.models import HumanResourceManager
 
 def generate_random_password(length=12):
     characters = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(characters) for _ in range(length))
+
+# Human resource manager
+
+class HumanResourceManagerDashboard(LoginRequiredMixin, ListView):
+    login_url = 'hrms:login'
+    model = get_user_model()
+    template_name = 'hrms/dashboard/index.html'
+    context_object_name = 'qset'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser and not request.user.role=='human_resource_manager':
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['emp_total'] = Employee.objects.all().count()
+        context['dept_total'] = Department.objects.all().count()
+        context['client_total'] = Client.objects.all().count()
+        context['users_count'] = get_user_model().objects.all().count()
+        context['admin_count'] = Admin.objects.all().count()
+        context['account_manager_count'] = AccountManager.objects.all().count()
+        context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
+        return context
+
+from .forms import HumanResourceManagerRegistrationForm
+
+class HumanResourceManagerNew(LoginRequiredMixin, CreateView):
+    model = HumanResourceManager
+    form_class = HumanResourceManagerRegistrationForm
+    template_name = 'hrms/account_managers/hr_create.html'
+    login_url = 'hrms:login'
+    redirect_field_name = 'redirect:'
+    success_url = reverse_lazy('hrms:human_resource_managers_all')  # URL to redirect to after a successful registration
+
+    @staticmethod
+    def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
+        # Construct the reset password URL
+        reset_url = f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/"
+
+        # Construct the email message
+        subject = 'Set Your Password'
+        context = {
+            'reset_url': reset_url,
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'theme_color': '#fdeb3d',
+            'secondary_color': '#773697',
+        }
+        html_message = render_to_string('auth/password_reset_email.html', context)
+        sender_email = settings.EMAIL_HOST_USER
+
+        # Send the email
+        send_mail(subject, None, sender_email, [email], html_message=html_message)
+
+    def form_valid(self, form):
+
+        # Generate a random password
+        password = generate_random_password()
+
+        # Save the form data
+        user = form.save(commit=False)
+        user.role = User.HUMAN_RESOURCE_MANAGER
+        user.set_password(password)  # Set the random password
+        user.save()
+
+        # Get the department from the form
+        department = form.cleaned_data.get('department')
+
+        # Generate uidb64 and token for password reset email
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        # Get user details
+        first_name = form.cleaned_data.get('first_name')
+        last_name = form.cleaned_data.get('last_name')
+        username = form.cleaned_data.get('username')
+
+        # Send password reset email
+        self.send_password_reset_email(uidb64, token, user.email, first_name, last_name, username)
+
+        # Create a new Employee instance and associate the user with it
+        HumanResourceManager.objects.create(human_resource_manager=user)
+        Employee.objects.create(employee=user)
+
+        return redirect(self.success_url)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()
+        return context
+
+# Bulk reistration
+import pandas as pd
+from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
+
+# Define a function to perform bulk registration
+from django.shortcuts import render
+from .forms import UploadFileForm
+from .utils import process_uploaded_file
+
+def upload_file(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            process_uploaded_file(file)
+            return render(request, 'auth/employee_bulk_upload_success.html')
+    else:
+        form = UploadFileForm()
+    return render(request, 'auth/employee_bulk_upload.html', {'form': form})
+
+
+class Employee_All(LoginRequiredMixin, ListView):
+    template_name = 'hrms/employee/index.html'
+    model = Employee
+    context_object_name = 'employees'
+    paginate_by = 5
+    login_url = 'hrms:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.role != 'human_resource_manager' and not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(employee__is_archived=False).order_by('-id')
+
+class Employee_View(LoginRequiredMixin,DetailView):
+    queryset = Employee.objects.select_related('employee__client').order_by('-id')
+    template_name = 'hrms/employee/single.html'
+    context_object_name = 'employee'
+    login_url = 'hrms:login'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            query = Kin.objects.get(employee=self.object.pk)
+            context["kin"] = query
+            return context
+        except ObjectDoesNotExist:
+            return context
+
 
 
 class Employee_New(LoginRequiredMixin, CreateView):
@@ -576,46 +726,24 @@ class Employee_New(LoginRequiredMixin, CreateView):
         context['form'] = self.get_form()
         return context
 
-# Bulk reistration
-import pandas as pd
-from django.contrib.auth import get_user_model
-from django.utils.crypto import get_random_string
-
-# Define a function to perform bulk registration
-from django.shortcuts import render
-from .forms import UploadFileForm
-from .utils import process_uploaded_file
-
-def upload_file(request):
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            file = request.FILES['file']
-            process_uploaded_file(file)
-            return render(request, 'auth/employee_bulk_upload_success.html')
-    else:
-        form = UploadFileForm()
-    return render(request, 'auth/employee_bulk_upload.html', {'form': form})
-
-
-class Employee_All(LoginRequiredMixin, ListView):
-    template_name = 'hrms/employee/index.html'
-    model = Employee
-    context_object_name = 'employees'
+class HumanResourceManagerAll(LoginRequiredMixin, ListView):
+    template_name = 'hrms/account_managers/human_resource_managers_list.html'
+    model = HumanResourceManager
+    context_object_name = 'human_resource_managers'
     paginate_by = 5
     login_url = 'hrms:login'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.role=='human_resource_manager':
             return render(request, 'auth/unauthorized.html')
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(employee__is_archived=False).order_by('-id')
+        return queryset.filter(human_resource_manager__is_archived=False).order_by('-id')
 
-class Employee_View(LoginRequiredMixin,DetailView):
-    queryset = Employee.objects.select_related('employee__department').order_by('-id')
+class HumanResourceManagerView(LoginRequiredMixin,DetailView):
+    queryset = Employee.objects.select_related('employee__client').order_by('-id')
     template_name = 'hrms/employee/single.html'
     context_object_name = 'employee'
     login_url = 'hrms:login'
@@ -761,15 +889,32 @@ from django.views.generic import DetailView
 from django.shortcuts import get_object_or_404
 from .models import Client
 
-class Client_Detail(LoginRequiredMixin, DetailView):
-    model = Client
-    context_object_name = 'clnt'
+# class Client_Detail(LoginRequiredMixin, DetailView):
+#     model = Client
+#     context_object_name = 'clnt'
+#     template_name = 'hrms/client/single.html'
+#     login_url = 'hrms:login'
+
+#     def get_object(self, queryset=None):
+#         client_pk = self.kwargs.get('pk')
+#         return get_object_or_404(Client, pk=client_pk)
+
+class Client_Detail(LoginRequiredMixin, ListView):
+    context_object_name = 'clients'
     template_name = 'hrms/client/single.html'
     login_url = 'hrms:login'
 
-    def get_object(self, queryset=None):
+    def get_queryset(self):
         client_pk = self.kwargs.get('pk')
-        return get_object_or_404(Client, pk=client_pk)
+        queryset = Employee.objects.filter(employee__client_id=client_pk)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        client_pk = self.kwargs.get('pk')
+        client = get_object_or_404(Client, pk=client_pk)
+        context["clnt"] = client
+        return context
 
 
 class Client_New(LoginRequiredMixin, CreateView):
@@ -793,7 +938,7 @@ class Client_Update(LoginRequiredMixin,UpdateView):
     template_name = 'hrms/client/edit.html'
     form_class = ClientForm
     login_url = 'hrms:login'
-    success_url = reverse_lazy('hrms:dashboard')
+    success_url = reverse_lazy('hrms:clnt_all')
 
     def get_object(self, queryset=None):
         # handle case where client does not exist
@@ -826,7 +971,7 @@ class Attendance_Admin(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
     def dispatch(self, request, *args, **kwargs):
-            if not request.user.is_superuser:
+            if request.user.role != 'human_resource_manager' and not request.user.is_superuser:
                 return render(request, 'auth/unauthorized.html')
             return super().dispatch(request, *args, **kwargs)
 
@@ -881,6 +1026,81 @@ class Attendance_Admin(LoginRequiredMixin, View):
         }
 
         return render(request, 'hrms/attendance/create.html', context)
+
+class Attendance_Account_Manager(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.role == 'account_manager':
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        # Get query parameters
+        date = request.GET.get('date')
+        keyword = request.GET.get('keyword')
+        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
+
+        account_manager = AccountManager.objects.get(account_manager=request.user)
+        clients = Client.objects.filter(account_manager=account_manager)
+        employees = Employee.objects.filter(employee__client__in=clients)
+        print('Your employees', employees)
+        # Retrieve attendance records based on the provided date
+        if date:
+            try:
+                selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+                present_staffers = Attendance.objects.filter(
+                    Q(status='PRESENT') &
+                    Q(date=selected_date) &
+                    Q(staff__in=employees)
+                ).order_by('-id')
+            except ValueError:
+                selected_date = None
+                present_staffers = Attendance.objects.none()
+        else:
+            selected_date = timezone.localdate()
+            present_staffers = Attendance.objects.filter(
+                Q(status='PRESENT') &
+                Q(date=selected_date) &
+                Q(staff__in=employees)
+            ).order_by('-id')
+
+        # Perform search if keyword is provided
+        if keyword:
+            present_staffers = present_staffers.filter(
+                Q(staff__employee__first_name__icontains=keyword) |
+                Q(staff__employee__last_name__icontains=keyword)
+            )
+
+        # Calculate distance for each present staffer
+        for staff in present_staffers:
+            if staff.latitude and staff.longitude:
+                staff.distance = geodesic((staff.latitude, staff.longitude), geofence_center).meters
+            else:
+                staff.distance = None
+
+        # Pagination
+        paginator = Paginator(present_staffers, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        clocked_in = Attendance.objects.filter(
+            staff__in=employees,
+            date=timezone.localdate(),
+            last_out__isnull=True
+        ).exists()
+
+        context = {
+            'today': timezone.localdate(),
+            'present_staffers': page_obj,
+            'selected_date': selected_date,
+            'keyword': keyword,
+            'page_obj': page_obj,
+            'clocked_in': clocked_in
+        }
+
+        return render(request, 'hrms/account_managers/attendance.html', context)
+
 
 
 class Attendance_Employee(LoginRequiredMixin, View):
@@ -976,6 +1196,29 @@ class Attendance_Out(LoginRequiredMixin, View):
         except Attendance.DoesNotExist:
             return redirect('hrms:attendance_new')
 
+class Attendance_Out_Account_Manager(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.role=='account_manager':
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
+
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = Attendance.objects.get(
+                Q(staff__id=self.kwargs['user_id']) &
+                Q(status='PRESENT') &
+                Q(date=timezone.localdate())
+            )
+            user.last_out = timezone.localtime()
+            user.save()
+            return redirect('hrms:account_manager_attendance_list')
+        except Attendance.DoesNotExist:
+            return redirect('hrms:account_manager_attendance_list')
+
+
 class Attendance_Out_Emp(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
@@ -991,6 +1234,8 @@ class Attendance_Out_Emp(LoginRequiredMixin, View):
             return redirect('hrms:attendance_employee')
         except Attendance.DoesNotExist:
             return redirect('hrms:attendance_employee')
+
+
 
 from django.contrib import messages
 from django.http import JsonResponse
@@ -1092,6 +1337,116 @@ class AdminClockInView(LoginRequiredMixin, View):
                 'first_name': admin.admin.first_name,
                 'last_name': admin.admin.last_name,
                 'username': admin.admin.username,
+                'clock_in_time': attendance_time.strftime("%H:%M:%S")
+            })
+            plain_message = strip_tags(html_message)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            # to_email = 'bollo.j@jawabubest.co.ke'
+            to_email = 'pascalouma55@gmail.com'
+
+            send_mail(
+                subject,
+                plain_message,
+                from_email,
+                [to_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
+class AccountManagerClockInView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+
+    def post(self, request, *args, **kwargs):
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        print(f"Received coordinates: latitude={latitude}, longitude={longitude}")
+
+        if latitude is None or longitude is None:
+            messages.error(request, 'Latitude and Longitude are required.')
+            return redirect('hrms:attendance_employee')
+
+        # Retrieve the logged-in user's employee instance
+        try:
+            account_manager = AccountManager.objects.get(account_manager=request.user)
+        except AccountManager.DoesNotExist:
+            messages.error(request, 'You are not an account manager')
+            return redirect('hrms:account_manager_attendance_list')
+
+        # Define the geofence center and radius
+        # geofence_center = (-1.2540381172761967, 36.71374983009918)  # Example: main institution coordinates
+        geofence_center = (-1.2504447, 36.7150981)
+        # main office onesmus phone -1.33220199, 36.8622648
+
+        # marials phone -1.2974781588016533, 36.76480694390815
+        # my phone coordinates -1.2504447, 36.7150981
+        # marials coordinates -1.2975869, 36.7649746
+        # -1.2558260124069696, 36.69340338379849 Kinoo jacmin
+        # geofence_center = (-1.2829549455322522, 36.82593840499116)  # Example: Nairobi odeon coordinates
+        # Naivas uthiru coperation (-1.2606487526706478, 36.709970821254515)
+        # Retrieve attendance records based on the provided date
+        # Uthiru chiefs camp -1.2540381172761967, 36.71374983009918
+        # Kisumu international airport -0.08182281166829138, 34.72939625715378
+        # kabete national polytechnic -1.263690553734057, 36.72265660553466
+        # Mombasa -4.0454093873302055, 39.65720790666958
+
+        # Kangemi -1.2710588266841318, 36.739521489451775
+        # kinoo hse -1.2841, 36.8155
+        # ABC PLACE -1.2584232411933278, 36.77113775720258
+        # Westlands -1.2676956311569731, 36.81221729528121
+        # Riara road -1.297610, 36.764904
+
+        geofence_radius_km = 0.3  # 200 meters (0.2 km)
+
+        try:
+            account_manager_location = (float(latitude), float(longitude))
+            distance_km = geodesic(account_manager_location, geofence_center).km
+            print(f"Calculated distance: {distance_km} km")
+        except ValueError:
+            messages.error(request, 'Invalid latitude or longitude. Please ensure that your location services are enabled')
+            return redirect('hrms:account_manager_attendance_list')
+
+        # Check if the user has the privilege to clock in from anywhere
+        if request.user.clockin_privileges == User.CAN_CLOCK_IN_ANYWHERE:
+            self.clock_in(account_manager, latitude, longitude, distance_km, request)
+            return redirect('hrms:account_manager_attendance_list')
+        else:
+            # Check if the employee is within the geofence area
+            if distance_km <= geofence_radius_km:
+                self.clock_in(admin, latitude, longitude, distance_km, request)
+            else:
+                messages.error(request, f'You are outside the allowed geofence area. Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+        return redirect('hrms:account_manager_attendance_list')
+
+    def clock_in(self, account_manager, latitude, longitude, distance_km, request):
+        # Check if the employee is already clocked in
+        attendance = Attendance.objects.filter(account_manager=account_manager, date=timezone.localdate(), last_out__isnull=True).first()
+        if attendance:
+            # Clocking out
+            attendance.last_out = timezone.localtime()
+            attendance.save()
+            messages.success(request, f'Clock-out successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+        else:
+            # Clocking in
+            Attendance.objects.create(
+                account_manager=account_manager,
+                latitude=latitude,
+                longitude=longitude,
+                first_in=timezone.localtime(),
+                status='PRESENT'
+            )
+            self.send_late_arrival_notification(account_manager, request)
+            messages.success(request, f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
+
+    def send_late_arrival_notification(self, account_manager, request):
+        attendance_time = timezone.localtime()
+        if attendance_time.time() > datetime.strptime('08:30', '%H:%M').time():
+            subject = 'Late Clock-in Notification'
+            html_message = render_to_string('hrms/employee/employee_late_arrival.html', {
+                'first_name': account_manager.account_manager.first_name,
+                'last_name': account_manager.account_manager.last_name,
+                'username': account_manager.account_manager.username,
                 'clock_in_time': attendance_time.strftime("%H:%M:%S")
             })
             plain_message = strip_tags(html_message)

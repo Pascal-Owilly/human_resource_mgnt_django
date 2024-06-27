@@ -32,6 +32,14 @@ urlpatterns = [
     path('dashboard/admin-list/', views.AdminListView.as_view(), name='admin_list'),
     path('dashboard/admin/<int:pk>/view/', views.Admin_View.as_view(), name='admin_single_view'),
 
+# Human resoource managers
+
+    path('dashboard/human-resource/', views.HumanResourceManagerDashboard.as_view(), name='hr_dashboard'),
+    path('dashboard/hr-manager/add/', views.HumanResourceManagerNew.as_view(), name='hr_add'),
+    path('dashboard/hr-manager-list/', views.HumanResourceManagerAll.as_view(), name='hr_all'),
+    path('dashboard/hr-manager/<int:pk>/view/', views.HumanResourceManagerView.as_view(), name='hr_single_view'),
+
+
 # Account managers
 
     path('dashboard/account-manager/', views.AccountManagerDashboard.as_view(), name='account_manager_dashboard'),
@@ -39,9 +47,9 @@ urlpatterns = [
     path('dashboard/account-manager-list/', views.Account_Manager_All.as_view(), name='account_manager_all'),
     path('dashboard/account-manager/<int:pk>/view/', views.Account_Manager_View.as_view(), name='account_manager_single_view'),
 
-        # For specific clients
+        # For specific clients & employee attendance
     path('dashboard/account/manager/clients/', views.AccountManagerClientListView.as_view(), name='account_manager_clients'),
-
+    path('dashboard/account-manager-attendance-list/', views.Attendance_Account_Manager.as_view(), name='account_manager_attendance_list'),
 
 # Employee Routes
     path('dashboard/employee/', views.EmployeeDashboard.as_view(), name='employee_dashboard'),
@@ -68,12 +76,16 @@ urlpatterns = [
 #Attendance Routes
     path('dashboard/attendance/in/admin/', views.Attendance_Admin.as_view(), name='attendance_new'),
     path('dashboard/attendance/emp/', views.Attendance_Employee.as_view(), name='attendance_employee'),
+    path('dashboard/attendance/account-manager-list/', views.Attendance_Account_Manager.as_view(), name='attendance_account_manager_list'),
 
     path('dashboard/attendance/<int:pk>/out/', views.Attendance_Out.as_view(), name='attendance_out'),
     path('dashboard/attendance/<int:pk>/out_emp/', views.Attendance_Out_Emp.as_view(), name='attendance_out_emp'),
+    path('dashboard/attendance/<int:pk>/out_acct_mng/', views.Attendance_Out_Account_Manager.as_view(), name='attendance_out_accnt_mng'),
 
     path('dashboard/attendance/clock_in/', views.AdminClockInView.as_view(), name='clock_in'),
     path('dashboard/attendance/clock_in_emp/', views.EmployeeClockInView.as_view(), name='clock_in_emp'),
+    path('dashboard/attendance/clock_in_acct_mng/', views.AccountManagerClockInView.as_view(), name='clock_in_acct_mng'),
+
     path('download_pdf/', views.DownloadPDF.as_view(), name='download_pdf'),
     path('download_excel/', views.DownloadExcel.as_view(), name='download_excel'),
 #Leave Routes

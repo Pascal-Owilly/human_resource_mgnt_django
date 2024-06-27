@@ -47,6 +47,34 @@
           </div>
           <br>
           <div class="row">
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+
+              <div class="card card-statistics">
+                <a href="{% url 'hrms:hr_all' %}" >
+
+                <div class="card-body">
+
+                  <div class="clearfix">
+                    <div class="float-left">
+                      <i class="mdi mdi-account-alert text-warning icon-lg"></i>
+                    </div>
+                      <div class="float-right">
+                      <p class="mb-0 text-right">HR Managers</p>
+                      <div class="fluid-container">
+                        <h3 class="font-weight-medium text-right mb-0">{{hr_count}}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-muted mt-3 mb-0">
+                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> HR Total Count
+                  </p>
+
+                </div>
+              </a>
+
+              </div>
+
+            </div>
 
             
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
@@ -133,6 +161,7 @@
 
               </div>
             </div>
+
             <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
 
               <div class="card card-statistics">
@@ -158,7 +187,38 @@
 
               </div>
             </div>
+
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+
+              <div class="card card-statistics">
+                <a class="nav-link" href="{% url 'hrms:admin_list' %}" aria-expanded="false" aria-controls="ui-basic">
+  
+                <div class="card-body">
+                  <div class="clearfix">
+                    <div class="float-left">
+                      <i class="mdi mdi-account-multiple text-info icon-lg"></i>
+                    </div>
+                    <div class="float-right">
+                      <p class="mb-0 text-right">Administrators</p>
+                      <div class="fluid-container">
+                        <h3 class="font-weight-medium text-right mb-0">{{admin_count}}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-muted mt-3 mb-0">
+                    <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Administrators Total Count
+                  </p>
+                </div>
+              </a>
+  
+              </div>
+            </div>
           </div>
+  
+
+          </div>
+
+                   
 
           <div class="row">
             <div class="col-lg-12 grid-margin">

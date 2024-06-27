@@ -63,6 +63,9 @@
                           <td class="text-danger"> 
                             {{employee.employee.email}}
                           </td>
+                          
+                          {% if request.user.is_superuser %}
+
                           <td>
                             <div class="btn-group dropdown">
                               <button type="button" class="btn btn-success dropdown-toggle btn-rounded btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -83,6 +86,7 @@
                               </div>
                             </div>                  
                           </td>
+                          {% endif %}
                           {% empty %}
                           <p>
                               <td colspan="2">No employees found.</td>

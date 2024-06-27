@@ -13,7 +13,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = [
             'role', 'clockin_privileges', 'first_name', 'last_name', 'username', 'thumb',
-            'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department', 'is_archived'
+            'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department','client', 'is_archived'
         ]
         widgets = {
             'role': forms.Select(attrs={'class': 'form-control'}),
@@ -28,6 +28,7 @@ class UserUpdateForm(forms.ModelForm):
             'emergency_contact': forms.TextInput(attrs={'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-control'}),
             'department': forms.Select(attrs={'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'}),
             'is_archived': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
 
         }
@@ -59,13 +60,12 @@ class EmployeeRegistrationForm(UserCreationForm):
     address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
     gender = forms.ChoiceField(choices=(('male', 'Male'), ('female', 'Female')), widget=forms.Select(attrs={'class':'form-control'}))
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label='Select a department', widget=forms.Select(attrs={'class':'form-control'}))
     client = forms.ModelChoiceField(queryset=Client.objects.all(), required=False, empty_label='Select a Client', widget=forms.Select(attrs={'class':'form-control'}))
     privileges = forms.ChoiceField(choices=get_user_model().PRIVILEGE_CHOICES, widget=forms.Select(attrs={'class':'form-control'}))  # Assuming you have PRIVILEGE_CHOICES in your User model
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -73,6 +73,31 @@ class EmployeeRegistrationForm(UserCreationForm):
         self.fields['email'].label = "Email"
         # You can add more custom labels or other customization if needed
 
+class HumanResourceManagerRegistrationForm(UserCreationForm):
+
+    username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Username'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class':'form-control','placeholder':'Valid Email is required'}))
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Password'}))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder':'Confirm Password'}))
+    thumb = forms.ImageField(label='Attach a Passport Photograph',required=True,widget=forms.FileInput(attrs={'class':'form-control mt-2'}))
+    first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'First Name'}))
+    last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Last Name'}))
+    mobile = forms.CharField(max_length=15, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Mobile Number'}))
+    address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
+    emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
+    gender = forms.ChoiceField(choices=(('male', 'Male'), ('female', 'Female')), widget=forms.Select(attrs={'class':'form-control'}))
+    client = forms.ModelChoiceField(queryset=Client.objects.all(), required=False, empty_label='Select a Client', widget=forms.Select(attrs={'class':'form-control'}))
+    privileges = forms.ChoiceField(choices=get_user_model().PRIVILEGE_CHOICES, widget=forms.Select(attrs={'class':'form-control'}))  # Assuming you have PRIVILEGE_CHOICES in your User model
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "Username"
+        self.fields['email'].label = "Email"
+        # You can add more custom labels or other customization if needed
 
 class AccountManagerRegistrationForm(UserCreationForm):
     
