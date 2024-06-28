@@ -190,6 +190,7 @@ class Attendance (models.Model):
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
     admin = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True)
     account_manager = models.ForeignKey(AccountManager, on_delete=models.SET_NULL, null=True)
+    human_resource_manager = models.ForeignKey(HumanResourceManager, on_delete=models.SET_NULL, null=True)
 
     latitude = models.FloatField(null=True, blank=True) 
     longitude = models.FloatField(null=True, blank=True)
@@ -197,7 +198,7 @@ class Attendance (models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:  # If it's a new object (i.e., first in)
             self.first_in = timezone.localtime()
-        else:  # If it's an existing object being updated (i.e., last out)
+        else:  # If it's an existing object bei ng updated (i.e., last out)
             self.last_out = timezone.localtime()
         super().save(*args, **kwargs)
 

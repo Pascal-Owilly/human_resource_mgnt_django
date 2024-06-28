@@ -13,7 +13,7 @@
                         <h4 class="text-center text-primary"><i class="fa fa-plus">&emsp; New HR Manager </i></h4>
                         <hr>
                         
-                        <form enctype="multipart/form-data" action="{% url 'hrms:account_manager_register' %}" class="form-group" method="POST">
+                        <form enctype="multipart/form-data" action="{% url 'hrms:hr_add' %}" class="form-group" method="POST">
                             {% csrf_token %}
                             <small class="mb-5">** All Fields are required</small> <br /><br />
 

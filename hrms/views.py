@@ -140,32 +140,11 @@ def send_password_reset_email(uidb64, token, email):
     send_mail(subject, message, sender_email, [email])
 
 class CustomPasswordResetView(PasswordResetView):
-    email_template_name = 'auth/password_reset_email.html'
+    email_template_name = 'auth/send_password_reset_email.html'
     subject_template_name = 'auth/password_reset_subject.txt'
     template_name = 'auth/password_reset_form.html'
     success_url = reverse_lazy('hrms:password_reset_done')
-    html_email_template_name = 'auth/password_reset_email.html'
-
-    @staticmethod
-    def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
-        # Construct the reset password URL
-        reset_url = f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/"
-
-        # Construct the email message
-        subject = 'Set Your Password'
-        context = {
-            'reset_url': reset_url,
-            'first_name': first_name,
-            'last_name': last_name,
-            'username': username,
-            'theme_color': '#fdeb3d',
-            'secondary_color': '#773697',
-        }
-        html_message = render_to_string('auth/password_reset_email.html', context)
-        sender_email = settings.EMAIL_HOST_USER
-
-        # Send the email
-        send_mail(subject, None, sender_email, [email], html_message=html_message)
+    html_email_template_name = 'auth/send_password_reset_email.html'
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
         subject = render_to_string(subject_template_name, context)
@@ -177,8 +156,13 @@ class CustomPasswordResetView(PasswordResetView):
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
+        try:
+            user = get_user_model().objects.get(email=email)
+        except get_user_model().DoesNotExist:
+            form.add_error(None, 'User with this email doesnot exist. Check and try again')
+            return self.form_invalid(form)        
         user = get_user_model().objects.get(email=email)
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))  
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         context = {
             'email': email,
@@ -188,6 +172,12 @@ class CustomPasswordResetView(PasswordResetView):
             'user': user,
             'token': token,
             'protocol': 'https' if self.request.is_secure() else 'http',
+            'password_reset_url': f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/",
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'username': user.username,
+            'theme_color': '#fdeb3d',
+            'secondary_color': '#773697',
         }
         self.send_mail(
             self.subject_template_name,
@@ -199,7 +189,7 @@ class CustomPasswordResetView(PasswordResetView):
         )
         
         return super().form_valid(form)
-
+        
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     success_url = reverse_lazy('hrms:password_reset_complete')
     template_name = 'auth/password_reset_confirm.html'
@@ -254,7 +244,7 @@ class CustomLoginView(LoginView):
             elif user.role == User.ACCOUNT_MANAGER:
                 return redirect('/dashboard/account-manager/')  # Redirect employees to employee dashboard
             elif user.role == User.HUMAN_RESOURCE_MANAGER:
-                return redirect('/dashboard/human-resource/')  # Redirect employees to employee dashboard
+                return redirect('/dashboard/admin/')  # Redirect employees to employee dashboard
             else:
                 # Handle other roles or scenarios
                 return redirect('/')  # Redirect to a generic dashboard
@@ -304,7 +294,7 @@ class AdminDashboard(LoginRequiredMixin, ListView):
     context_object_name = 'qset'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not request.user.role=='human_resource_manager':
             return render(request, 'auth/unauthorized.html')
         return super().dispatch(request, *args, **kwargs)
 
@@ -317,6 +307,8 @@ class AdminDashboard(LoginRequiredMixin, ListView):
         context['users_count'] = get_user_model().objects.all().count()
         context['admin_count'] = Admin.objects.all().count()
         context['account_manager_count'] = AccountManager.objects.all().count()
+        context['hr_manager_count'] = HumanResourceManager.objects.all().count()
+
         context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
         return context
 
@@ -546,7 +538,7 @@ class HumanResourceManagerNew(LoginRequiredMixin, CreateView):
     template_name = 'hrms/account_managers/hr_create.html'
     login_url = 'hrms:login'
     redirect_field_name = 'redirect:'
-    success_url = reverse_lazy('hrms:human_resource_managers_all')  # URL to redirect to after a successful registration
+    success_url = reverse_lazy('hrms:hr_all')  # URL to redirect to after a successful registration
 
     @staticmethod
     def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
@@ -1012,9 +1004,13 @@ class Attendance_Admin(LoginRequiredMixin, View):
         paginator = Paginator(present_staffers, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        admin = Admin.objects.get(admin=request.user)
-
-        clocked_in = Attendance.objects.filter(admin=admin, date=timezone.localdate(), last_out__isnull=True).exists()
+        
+        try:
+            admin = Admin.objects.get(admin=request.user)
+            clocked_in = Attendance.objects.filter(admin=admin, date=timezone.localdate(), last_out__isnull=True).exists()
+        except Admin.DoesNotExist:
+            hr_manager = HumanResourceManager.objects.get(human_resource_manager=request.user)
+            clocked_in = Attendance.objects.filter(human_resource_manager=hr_manager, date=timezone.localdate(), last_out__isnull=True).exists()
 
         context = {
             'today': timezone.localdate(),
@@ -1100,7 +1096,6 @@ class Attendance_Account_Manager(LoginRequiredMixin, View):
         }
 
         return render(request, 'hrms/account_managers/attendance.html', context)
-
 
 
 class Attendance_Employee(LoginRequiredMixin, View):
@@ -1258,9 +1253,16 @@ class AdminClockInView(LoginRequiredMixin, View):
         # Retrieve the logged-in user's employee instance
         try:
             admin = Admin.objects.get(admin=request.user)
+            # Process attendance for admin
+            # Your code to handle attendance for admin
         except Admin.DoesNotExist:
-            messages.error(request, 'You are not an admin')
-            return redirect('hrms:attendance_new')
+            try:
+                hr_manager = HumanResourceManager.objects.get(human_resource_manager=request.user)
+                # Process attendance for Human Resource Manager
+                # Your code to handle attendance for Human Resource Manager
+            except HumanResourceManager.DoesNotExist:
+                messages.error(request, 'You are neither an admin nor a human resource manager.')
+                return redirect('hrms:attendance_new')
 
         # Define the geofence center and radius
         # geofence_center = (-1.2540381172761967, 36.71374983009918)  # Example: main institution coordinates
