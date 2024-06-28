@@ -1,10 +1,11 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
+
 {% block title %} Attendance | JBL {% endblock title %}
 
 {% block content %}
 <style>
-    .content-wrapper{
+    .content-wrapper {
         transition: .5s ease-in-out;
     }
 </style>
@@ -78,31 +79,53 @@
                                                 <th>First-In (Arrival)</th>
                                                 <th>Last-Out (Departure)</th>
                                                 <th>Name</th>
-                                                <!-- <th>Distance (m)</th> -->
                                                 <th>Action(s)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for ps in present_staffers %}
-                                                <tr>
-                                                    <td class="py-1">{{ ps.date }}</td>
-                                                    <td><strong>{{ ps.first_in }}</strong></td>
-                                                    <td><strong>{{ ps.last_out }}</strong></td>
-                                                    <td>
-                                                        {{ ps.staff.employee.first_name }} {{ ps.staff.employee.last_name }}
-                                                    </td>
-                                                    <td>
-                                                        {% if ps.last_out %}
-                                                            <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
-                                                        {% else %}
-                                                            <span class="btn btn-sm" style="background-color: #fdeb3d;color: #773697;">
-                                                                <i class="fa fa-sign-out"></i> Clocked In
-                                                            </span>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
+                                            <!-- Loop over attendances of the logged-in employee -->
+                                            {% for attendance in present_staffers %}
+                                            <tr>
+                                                <td class="py-1">{{ attendance.date }}</td>
+                                                <td><strong>{{ attendance.first_in }}</strong></td>
+                                                <td><strong>{{ attendance.last_out }}</strong></td>
+                                                <td>
+                                                    {{ attendance.staff.employee.first_name }} {{ attendance.staff.employee.last_name }}
+                                                </td>
+                                                <td>
+                                                    {% if attendance.last_out %}
+                                                        <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
+                                                    {% else %}
+                                                        <span class="btn btn-sm" style="background-color: #fdeb3d;color: #773697;">
+                                                            <i class="fa fa-sign-out"></i> Clocked In
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        
+                                            <!-- Loop over attendances of client employees -->
+                                            {% for client_attendance in client_attendances %}
+                                            <tr>
+                                                <td class="py-1">{{ client_attendance.date }}</td>
+                                                <td><strong>{{ client_attendance.first_in }}</strong></td>
+                                                <td><strong>{{ client_attendance.last_out }}</strong></td>
+                                                <td>
+                                                    {{ client_attendance.staff.employee.first_name }} {{ client_attendance.staff.employee.last_name }}
+                                                </td>
+                                                <td>
+                                                    {% if client_attendance.last_out %}
+                                                        <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
+                                                    {% else %}
+                                                        <span class="btn btn-sm" style="background-color: #fdeb3d;color: #773697;">
+                                                            <i class="fa fa-sign-out"></i> Clocked In
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
                                             {% endfor %}
                                         </tbody>
+                                        
                                     </table>
                                 </div>
                                 <!-- Pagination controls -->

@@ -1032,16 +1032,19 @@ class Attendance_Account_Manager(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        # Get query parameters
         date = request.GET.get('date')
         keyword = request.GET.get('keyword')
-        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
-
         account_manager = AccountManager.objects.get(account_manager=request.user)
         clients = Client.objects.filter(account_manager=account_manager)
-        employees = Employee.objects.filter(employee__client__in=clients)
-        print('Your employees', employees)
-        # Retrieve attendance records based on the provided date
+        
+        # Fetch employees associated with the account manager's clients
+        client_employees = Employee.objects.filter(employee__client__in=clients)
+
+        # Fetch employees directly associated with the account manager
+
+        # Combine both sets of employees
+        employees = client_employees 
+        print('client employees',employees)
         if date:
             try:
                 selected_date = datetime.strptime(date, '%Y-%m-%d').date()
@@ -1061,38 +1064,11 @@ class Attendance_Account_Manager(LoginRequiredMixin, View):
                 Q(staff__in=employees)
             ).order_by('-id')
 
-        # Perform search if keyword is provided
-        if keyword:
-            present_staffers = present_staffers.filter(
-                Q(staff__employee__first_name__icontains=keyword) |
-                Q(staff__employee__last_name__icontains=keyword)
-            )
-
-        # Calculate distance for each present staffer
-        for staff in present_staffers:
-            if staff.latitude and staff.longitude:
-                staff.distance = geodesic((staff.latitude, staff.longitude), geofence_center).meters
-            else:
-                staff.distance = None
-
-        # Pagination
-        paginator = Paginator(present_staffers, 10)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
-        clocked_in = Attendance.objects.filter(
-            staff__in=employees,
-            date=timezone.localdate(),
-            last_out__isnull=True
-        ).exists()
-
         context = {
             'today': timezone.localdate(),
-            'present_staffers': page_obj,
+            'present_staffers': present_staffers,
             'selected_date': selected_date,
             'keyword': keyword,
-            'page_obj': page_obj,
-            'clocked_in': clocked_in
         }
 
         return render(request, 'hrms/account_managers/attendance.html', context)
@@ -1532,6 +1508,7 @@ class EmployeeClockInView(LoginRequiredMixin, View):
     def clock_in(self, employee, latitude, longitude, distance_km, request):
         # Check if the employee is already clocked in
         attendance = Attendance.objects.filter(staff=employee, date=timezone.localdate(), last_out__isnull=True).first()
+        
         if attendance:
             # Clocking out
             attendance.last_out = timezone.localtime()
