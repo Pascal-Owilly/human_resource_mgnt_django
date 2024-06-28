@@ -232,26 +232,7 @@ body {
             </a>    
         </li>
         {% endif %}
-        {% if request.user.is_superuser %}
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-folder "></i>
-                <span class="menu-title ">&emsp;Departments</span>
-                <i class="menu-arrow "></i>
-            </a>
-        </li>
-        <div class="collapse mt-1 mx-1" id="ui-basic">
-            <ul class="nav flex-column sub-menu" style="border-radius: 30px;">
-                <li class="nav-item bg-light">
-                    <a class="nav-link text-dark" href="{% url 'hrms:depat_all' %}">View all Departments</a>
-                </li>
-                <li class="nav-item bg-light">
-                    <a class="nav-link text-dark" href="{% url 'hrms:dept_new' %}">
-                        <i class="fa fa-plus text-dark"></i>&emsp;New Department</a>
-                </li>
-            </ul>
-        </div>
-        {% endif %}
+        
  
         {% if request.user.is_superuser %}
         <li class="nav-item">
