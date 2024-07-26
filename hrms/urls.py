@@ -47,7 +47,7 @@ urlpatterns = [
     path('dashboard/account-manager-list/', views.Account_Manager_All.as_view(), name='account_manager_all'),
     path('dashboard/account-manager/<int:pk>/view/', views.Account_Manager_View.as_view(), name='account_manager_single_view'),
 
-        # For specific clients & employee attendance
+# For specific clients & employee attendance
     path('dashboard/account/manager/clients/', views.AccountManagerClientListView.as_view(), name='account_manager_clients'),
     path('dashboard/account-manager-attendance-list/', views.Attendance_Account_Manager.as_view(), name='account_manager_attendance_list'),
 
@@ -82,12 +82,13 @@ urlpatterns = [
     path('dashboard/attendance/<int:pk>/out_emp/', views.Attendance_Out_Emp.as_view(), name='attendance_out_emp'),
     path('dashboard/attendance/<int:pk>/out_acct_mng/', views.Attendance_Out_Account_Manager.as_view(), name='attendance_out_accnt_mng'),
 
-    path('dashboard/attendance/clock_in/', views.AdminClockInView.as_view(), name='clock_in'),
-    path('dashboard/attendance/clock_in_emp/', views.EmployeeClockInView.as_view(), name='clock_in_emp'),
-    path('dashboard/attendance/clock_in_acct_mng/', views.AccountManagerClockInView.as_view(), name='clock_in_acct_mng'),
+    path('dashboard/attendance/clock_in/', views.ClockInView.as_view(), name='clock_in'),
+    path('dashboard/attendance/clock_in_emp/', views.ClockInView.as_view(), name='clock_in_emp'),
+    path('dashboard/attendance/clock_in_acct_mng/', views.ClockInView.as_view(), name='clock_in_acct_mng'),
 
     path('download_pdf/', views.DownloadPDF.as_view(), name='download_pdf'),
     path('download_excel/', views.DownloadExcel.as_view(), name='download_excel'),
+    
 #Leave Routes
 
     path("dashboard/leave/new/", views.LeaveNew.as_view(), name="leave_new"),

@@ -49,7 +49,7 @@
 </head>
 <body>
     <div class="header">
-        <img src=" {% static 'hrms/images/jawabu_logo.jpeg' %} " width="100px" alt="">
+       <h4>Jawabu best Limited</h4>
     </div>
     <div class="content">
         <h2>Attendance for {{ date }}</h2>
@@ -60,7 +60,7 @@
                     <th>First-In (Arrival)</th>
                     <th>Last-Out (Departure)</th>
                     <th>Name</th>
-                    <!-- <th>Distance (m)</th> -->
+                    <th>Distance (m)</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,8 +69,8 @@
                         <td>{{ ps.date }}</td>
                         <td>{{ ps.first_in }}</td>
                         <td>{{ ps.last_out }}</td>
-                        <td>{{ ps.staff.employee.first_name }} {{ ps.staff.employee.last_name }}</td>
-                        <!-- <td>{{ ps.distance|default_if_none:'N/A'|floatformat:2 }} m</td> -->
+                        <td>{{ ps.user.first_name }} {{ ps.user.last_name }}</td>
+                        <td>{{ ps.distance_meters }} m</td>
                     </tr>
                 {% endfor %}
             </tbody>

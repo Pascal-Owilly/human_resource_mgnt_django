@@ -1,283 +1,231 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
 {% block title %} Dashboard | JBL {% endblock title %}
-      <!--  MAIN BODY START HERE -->
-          {% block content %}
+{% block content %}
 
-          <style>
-            .admin-card{
-              position: fixed;
-              border-radius: 50%;
-              font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-              bottom: 5px;
-              z-index: 10;
-              right: 10px;
-              box-shadow: 3px 3px #d9d9d9;
-              padding: 20px;
+<style>
+  .admin-card {
+    position: fixed;
+    border-radius: 50%;
+    font-family: 'Arial', sans-serif;
+    bottom: 5px;
+    right: 10px;
+    box-shadow: 2px 2px #d9d9d9;
+    padding: 10px;
+    font-size: 8px;
+  }
+  .card-statistics {
+    font-size: 10px;
+  }
+  .icon-lg {
+    font-size: 24px;
+  }
+  .table-bordered th, .table-bordered td {
+    padding: 0.25rem;
+    font-size: 10px;
+  }
+  .btn-sm {
+    font-size: 8px;
+    padding: 0.2rem 0.5rem;
+  }
+</style>
 
-              font-size: 10px;
-            }
-          </style>
-
-            <div class="main-panel">
-        <div class="content-wrapper">
-          <div class=" ">
-
-            <div class="card admin-card ">
-              <a href="{% url 'hrms:admin_list' %}" >
-
-
-                <div class="clearfix">
-                  <div class="float-left">
-                    <i class="mdi mdi-account-alert text-warning icon-md"></i>
-                  </div>
-                    <div class="float-right">
-                    <p style="font-size: 10px;" class="mb-0 text-right">Admins</p>
-                    <div class="fluid-container">
-                      <h5 class="font-weight-medium text-right mb-0">{{admin_count}}</h5>
-                    </div>
-                  </div>
-                </div>
-               
-
-            </a>
-
-            </div>
-
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="card admin-card">
+      <a href="{% url 'hrms:admin_list' %}">
+        <div class="clearfix">
+          <div class="float-left">
+            <i class="mdi mdi-account-alert text-warning icon-md"></i>
           </div>
-          <br>
-          <div class="row">
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a href="{% url 'hrms:hr_all' %}" >
-
-                <div class="card-body">
-
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-alert text-warning icon-lg"></i>
-                    </div>
-                      <div class="float-right">
-                      <p class="mb-0 text-right">HR Managers</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{hr_manager_count}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> HR Total Count
-                  </p>
-
-                </div>
-              </a>
-
-              </div>
-
-            </div>
-
-            
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a href="{% url 'hrms:account_manager_all' %}" >
-
-                <div class="card-body">
-
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-alert text-warning icon-lg"></i>
-                    </div>
-                      <div class="float-right">
-                      <p class="mb-0 text-right">Account Managers</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{account_manager_count}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> List
-                  </p>
-
-                </div>
-              </a>
-
-              </div>
-
-            </div>
-           
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a href="{% url 'hrms:user_list' %}" >
-
-                <div class="card-body">
-
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-alert text-warning icon-lg"></i>
-                    </div>
-                      <div class="float-right">
-                      <p class="mb-0 text-right">All users</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{users_count}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> Users Total Count
-                  </p>
-
-                </div>
-              </a>
-
-              </div>
-
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-
-                <div class="card-body">
-                  <a class="nav-link" href="{% url 'hrms:clnt_all' %}" aria-expanded="false" aria-controls="ui-basic">
-
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-home text-success icon-lg"></i>
-                    </div>
-                    <div class="float-right">
-                      <p class="mb-0 text-right">Clients</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{client_total}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-calendar mr-1" aria-hidden="true"></i> Available Clients
-                  </p>
-                </a>
-
-                </div>
-
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
-
-                <div class="card-body">
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-multiple text-info icon-lg"></i>
-                    </div>
-                    <div class="float-right">
-                      <p class="mb-0 text-right">Employees</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{emp_total}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Employee's Total Count
-                  </p>
-                </div>
-              </a>
-
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
-
-              <div class="card card-statistics">
-                <a class="nav-link" href="{% url 'hrms:admin_list' %}" aria-expanded="false" aria-controls="ui-basic">
-  
-                <div class="card-body">
-                  <div class="clearfix">
-                    <div class="float-left">
-                      <i class="mdi mdi-account-multiple text-info icon-lg"></i>
-                    </div>
-                    <div class="float-right">
-                      <p class="mb-0 text-right">Administrators</p>
-                      <div class="fluid-container">
-                        <h3 class="font-weight-medium text-right mb-0">{{admin_count}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-muted mt-3 mb-0">
-                    <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Administrators Total Count
-                  </p>
-                </div>
-              </a>
-  
-              </div>
-            </div>
-          </div>
-  
-
-          </div>
-
-                   
-
-          <div class="row">
-            <div class="col-lg-12 grid-margin">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">New Employees</h4>
-                  <div class="table-responsive">
-                    <table class="table table-bordered">
-                      <thead>
-                        <tr>
-                          
-                          <th>
-                            Picture
-                          </th>
-                          <th>
-                            First name
-                          </th>
-                          <th>
-                            Last name
-                          </th>
-                          <th>
-                            Mobile
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-
-                      {% for worker in workers %}
-                        <tr>
-                          <td class="font-weight-medium">
-                            <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class='img-fluid rounded-circle' alt="">
-                        </td>
-                        
-                          <td>
-                            {{worker.employee.first_name}}
-                          </td>
-                          <td>
-                            {{worker.employee.last_name}}
-                          </td>
-                          <td>
-                            {{worker.mobile}} &emsp;<span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span>
-                          </td>
-                        </tr>
-                        {% empty %}
-                        <p>
-                            <td colspan="2">No employees found.</td>
-                        </p>
-                      {% endfor %}                   
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-                  </div>
-                </div>
-              </div>
+          <div class="float-right">
+            <p class="mb-0 text-right">Admins</p>
+            <div class="fluid-container">
+              <h5 class="font-weight-medium text-right mb-0">{{ admin_count }}</h5>
             </div>
           </div>
         </div>
-        {% endblock content %}
+      </a>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a href="{% url 'hrms:hr_all' %}">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-account-alert text-warning icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">HR Managers</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ hr_manager_count }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> HR Total Count
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a href="{% url 'hrms:account_manager_all' %}">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-account-alert text-warning icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">Account Managers</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ account_manager_count }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> List
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a href="{% url 'hrms:user_list' %}">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-account-alert text-warning icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">All users</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ users_count }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> Users Total Count
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a class="nav-link" href="{% url 'hrms:clnt_all' %}" aria-expanded="false" aria-controls="ui-basic">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-home text-success icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">Clients</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ client_total }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-calendar mr-1" aria-hidden="true"></i> Available Clients
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-account-multiple text-info icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">Employees</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ emp_total }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Employee's Total Count
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 grid-margin stretch-card">
+        <div class="card card-statistics">
+          <a class="nav-link" href="{% url 'hrms:admin_list' %}" aria-expanded="false" aria-controls="ui-basic">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <i class="mdi mdi-account-multiple text-info icon-lg"></i>
+                </div>
+                <div class="float-right">
+                  <p class="mb-0 text-right">Administrators</p>
+                  <div class="fluid-container">
+                    <h3 class="font-weight-medium text-right mb-0">{{ admin_count }}</h3>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mt-1 mb-0">
+                <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> Administrators Total Count
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 grid-margin">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">New Employees</h4>
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Picture</th>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Mobile</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for worker in workers %}
+                  <tr>
+                    <td class="font-weight-medium">
+                      <img src="{% if worker.employee.thumb %}{{ worker.employee.thumb.url }}{% else %}{% static 'hrms/images/auth/default_profile.svg' %}{% endif %}" class="img-fluid rounded-circle" alt="">
+                    </td>
+                    <td>{{ worker.employee.first_name }}</td>
+                    <td>{{ worker.employee.last_name }}</td>
+                    <td>{{ worker.mobile }} <span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span></td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center">No employees found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

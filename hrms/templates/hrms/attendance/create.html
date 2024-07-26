@@ -58,9 +58,9 @@
                                 <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Date</span>
                                 <input type="date" class="form-control" id="date" name="date" value="{{ selected_date|default:today|date:'Y-m-d' }}">
                             </div>
-
+                            
                             <div class="form-group">
-                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by name" value="{{ keyword|default:'' }}">
+                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by username, email, first name, last name" value="{{ keyword|default:'' }}">
                                 <button type="submit" id="search-btn" class="btn btn-primary ml-2">Search</button>
                             </div>
                         </form>
@@ -75,7 +75,7 @@
                                                 <th>First-In (Arrival)</th>
                                                 <th>Last-Out (Departure)</th>
                                                 <th>Name</th>
-                                                <!-- <th>Distance (m)</th> -->
+                                                <th>Distance (m)</th>
                                                 <th>Action(s)</th>
                                             </tr>
                                         </thead>
@@ -86,15 +86,14 @@
                                                             <td><strong>{{ ps.first_in }}</strong></td>
                                                             <td><strong>{{ ps.last_out }}</strong></td>
                                                             <td>
-                                                                {% if ps.admin %}
-                                                                    {{ ps.admin.admin.first_name }} {{ ps.admin.admin.last_name }}
-                                                                {% elif ps.staff %}
-                                                                    {{ ps.staff.employee.first_name }} {{ ps.staff.employee.last_name }}
+                                                                {% if ps.user %}
+                                                                    {{ ps.user.first_name }} {{ ps.user.last_name }}
+                                                                
                                                                 {% else %}
                                                                     N/A
                                                                 {% endif %}
                                                             </td>
-                                                            <!-- <td>{{ ps.distance|default_if_none:'N/A'|floatformat:2 }} m</td> -->
+                                                            <td>{{ ps.distance|default_if_none:'N/A'|floatformat:2 }} m</td>
                                                             <td>
                                                                 {% if ps.last_out %}
                                                                     <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>

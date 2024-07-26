@@ -45,12 +45,17 @@
 
                         <form class="form-inline mb-3 justify-content-between" method="GET">
                             <div class="form-group">
-                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by name" value="{{ keyword|default:'' }}">
+                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Date</span>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date|default:today_emp|date:'Y-m-d' }}">
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by username, email, first name, last name" value="{{ keyword|default:'' }}">
                                 <button type="submit" id="search-btn" class="btn btn-primary ml-2">Search</button>
                             </div>
                         </form>
-
                         <div class="table-responsive">
+                            {% if page_obj.object_list %}
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -58,7 +63,7 @@
                                         <th>First-In (Arrival)</th>
                                         <th>Last-Out (Departure)</th>
                                         <th>Name</th>
-                                        <!-- <th>Distance (m)</th> -->
+                                        <th>Distance (m)</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -68,8 +73,8 @@
                                         <td class="py-1">{{ ps.date }}</td>
                                         <td><strong>{{ ps.first_in }}</strong></td>
                                         <td><strong>{{ ps.last_out }}</strong></td>
-                                        <td>{{ ps.staff.employee.first_name }} {{ ps.staff.employee.last_name }}</td>
-                                        <!-- <td>{{ ps.distance|floatformat:2 }} m</td> -->
+                                        <td>{{ ps.user.first_name }} {{ ps.user.last_name }}</td>
+                                        <td>{{ ps.distance|floatformat:2 }} m</td>
                                         <td>
                                             {% if ps.last_out %}
                                                 <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
@@ -83,7 +88,14 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            {% else %}
+                            <div class="text-center my-5">
+                                <i class="fa fa-clock-o fa-3x mb-3" style="color: #773697;"></i>
+                                <h4>No clock-in data </h4>
+                            </div>
+                            {% endif %}
                         </div>
+                        
 
                         <!-- Pagination controls -->
                         <div class="pagination-controls">

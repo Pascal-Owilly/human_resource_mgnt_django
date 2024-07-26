@@ -82,7 +82,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     thumb = models.ImageField(blank=True, null=True)
     email = models.EmailField(unique=True, null=True, blank=True)
-    phone_number = models.CharField(max_length=11, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True, unique=True)
     address = models.CharField(max_length=100, null=True, blank=True)
 
     emp_id = models.CharField(max_length=70, unique=True, editable=False)
@@ -137,6 +137,8 @@ class AccountManager(models.Model):
     
 class Employee(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
@@ -181,20 +183,32 @@ class Kin(models.Model):
         return reverse("hrms:employee_view",kwargs={'pk':self.employee.pk})
     
 
+class OTP(models.Model):
+    user =  models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    otp = models.CharField(max_length=6)
+    expiry_time = models.DateTimeField()
+
+    print('OTP', otp)
+    def __str__(self):
+        return f"OTP for {self.user.phone_number}"
+        
 class Attendance (models.Model):
     STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))
     date = models.DateField(auto_now_add=True, null=True, blank=True)
-    first_in = models.TimeField()
-    last_out = models.TimeField(null=True)
-    status = models.CharField(choices=STATUS, max_length=15 )
+    first_in = models.TimeField(null=True, blank=True)
+    last_out = models.TimeField(null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True)  # Field to store user's full name
+    status = models.CharField(choices=STATUS, max_length=15, null=True, blank=True )
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
     admin = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True)
     account_manager = models.ForeignKey(AccountManager, on_delete=models.SET_NULL, null=True)
     human_resource_manager = models.ForeignKey(HumanResourceManager, on_delete=models.SET_NULL, null=True)
-
+    distance = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True) 
     longitude = models.FloatField(null=True, blank=True)
-    
+    imei = models.CharField(max_length=255, null=True, blank=True)  # Add this field
+
     def save(self, *args, **kwargs):
         if not self.pk:  # If it's a new object (i.e., first in)
             self.first_in = timezone.localtime()
@@ -203,7 +217,7 @@ class Attendance (models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return 'Attendance -> '+str(self.date) + ' -> ' + str(self.staff)
+        return 'Attendance -> '+str(self.date) + ' -> ' + str(self.user)
 
 class Leave (models.Model):
     STATUS = (('approved','APPROVED'),('unapproved','UNAPPROVED'),('decline','DECLINED'))

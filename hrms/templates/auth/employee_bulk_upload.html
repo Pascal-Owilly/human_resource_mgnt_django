@@ -2,7 +2,7 @@
 
 {% extends 'hrms/layout.html' %}
 {% load static %}
-{% block title %} New Employee | JBL {% endblock title %}
+{% block title %} Employee bulk upload | JBL {% endblock title %}
 
 {% block content %}
     <div class="main-panel">
@@ -12,7 +12,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="text-center text-primary">
-                                <i class="fa fa-plus">&emsp; New Employees </i>
+                                <i class="fa fa-plus">&emsp; Employee bulk upload</i>
                             </h4>
                             <hr>
                             <form enctype="multipart/form-data" action="{% url 'hrms:employee_bulk_register' %}" class="form-group" method="POST">

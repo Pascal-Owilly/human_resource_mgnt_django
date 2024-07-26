@@ -104,4 +104,37 @@ def is_within_geofence(employee_location, geofence_center, radius_km):
     return distance <= radius_km
 
 
+import random
+from datetime import datetime, timedelta
+from .models import OTP
+
+def generate_otp():
+    """
+    Generates a random 6-digit OTP.
+    """
+    return str(random.randint(100000, 999999))
+
+def store_otp(phone_number, otp):
+    """
+    Stores OTP in the database with an expiry time.
+    """
+    expiry_time = datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
+    OTP.objects.update_or_create(
+        phone_number=phone_number,
+        defaults={'otp': otp, 'expiry_time': expiry_time}
+    )
+
+def verify_otp(phone_number, otp):
+    """
+    Verifies if the entered OTP matches the stored OTP for the phone number
+    and if it has not expired.
+    """
+    try:
+        otp_object = OTP.objects.get(phone_number=phone_number)
+        if otp_object.otp == otp and otp_object.expiry_time > datetime.now():
+            return True
+        else:
+            return False
+    except OTP.DoesNotExist:
+        return False
 
