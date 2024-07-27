@@ -27,7 +27,7 @@
                         <!-- Messages block -->
                         <div id="messages" class="my-3">
                             {% for message in messages %}
-                                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                                <div style="font-size: 13px;" class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
                                     {{ message }}
                                 </div>
                             {% endfor %}
@@ -40,19 +40,19 @@
                             <input type="hidden" name="longitude" id="longitude">
                             <div class="text-center mt-3">
                                 {% if clocked_in %}
-                                    <button type="submit" class="btn btn-rounded btn-outline-danger"><i class="mdi mdi-logout"></i> Clock Out</button>
+                                    <button type="submit" class="btn btn-rounded btn-sm btn-outline-danger" style="font-size: 10px;"><i class="mdi mdi-logout"></i> Clock Out</button>
                                 {% else %}
-                                    <button type="submit" class="btn btn-rounded btn-outline-success"><i class="mdi mdi-check"></i> Clock In</button>
+                                    <button type="submit" class="btn btn-rounded btn-sm btn-outline-success" style="font-size: 10px;"><i class="mdi mdi-check"></i> Clock In</button>
                                 {% endif %}
                             </div>
                         </form>
 
                         <br>
-                        <h4 class="text-primary"><i class="fa fa-sign-in"></i>&emsp; List of employee(s) that clocked-in today</h4>
+                        <h4 class="text-primary" style="font-size: 13px;"><i class="fa fa-sign-in"></i>&emsp; List of employee(s) that clocked-in today</h4>
                         <div class="d-flex justify-content-end mb-3">
-                            <button class="btn btn-primary mr-2" onclick="printAttendance()">Print</button>
-                            <a href="{% url 'hrms:download_pdf' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-danger btn-sm mr-2" style="font-size: 12px;">Download PDF</a>
-                            <a href="{% url 'hrms:download_excel' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-success">Download Excel</a>
+                            <button class="btn btn-primary btn-sm mr-2" onclick="printAttendance()" style="font-size: 10px;">Print</button>
+                            <a href="{% url 'hrms:download_pdf' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-danger btn-sm mr-2" style="font-size: 10px;">Download PDF</a>
+                            <a href="{% url 'hrms:download_excel' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-sm btn-success" style="font-size: 10px;">Download Excel</a>
                         </div>
                         <hr>
                         <!-- Add buttons for printing and downloading -->
@@ -65,34 +65,34 @@
 
                             <div class="form-group">
                                 <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by name" value="{{ keyword|default:'' }}">
-                                <button type="submit" id="search-btn" class="btn btn-primary ml-2">Search</button>
+                                <button type="submit" id="search-btn" class="btn btn-primary btn-sm ml-2" style="font-size: 10px;"><i class="fa fa-search"></i></button>
                             </div>
                         </form>
 
                         {% if present_staffers %}
-                            <div id="printable-section">
+                            <div id="printable-section" >
                                 <div class="table-responsive">
                                     <table class="table table-striped">
                                         <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>First-In (Arrival)</th>
-                                                <th>Last-Out (Departure)</th>
-                                                <th>Name</th>
-                                                <th>Action(s)</th>
+                                            <tr style="font-size: 10px;">
+                                                <th style="font-size: 10px;">Date</th>
+                                                <th style="font-size: 10px;">First-In (Arrival)</th>
+                                                <th style="font-size: 10px;">Last-Out (Departure)</th>
+                                                <th style="font-size: 10px;">Name</th>
+                                                <th style="font-size: 10px;">Action(s)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <!-- Loop over attendances of the logged-in employee -->
                                             {% for attendance in present_staffers %}
                                             <tr>
-                                                <td class="py-1">{{ attendance.date }}</td>
-                                                <td><strong>{{ attendance.first_in }}</strong></td>
-                                                <td><strong>{{ attendance.last_out }}</strong></td>
-                                                <td>
+                                                <td style="font-size: 10px;" class="py-1">{{ attendance.date }}</td>
+                                                <td style="font-size: 10px;"><strong>{{ attendance.first_in }}</strong></td>
+                                                <td style="font-size: 10px;"><strong>{{ attendance.last_out }}</strong></td>
+                                                <td style="font-size: 10px;">
                                                     {{ attendance.user.first_name }} {{ attendance.user.last_name }}
                                                 </td>
-                                                <td>
+                                                <td style="font-size: 10px;"> 
                                                     {% if attendance.last_out %}
                                                         <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
                                                     {% else %}
@@ -107,17 +107,17 @@
                                             <!-- Loop over attendances of client employees -->
                                             {% for client_attendance in client_attendances %}
                                             <tr>
-                                                <td class="py-1">{{ client_attendance.date }}</td>
-                                                <td><strong>{{ client_attendance.first_in }}</strong></td>
-                                                <td><strong>{{ client_attendance.last_out }}</strong></td>
-                                                <td>
+                                                <td style="font-size: 10px;" class="py-1">{{ client_attendance.date }}</td>
+                                                <td style="font-size: 10px;"><strong>{{ client_attendance.first_in }}</strong></td>
+                                                <td style="font-size: 10px;"><strong>{{ client_attendance.last_out }}</strong></td>
+                                                <td style="font-size: 10px;">
                                                     {{ client_attendance.staff.employee.first_name }} {{ client_attendance.staff.employee.last_name }}
                                                 </td>
-                                                <td>
+                                                <td style="font-size: 10px;">
                                                     {% if client_attendance.last_out %}
-                                                        <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>
+                                                        <span class="btn btn-sm btn-secondary disabled" style="font-size: 12px;">Clocked Out</span>
                                                     {% else %}
-                                                        <span class="btn btn-sm" style="background-color: #fdeb3d;color: #773697;">
+                                                        <span class="btn btn-sm" style="background-color: #fdeb3d;color: #773697; font-size: 12px;">
                                                             <i class="fa fa-sign-out"></i> Clocked In
                                                         </span>
                                                     {% endif %}

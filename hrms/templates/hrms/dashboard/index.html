@@ -13,6 +13,7 @@
     box-shadow: 2px 2px #d9d9d9;
     padding: 10px;
     font-size: 8px;
+    z-index: 2;
   }
   .card-statistics {
     font-size: 10px;
@@ -22,15 +23,28 @@
   }
   .table-bordered th, .table-bordered td {
     padding: 0.25rem;
-    font-size: 10px;
   }
   .btn-sm {
     font-size: 8px;
     padding: 0.2rem 0.5rem;
   }
+
+  .admin-header {
+    text-align: center;
+    margin-top: 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 15px;
+    color: #d9d9d9;
+    border-bottom: 1px solid #773697;
+    padding-bottom: 1px;
+  }
 </style>
 
 <div class="main-panel">
+  <div class="admin-header">
+    <h4>Jawabu Best Limited Administration</h4>
+  </div>
+  
   <div class="content-wrapper">
     <div class="card admin-card">
       <a href="{% url 'hrms:admin_list' %}">

@@ -112,7 +112,6 @@ class AccountManagerRegistrationForm(UserCreationForm):
     address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
     gender = forms.ChoiceField(choices=(('male', 'Male'), ('female', 'Female')), widget=forms.Select(attrs={'class':'form-control'}))
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label='Select a department', widget=forms.Select(attrs={'class':'form-control'}))
     client = forms.ModelChoiceField(queryset=Client.objects.all(), required=False, empty_label='Select a Client', widget=forms.Select(attrs={'class':'form-control'}))
     privileges = forms.ChoiceField(choices=get_user_model().PRIVILEGE_CHOICES, widget=forms.Select(attrs={'class':'form-control'}))  # Assuming you have PRIVILEGE_CHOICES in your User model
 
@@ -179,11 +178,10 @@ class DepartmentForm(forms.ModelForm):
 
 class ClientForm(forms.ModelForm):
     name = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Client Name'}))
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, empty_label='Select a department', widget=forms.Select(attrs={'class':'form-control'}))
     
     class Meta:
         model = Client
-        fields = '__all__'
+        fields = ['name', 'branch', 'account_manager']
 
 class AttendanceForm(forms.ModelForm):
     status = forms.ChoiceField(choices=Attendance.STATUS, widget=forms.Select(attrs={'class': 'form-control w-50'}))

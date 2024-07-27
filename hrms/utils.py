@@ -104,37 +104,21 @@ def is_within_geofence(employee_location, geofence_center, radius_km):
     return distance <= radius_km
 
 
-import random
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 from .models import OTP
 
 def generate_otp():
-    """
-    Generates a random 6-digit OTP.
-    """
     return str(random.randint(100000, 999999))
 
-def store_otp(phone_number, otp):
-    """
-    Stores OTP in the database with an expiry time.
-    """
-    expiry_time = datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
-    OTP.objects.update_or_create(
-        phone_number=phone_number,
-        defaults={'otp': otp, 'expiry_time': expiry_time}
-    )
+def store_otp(user, otp):
+    expiry_time = timezone.now() + timedelta(minutes=5)
+    OTP.objects.update_or_create(user=user, defaults={'otp': otp, 'expiry_time': expiry_time})
 
-def verify_otp(phone_number, otp):
-    """
-    Verifies if the entered OTP matches the stored OTP for the phone number
-    and if it has not expired.
-    """
+def verify_otp(user, otp):
     try:
-        otp_object = OTP.objects.get(phone_number=phone_number)
-        if otp_object.otp == otp and otp_object.expiry_time > datetime.now():
-            return True
-        else:
-            return False
+        otp_object = OTP.objects.get(user=user)
+        return otp_object.otp == otp and otp_object.is_valid()
     except OTP.DoesNotExist:
         return False
 

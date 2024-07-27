@@ -184,13 +184,15 @@ class Kin(models.Model):
     
 
 class OTP(models.Model):
-    user =  models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     otp = models.CharField(max_length=6)
     expiry_time = models.DateTimeField()
 
-    print('OTP', otp)
     def __str__(self):
-        return f"OTP for {self.user.phone_number}"
+        return f"OTP for {self.user.phone_number if self.user else 'Unknown'}"
+
+    def is_valid(self): 
+        return self.expiry_time > timezone.now()
         
 class Attendance (models.Model):
     STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))
