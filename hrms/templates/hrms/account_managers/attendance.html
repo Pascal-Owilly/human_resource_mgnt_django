@@ -40,11 +40,16 @@
                             <input type="hidden" name="longitude" id="longitude">
                             <div class="text-center mt-3">
                                 {% if clocked_in %}
-                                    <button type="submit" class="btn btn-rounded btn-sm btn-outline-danger" style="font-size: 10px;"><i class="mdi mdi-logout"></i> Clock Out</button>
+                                    <button id="clockin-button" type="submit" class="btn btn-rounded btn-outline-info"><i class="mdi mdi-logout"></i> Clock Out</button>
                                 {% else %}
-                                    <button type="submit" class="btn btn-rounded btn-sm btn-outline-success" style="font-size: 10px;"><i class="mdi mdi-check"></i> Clock In</button>
+                                    <button id="clockin-button" type="submit" class="btn btn-rounded btn-outline-warning"><i class="mdi mdi-check"></i> Clock In</button>
                                 {% endif %}
+                                <div id="otp-section" style="display: none; margin-top: 15px;">
+                                    <input type="text" name="otp" id="otp" placeholder="Enter OTP">
+                                    <button id="verify-otp" type="submit" class="btn btn-rounded btn-outline-warning"><i class="mdi mdi-check"></i> Verify OTP</button>
+                                </div>
                             </div>
+                            
                         </form>
 
                         <br>
@@ -192,6 +197,48 @@
         window.print();
         document.body.innerHTML = originalContent;
     }
+
+    document.getElementById('clockin-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const form = this;
+    const otpSection = document.getElementById('otp-section');
+    const clockinButton = document.getElementById('clockin-button');
+    const otpField = document.getElementById('otp');
+
+    toastr.info('Processing your request...');
+
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': form.csrfmiddlewaretoken.value
+        }
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url; // Handle redirect
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data) {
+            if (data.otp_sent) {
+                toastr.success('OTP sent. Please enter it to verify.');
+                clockinButton.style.display = 'none';
+                otpSection.style.display = 'block';
+                otpField.focus();
+            } else if (data.error) {
+                toastr.error(data.error);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        toastr.error('An error occurred. Please try again.');
+    });
+});
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {

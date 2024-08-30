@@ -122,7 +122,7 @@
                             {{worker.employee.last_name}}
                           </td>
                           <td>
-                            {{worker.mobile}} &emsp;<span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span>
+                            {{worker.phone_number}} &emsp;<span><a href="{% url 'hrms:employee_view' pk=worker.id %}" class="btn btn-sm btn-info">View</a></span>
                           </td>
                         </tr>
                         {% empty %}

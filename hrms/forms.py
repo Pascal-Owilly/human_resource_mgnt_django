@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User
+from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User, Location
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django import forms
 from django.core import validators
@@ -12,7 +12,7 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'role', 'clockin_privileges', 'first_name', 'last_name', 'username', 'thumb',
+            'role', 'assigned_location', 'imei', 'clockin_privileges', 'first_name', 'last_name', 'username', 'thumb',
             'email', 'phone_number', 'address', 'emergency_contact', 'gender', 'department','client', 'is_archived'
         ]
         widgets = {
@@ -20,10 +20,12 @@ class UserUpdateForm(forms.ModelForm):
             'clockin_privileges': forms.Select(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'assigned_location': forms.Select(attrs={'class': 'form-control'}),
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'thumb': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'imei': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
             'emergency_contact': forms.TextInput(attrs={'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'form-control'}),
@@ -56,6 +58,7 @@ class EmployeeRegistrationForm(UserCreationForm):
     thumb = forms.ImageField(label='Attach a Passport Photograph',required=True,widget=forms.FileInput(attrs={'class':'form-control mt-2'}))
     first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'First Name'}))
     last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Last Name'}))
+    assigned_location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False, empty_label='Select a Location', widget=forms.Select(attrs={'class':'form-control'}))
     mobile = forms.CharField(max_length=15, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Mobile Number'}))
     address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
@@ -65,7 +68,7 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,6 +85,7 @@ class HumanResourceManagerRegistrationForm(UserCreationForm):
     thumb = forms.ImageField(label='Attach a Passport Photograph',required=True,widget=forms.FileInput(attrs={'class':'form-control mt-2'}))
     first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'First Name'}))
     last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Last Name'}))
+    assigned_location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False, empty_label='Select a Location', widget=forms.Select(attrs={'class':'form-control'}))
     mobile = forms.CharField(max_length=15, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Mobile Number'}))
     address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
@@ -91,7 +95,7 @@ class HumanResourceManagerRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -108,6 +112,7 @@ class AccountManagerRegistrationForm(UserCreationForm):
     thumb = forms.ImageField(label='Attach a Passport Photograph',required=True,widget=forms.FileInput(attrs={'class':'form-control mt-2'}))
     first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'First Name'}))
     last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Last Name'}))
+    assigned_location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False, empty_label='Select a Location', widget=forms.Select(attrs={'class':'form-control'}))
     mobile = forms.CharField(max_length=15, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Mobile Number'}))
     address = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Address'}))
     emergency = forms.CharField(max_length=11, widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Emergency Contact'}))
@@ -117,7 +122,7 @@ class AccountManagerRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges' , 'password1', 'password2',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -182,6 +187,29 @@ class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
         fields = ['name', 'branch', 'account_manager']
+
+class LocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['name', 'latitude', 'longitude', 'radius']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter place name'
+            }),
+            'latitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter latitude (e.g., -1.2921)'
+            }),
+            'longitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter longitude (e.g., 36.8219)'
+            }),
+            'radius': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter radius in kilometers'
+            }),
+        }
 
 class AttendanceForm(forms.ModelForm):
     status = forms.ChoiceField(choices=Attendance.STATUS, widget=forms.Select(attrs={'class': 'form-control w-50'}))

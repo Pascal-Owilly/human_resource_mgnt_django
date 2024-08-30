@@ -1110,7 +1110,7 @@ class Attendance_Employee(LoginRequiredMixin, View):
         # Determine the start and end of the current week (Monday to Friday)
         today_emp = timezone.localdate()
         start_of_week = today_emp - timedelta(days=today_emp.weekday())  # Monday
-        end_of_week = start_of_week + timedelta(days=4)  # Friday
+        end_of_week = start_of_week + timedelta(days=6)  # Friday
 
         # Retrieve attendance records for the logged-in employee within the current week
         if date_emp:
@@ -1268,12 +1268,57 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from geopy.distance import geodesic
 from datetime import datetime
-from .models import OTP
+from .models import OTP, Location
+
+from .forms import LocationForm
+
+class AddLocationView(View):
+    def get(self, request):
+        form = LocationForm()
+        return render(request, 'hrms/attendance/add_location.html', {'form': form})
+
+    def post(self, request):
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Location added successfully.')
+            return redirect('hrms:add_location')
+        return render(request, 'hrms/attendance/list_location.html', {'form': form})
+
+# views.py
+class LocationListView(ListView):
+    model = Location
+    template_name = 'hrms/attendance/list_location.html'
+    context_object_name = 'locations'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        locations = Location.objects.all()
+        print('Locations:', locations)  # Debug print
+        context['locations'] = locations
+        return context
+
+
+class LocationUpdateView(UpdateView):
+    model = Location
+    form_class = LocationForm
+    template_name = 'hrms/attendance/edit_location.html'
+    success_url = reverse_lazy('hrms:location_list')
+
+def update_user_location(request, id):
+    user = get_object_or_404(User, id=id)
+    if request.method == 'POST':
+        location_id = request.POST.get('location')
+        user.assigned_location = get_object_or_404(Location, id=location_id)
+        user.save()
+        return redirect('hrms:user_list')
+    return redirect('hrms:user_list')
+
 
 class ClockInView(View):
     def post(self, request, *args, **kwargs):
         phone_number = request.POST.get('phone_number')
-        otp = request.POST.get('otp')
+        imei = request.POST.get('imei')
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
 
@@ -1283,63 +1328,36 @@ class ClockInView(View):
             messages.error(request, 'User not authenticated.')
             return self.redirect_based_on_role()
 
-        if otp:
-            # Verify OTP for clock-in only
-            return self.verify_otp(user, otp, latitude, longitude)
+        if imei != user.imei:  # Assuming the IMEI is stored in the user's profile
+            messages.error(request, 'Invalid device.')
+            return self.redirect_based_on_role()
+
+        # Check if user is clocking out
+        if Attendance.objects.filter(user=user, date=timezone.localdate(), last_out__isnull=True).exists():
+            return self.handle_attendance(user, latitude, longitude, None)  # No geofence check for clock-out
         else:
-            # Check if user is clocking out
-            if Attendance.objects.filter(user=user, date=timezone.localdate(), last_out__isnull=True).exists():
-                return self.handle_attendance(user, latitude, longitude, None)  # No OTP needed for clock-out
-            else:
-                # Generate and send OTP for clock-in
-                return self.generate_and_send_otp(user, latitude, longitude)
+            # Verify geofence for clock-in
+            return self.verify_geofence(user, latitude, longitude)
     
-    def generate_otp(self):
-        import random
-        return str(random.randint(100000, 999999))
-    
-    def send_otp(self, user, otp_code):
-        # Send OTP via SMS or email
-        subject = 'Your OTP Code'
-        message = f'Your OTP code is {otp_code}.'
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = [user.email]
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+    def verify_geofence(self, user, latitude, longitude):
+        if not (latitude and longitude):
+            messages.error(self.request, 'Location data required.')
+            return self.redirect_based_on_role()
 
-    def verify_otp(self, user, otp, latitude, longitude):
         try:
-            otp_record = OTP.objects.get(user=user, otp=otp)
-            if otp_record.is_valid():
-                if not (latitude and longitude):
-                    messages.error(self.request, 'Location data required.')
-                    return self.redirect_based_on_role()
+            user_location = (float(latitude), float(longitude))
+        except ValueError:
+            messages.error(self.request, 'Invalid location data.')
+            return self.redirect_based_on_role()
 
-                try:
-                    user_location = (float(latitude), float(longitude))
-                    distance_km = geodesic(user_location, (-1.3319954, 36.8622605)).km
-                except ValueError:
-                    messages.error(self.request, 'Invalid location data.')
-                    return self.redirect_based_on_role()
+        # Check if the user is within any allowed geofence area
+        for location in Location.objects.all():
+            distance_km = geodesic(user_location, (location.latitude, location.longitude)).km
+            if distance_km <= location.radius:
+                return self.handle_attendance(user, latitude, longitude, distance_km)
 
-                if user.clockin_privileges == User.CAN_CLOCK_IN_ANYWHERE or distance_km <= 0.3:
-                    return self.handle_attendance(user, latitude, longitude, distance_km)
-                else:
-                    messages.error(self.request, 'Outside allowed geofence area.')
-                    return self.redirect_based_on_role()
-            else:
-                return JsonResponse({'error': 'Invalid or expired OTP.'}, status=400)
-        except OTP.DoesNotExist:
-            return JsonResponse({'error': 'OTP not found.'}, status=400)
-    
-    def generate_and_send_otp(self, user, latitude, longitude):
-        otp_code = self.generate_otp()
-        expiry_time = timezone.now() + timezone.timedelta(minutes=10)
-        OTP.objects.create(user=user, otp=otp_code, expiry_time=expiry_time)
-        
-        # Send OTP to user via SMS or email
-        self.send_otp(user, otp_code)
-        
-        return JsonResponse({'otp_sent': True}, status=200)
+        messages.error(self.request, 'Outside allowed geofence area.')
+        return self.redirect_based_on_role()
 
     def handle_attendance(self, user, latitude, longitude, distance_km):
         attendance = Attendance.objects.filter(
@@ -1369,7 +1387,7 @@ class ClockInView(View):
 
     def send_late_arrival_notification(self, user):
         clock_in_time = timezone.localtime()
-        if clock_in_time.time() > datetime.strptime('08:30', '%H:%M').time():
+        if clock_in_time.time() > datetime.strptime('00:00', '%H:%M').time():
             subject = 'Late Clock-in Notification'
             html_message = render_to_string('hrms/employee/employee_late_arrival.html', {
                 'first_name': user.first_name,
@@ -1378,9 +1396,21 @@ class ClockInView(View):
             })
             plain_message = strip_tags(html_message)
             from_email = settings.DEFAULT_FROM_EMAIL
-            to_email = 'pascalouma55@gmail.com'
 
-            send_mail(subject, plain_message, from_email, [to_email], html_message=html_message, fail_silently=False)
+            to_email = user.email
+
+            account_manager_email = None
+            if hasattr(user, 'accountmanager'):
+                account_manager_email = user.accountmanager.account_manager.email
+
+            admin_emails = Admin.objects.exclude(admin__email__isnull=True).values_list('admin__email', flat=True)
+
+            recipients = [to_email]
+            if account_manager_email:
+                recipients.append(account_manager_email)
+            recipients.extend(admin_emails)
+
+            send_mail(subject, plain_message, from_email, recipients, html_message=html_message, fail_silently=False)
 
     def redirect_based_on_role(self):
         user = self.request.user
@@ -1391,7 +1421,8 @@ class ClockInView(View):
             'account_manager': 'hrms:account_manager_attendance_list'
         }
         return redirect(role_redirects.get(user.role, 'hrms:attendance_employee'))
-            
+
+
 from geopy.distance import geodesic
 from django.contrib import messages
 from django.http import JsonResponse

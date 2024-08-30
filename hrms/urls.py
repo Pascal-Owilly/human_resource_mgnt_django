@@ -26,6 +26,7 @@ urlpatterns = [
     path('users/archived/', views.ArchivedUserListView.as_view(), name='archived_user_list'),
     path('user_unarchive/<int:pk>/', views.UserUnarchiveView.as_view(), name='user_unarchive'),
     path('users/delete/<int:pk>/', views.UserDeleteView.as_view(), name='user_delete'),
+    path('user/<int:id>/update-location/', views.update_user_location, name='update_user_location'),
 
 # Admin routes
     path('dashboard/admin/', views.AdminDashboard.as_view(), name='admin_dashboard'),
@@ -74,6 +75,11 @@ urlpatterns = [
     path('dashboard/client/<int:pk>/update/', views.Client_Update.as_view(), name='client_update'),
 
 #Attendance Routes
+
+    path('add-location/', views.AddLocationView.as_view(), name='add_location'),
+    path('locations/', views.LocationListView.as_view(), name='location_list'),
+    path('location/edit/<int:pk>/',  views.LocationUpdateView.as_view(), name='edit_location'),
+
     path('dashboard/attendance/in/admin/', views.Attendance_Admin.as_view(), name='attendance_new'),
     path('dashboard/attendance/emp/', views.Attendance_Employee.as_view(), name='attendance_employee'),
     path('dashboard/attendance/account-manager-list/', views.Attendance_Account_Manager.as_view(), name='attendance_account_manager_list'),

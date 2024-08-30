@@ -44,6 +44,15 @@ def generate_emp_id():
 def generate_mng_id():
     return generate_short_id('mng-', User, 'mng_id')
 
+class Location(models.Model):
+    name = models.CharField(max_length=255)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    radius = models.FloatField(help_text="Geofence radius in kilometers")
+
+    def __str__(self):
+        return self.name
+
 class User(AbstractUser):
 
     SUPERUSER = 'superuser'
@@ -84,6 +93,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True, unique=True)
     address = models.CharField(max_length=100, null=True, blank=True)
+    imei = models.CharField(max_length=255, null=True, blank=True)  # Add this field
 
     emp_id = models.CharField(max_length=70, unique=True, editable=False)
     mng_id = models.CharField(max_length=70, unique=True, editable=False)
@@ -91,6 +101,7 @@ class User(AbstractUser):
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+    assigned_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
 
     is_archived = models.BooleanField(default=False)
 
@@ -184,7 +195,7 @@ class Kin(models.Model):
     
 
 class OTP(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     otp = models.CharField(max_length=6)
     expiry_time = models.DateTimeField()
 
@@ -193,6 +204,7 @@ class OTP(models.Model):
 
     def is_valid(self): 
         return self.expiry_time > timezone.now()
+
         
 class Attendance (models.Model):
     STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))

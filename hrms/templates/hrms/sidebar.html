@@ -129,7 +129,7 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item text-light">
             <a class="nav-link" href="{% url 'hrms:admin_dashboard' %}">
-                <i class="fa fa-dashboard"></i>
+                <i class="fa fa-tachometer-alt"></i>
                 <span class="menu-title ">&emsp;Dashboard</span>
             </a>
         </li>
@@ -193,6 +193,12 @@ body {
             <a class="nav-link" href="{% url 'hrms:attendance_new' %}">
                 <i class="fa fa-calendar "></i>
                 <span class="menu-title ">&emsp;Attendance</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'hrms:location_list' %}">
+                <i class="fa fa-map-marker"></i>
+                <span class="menu-title ">&emsp;Locations</span>
             </a>
         </li>
         {% endif %}
