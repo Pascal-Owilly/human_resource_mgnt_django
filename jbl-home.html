@@ -1,0 +1,692 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="{% static 'hrms/vendors/iconfonts/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'hrms/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'hrms/images/favicon.png' %}">
+    <style>
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 70px;
+    background-color: #733793;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.logo {
+    width: 100px;
+    height: 70px;
+}
+
+.social-links {
+    margin-left: auto;
+    display: flex;
+    gap: 15px;
+    margin-right: 20px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Size of the rounded icon */
+    height: 30px;
+    background-color: #00FF00; /* Greenish background color */
+    color: black; /* Icon color */
+    border-radius: 50%; /* Rounded background */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 20px; /* Font size for Font Awesome icons */
+    fill: black; /* Icon color for SVG */
+    padding: 5px;
+}
+
+
+.social-icon:hover {
+    background-color: #00CC00; /* Slightly darker green on hover */
+}
+
+        /* General Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    height: 100%;
+    background-color: #28a745;
+}
+
+.container {
+    position: relative;
+    height: 100vh;
+background-color: #FBEE28;
+    overflow: hidden;
+}
+
+/* Navbar */
+nav {
+    width: 100%; /* Ensure the nav takes up the full width of its container */
+    box-sizing: border-box; /* Include padding and border in the element's width and height */
+}
+
+
+/* Adjustments for Login Form */
+.login-form-container {
+    position: relative;
+    margin-top: 80px;
+    margin-right: 5%;
+    width: 40%;
+}
+
+
+/* Scrolling Text */
+.scrolling-text {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: #733793;
+    color: #fff;
+    padding: 10px;
+    white-space: nowrap;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    z-index: 1;
+    left: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .navbar {
+        width: 100%;
+        left: 0;
+        padding: 5px;
+        background-color: #733793;
+    }
+
+    .login-form-container {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .scrolling-text {
+        width: 100%;
+        left: 0;
+    }
+}
+
+        .container {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+
+        .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #733793;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: flex;
+    justify-content: flex-start; /* Aligns logo to the left */
+    align-items: center; /* Vertically centers the logo */
+    padding-left: 10px; /* Adjust padding as needed */
+    border-radius: 10px;
+}
+
+.logo {
+    width: 100px;
+    height: 70px;
+}
+
+
+        /* .login-form-container {
+            position: relative;
+            margin-top: 80px; 
+            margin-right: 5%;
+            width: 40%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1; 
+        } */
+
+        .info-section {
+            position: relative;
+            flex: 0 0 75%;
+            background: #733793;
+            color: white;
+            border-radius: 90% 0 0 80%; /* Oval shape on the right */
+            padding: 20px;
+            overflow: visible ;
+            height: 100%;
+            width: 100%;
+            align-items: center !important;
+        }
+
+
+
+        .info-content {
+            position: relative;
+            z-index: 2;
+            width: 50%;
+            margin: auto;
+            left: 15%;
+        }
+
+        .info-content h2 {
+            font-weight: bold;
+        }
+
+        h1 {
+          font-size: 2rem;
+          font-weight: bold;
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+          color: #333;
+          text-align: center;
+    
+}
+
+.login-form {
+    display: inline-block;
+    background: #FBEE28;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+            position: absolute;
+            margin-top: 80px; 
+            margin: auto;
+            width: 30%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1; 
+
+            top: 50px; /* Adjust based on layout */
+            left: 5%;
+            width: 77%;
+}
+
+/* .login-form {
+    left: 5%;
+    width: 100%;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    border-radius: 10px;
+} */
+
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.input-group img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.input-group i {
+    font-size: 20px;
+    margin-right: 10px;
+    color: #28a745; /* Color of the icons */
+}
+
+input {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: calc(100% - 30px);
+    padding: 20px 30px;
+
+}
+
+button {
+    background-color: #733793;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 30px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.forgot-password {
+    display: block;
+    margin-top: 10px;
+    color: orange;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+        .download-button {
+            display: inline-block;
+            background-color: #fff;
+            color: #733793;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            border: 2px solid #733793;
+            transition: background-color 0.3s, color 0.3s;
+            text-align: center;
+        }
+
+        .download-button:hover {
+            background-color: #FBEE28;
+            color: #333;
+        }
+
+        .scrolling-text {
+            position: absolute;
+            bottom: 0;
+            width: 95%; /* Adjust to fit within the blue background */
+            background-color: #733793;
+            color: #fff;
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            z-index: 1; /* Ensure it is above other content */
+            left: 5%; /* Center align within the background */
+        }
+
+        .scrolling-text p {
+            display: inline-block;
+            animation: scroll 10s linear infinite;
+            color: #FBEE28;
+            letter-spacing: 2px;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        footer {
+            position: absolute;
+            /* bottom: 10px; */
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            z-index: 1; /* Ensure footer is above the green background */
+        }
+
+        .social-media {
+            position: absolute;
+            bottom: 10px;
+            right: 5%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .social-media a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 20px; /* Adjust size as needed */
+        }
+
+        .social-media a:hover {
+            opacity: 0.7;
+        }
+
+        .separator-logo {
+            position: absolute;
+            top: 50%;
+            left: calc(70% - 75px); 
+            transform: translateY(-50%);
+            max-height: 150px;
+            z-index: 1; 
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar, .separator-logo {
+                width: 100%;
+                left: 0;
+                transform: none;
+            }
+
+            .navbar {
+                padding: 5px;
+            }
+
+            .separator-logo {
+                display: none;
+            }
+
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info-section {
+                border-radius: 0;
+                margin-right: 0;
+                margin-top: 20px;
+                height: auto; /* Allow for responsive height */
+            }
+
+            .login-form-container {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            .scrolling-text {
+                width: 100%;
+                left: 0;
+            }
+
+            .social-media {
+                bottom: 20px; /* Adjust based on mobile view */
+                right: 10px;
+            }
+        }
+
+        /* General responsive styles for small devices */
+@media (max-width: 768px) {
+    /* Navbar adjustments */
+    .navbar {
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .logo {
+        width: 80px;
+        height: auto;
+    }
+
+    /* Login form adjustments */
+    .login-form-container {
+        width: 90%;
+        margin: 0 auto;
+        margin-top: 20px;
+        padding: 10px;
+    }
+
+    .login-form {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .login-form h1 {
+        font-size: 1.5rem;
+    }
+
+    .input-group img, .input-group i {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    /* Info section adjustments */
+    .info-section {
+        flex: 0 0 100%;
+        border-radius: 0;
+        padding: 20px;
+        height: auto;
+        margin-top: 20px;
+    }
+
+    .info-content {
+        width: 100%;
+        margin: 0;
+        left: 0;
+    }
+
+    .info-content h2, .info-content h1 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .info-content p {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    /* Scrolling text adjustments */
+    .scrolling-text {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* Footer adjustments */
+    footer {
+        left: 0;
+        width: 100%;
+        padding: 10px;
+    }
+
+    .social-media {
+        bottom: 20px;
+        right: 10px;
+        justify-content: center;
+    }
+
+    .social-media a {
+        font-size: 18px;
+        margin: 0 5px;
+    }
+}
+
+/* For even smaller devices (like small phones) */
+@media (max-width: 480px) {
+    /* Further adjustments for smaller screens */
+    .login-form h1 {
+        font-size: 1.2rem;
+    }
+
+    .input-group img, .input-group i {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+
+    input {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    button {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .info-content h2, .info-content h1 {
+        font-size: 1.2rem;
+    }
+
+    .info-content p {
+        font-size: 0.9rem;
+    }
+
+    .scrolling-text p {
+        font-size: 0.8rem;
+    }
+
+    .social-media a {
+        font-size: 16px;
+    }
+
+    .login-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .login-form .form-control {
+        border-radius: 0.25rem;
+        box-shadow: none;
+    }
+
+    .login-form .input-group {
+        margin-bottom: 0.5rem;
+    }
+
+    .login-form .input-group .input-group-append .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    .login-form .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 0.25rem;
+    }
+
+    .login-form .forgot-password {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .login-form .forgot-password:hover {
+        text-decoration: underline;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <img src="{% static 'hrms/images/logo.png' %}" class="logo" alt="Logo">        
+            <div class="social-links">
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="social-icon">
+                    <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/>
+                </svg>                
+                <a href="#" class="social-icon">
+                    <i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+        
+
+        <div class="login-form-container"
+        style="background-image: url('static/hrms/images/board.jpg');background-size: size;background-repeat: no-repeat;"
+        >
+
+        <form class="login-form" action="{% url 'hrms:login' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> <!-- Font Awesome user icon -->
+                </label>
+              <div class="input-group">
+                {{ form.username }}
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> <!-- Font Awesome lock icon -->
+                </label>              <div class="input-group">
+                {{ form.password }}
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary submit-btn btn-block">Login</button>
+            </div>
+            <div class="text-block text-center my-3">
+                <br>
+              <span class="text-small font-weight-semibold">Forgot password?</span>
+              <br>
+              <a href="{% url 'hrms:password_reset' %}" class="forgot-password">Reset Password</a>
+
+            </div>
+          </form>
+
+        </div>
+
+        <div class="info-section">
+            <div class="info-content ">
+                <h1 style="color: #ccc;text-align: left;"> About Jawabu </h1>
+                <p>
+                    At Jawabu, we offer a cutting-edge employee clock-in management system that leverages IMEI and location detection technology.
+                </p>
+                <p>
+                    Our platform is tailored for account managers and human resource professionals, enabling them to efficiently oversee workforce management.
+
+                </p>
+                <p>
+                    With our system, employee clock-ins are accurately tracked and managed, ensuring smooth operations and enhanced accountability across the organization.
+                </p>
+
+
+                                        <a href="{% static 'apk/jbl.apk' %}" download="jawabu-best-limited-v2.apk" class="download-button">
+                                                Download Android App &rarr;
+                                        </a>
+            </div>
+        </div>
+
+        <div class="scrolling-text">
+            <p>Welcome to our Employee Management System - Innovative Solutions for Modern Businesses!</p>
+        </div>
+
+        <footer>
+   
+            <div class="copyright">
+                <p class="footer-text text-center mt-4 text-dark">Copyright © {{ 2024 }} Jawabu Best Limited. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+    <img src="{% static 'images/separator-logo.png' %}" alt="Separator Logo" class="separator-logo">
+</body>
+</html>

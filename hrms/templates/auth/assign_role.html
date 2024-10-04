@@ -1,0 +1,50 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %}Assign Role{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Assign Role to User</h2>
+
+    <!-- Display success or error messages -->
+    {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Form for assigning roles -->
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" class="form-horizontal">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-primary">Assign Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add custom styling -->
+<style>
+    .alert-container {
+        margin-bottom: 20px;
+    }
+    .alert {
+        margin: 0;
+    }
+    .form-horizontal .form-group {
+        margin-bottom: 15px;
+    }
+    .form-horizontal .control-label {
+        text-align: left;
+    }
+</style>
+{% endblock %}
+

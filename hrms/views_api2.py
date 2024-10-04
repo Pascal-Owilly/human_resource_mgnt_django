@@ -2,12 +2,11 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import User, Client, Employee, Admin, Attendance, AccountManager, HumanResourceManager, Device
+from .models import User, Client, Employee, Admin, Attendance, AccountManager, HumanResourceManager
 from .serializers import UserSerializer, ClientSerializer, EmployeeSerializer, AttendanceSerializer, LoginSerializer, UserRegistrationSerializer,  PasswordResetSerializer, PasswordResetConfirmSerializer, HumanResourceManagerSerializer, AccountManagerSerializer
 from django.shortcuts import get_object_or_404
 import string
 import random
-from datetime import datetime
 
 # EMAILS
 from django.contrib.auth.tokens import default_token_generator
@@ -479,7 +478,7 @@ class AcEmployeeClockInView(APIView):
                 latitude=latitude,
                 longitude=longitude,
                 distance_km=distance_km,
-                imei=devise,
+                imei=imei,
                 clock_in_time=timezone.now()  # Adjust as per your requirements
             )
             return Response({'success': 'Clock-in successful.'}, status=status.HTTP_200_OK)
@@ -531,69 +530,46 @@ class AdminClockInView(APIView):
         if not user.is_authenticated:
             return Response({'error': 'User not authenticated.'}, status=status.HTTP_403_FORBIDDEN)
 
+        # Check if the device already exists or create a new one
+        device, created = Device.objects.get_or_create(
+            imei=imei,
+            user=user
+        )
+
         # Check if latitude and longitude are provided
         if not latitude or not longitude:
             return Response({'error': 'Latitude and Longitude are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Fetch user's assigned location
+        location = user.assigned_location
+        if not location:
+            return Response({'error': 'User does not have an assigned location.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        geofence_center = (location.latitude, location.longitude)
+        geofence_radius_km = location.radius
+
         try:
-            latitude = float(latitude)
-            longitude = float(longitude)
+            admin_location = (float(latitude), float(longitude))
+            distance_km = geodesic(admin_location, geofence_center).km
         except ValueError:
             return Response({'error': 'Invalid latitude or longitude.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if IMEI is provided
+        # Check IMEI and handle clock-in
         if not imei:
             return Response({'error': 'IMEI is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the device already exists or create a new one
-        device, created = Device.objects.get_or_create(imei=imei)
-
-        # Fetch user's assigned location from a dynamic setting
-        location = user.assigned_location  # Assuming user has an assigned location (latitude, longitude, radius)
-
-        if not location and user.clockin_privileges != User.CAN_CLOCK_IN_ANYWHERE:
-            return Response({'error': 'You do not have an assigned location.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Initialize distance_km variable
-        distance_km = None
-
-        # If the user does not have the "Can clock in from anywhere" privilege, perform geofence check
-        if user.clockin_privileges != User.CAN_CLOCK_IN_ANYWHERE:
-            if not location:
-                return Response({'error': 'Location not assigned for user.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            geofence_center = (location.latitude, location.longitude)
-            geofence_radius_km = location.radius  # Radius in kilometers
-
-            # Calculate the distance between user's location and geofence center
-            user_location = (latitude, longitude)
-            distance_km = geodesic(user_location, geofence_center).km
-
-            # Validate if the distance is within the allowed radius
-            if distance_km > geofence_radius_km:
-                return Response(
-                    {
-                        'error': f'You are outside the allowed geofence radius: {round(distance_km, 2)} km away',
-                        'distance_from_geofence_center_km': round(distance_km, 2)  # Return distance in the response
-                    },
-                    status=status.HTTP_403_FORBIDDEN
-                )
-
         # Check if the user is already clocked in today
-        today_attendance = Attendance.objects.filter(user=user, date=timezone.localdate(), last_out__isnull=True).first()
+        today_attendance = Attendance.objects.filter(user=user, date=timezone.localdate()).first()
         if today_attendance:
-            if today_attendance.imei != device:
+            if today_attendance.imei != imei:
                 return Response({'error': 'IMEI mismatch. Please use the same device for clock-in.'}, status=status.HTTP_403_FORBIDDEN)
             else:
                 # Clocking out
-                self.clock_in(user, latitude, longitude, distance_km, device)
+                self.clock_in(user, latitude, longitude, distance_km, imei)
                 return Response({'message': 'Clock-out successful!'}, status=status.HTTP_200_OK)
         else:
             # Clocking in
-            self.clock_in(user, latitude, longitude, distance_km, device)
-            
-            # Send late arrival notification if the clock-in is after a specific time
-            self.send_late_arrival_notification(user)
+            self.clock_in(user, latitude, longitude, distance_km, imei)
             return Response({'message': 'Clock-in successful!'}, status=status.HTTP_200_OK)
 
     def get(self, request, *args, **kwargs):
@@ -601,13 +577,13 @@ class AdminClockInView(APIView):
         serializer = AttendanceSerializer(attendances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def clock_in(self, user, latitude, longitude, distance_km, device):
+    def clock_in(self, user, latitude, longitude, distance_km, imei):
         today_attendance = Attendance.objects.filter(user=user, date=timezone.localdate(), last_out__isnull=True).first()
         if today_attendance:
             # Clocking out
             today_attendance.last_out = timezone.localtime()
             today_attendance.save()
-            print(f'Clock-out successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km' if distance_km else '')
+            print(f'Clock-out successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
         else:
             # Clocking in
             Attendance.objects.create(
@@ -616,12 +592,24 @@ class AdminClockInView(APIView):
                 latitude=latitude,
                 longitude=longitude,
                 first_in=timezone.localtime(),
-                imei=device,  # Use the Device instance here
+                imei=imei,
                 status='PRESENT'
             )
-            print(f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km' if distance_km else '')
+            print(f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km')
 
-    def send_late_arrival_notification(self, user):
+    def generate_otp(self):
+        import random
+        return str(random.randint(100000, 999999))
+
+    def store_otp(self, phone_number, otp):
+        # Implement this function to store OTP for later verification
+        pass
+
+    def verify_otp(self, phone_number, otp):
+        # Implement this function to verify OTP
+        return True  # Replace with actual verification logic
+
+    def send_late_arrival_notification(self, user, request):
         attendance_time = timezone.localtime()
         if attendance_time.time() > datetime.strptime('08:30', '%H:%M').time():
             subject = 'Late Clock-in Notification'
@@ -633,23 +621,15 @@ class AdminClockInView(APIView):
             })
             plain_message = strip_tags(html_message)
             from_email = settings.DEFAULT_FROM_EMAIL
-
-            # Get email addresses of Admins and Account Managers
-            admin_emails = User.objects.filter(role=User.SUPERUSER).values_list('email', flat=True)
-            account_manager_emails = User.objects.filter(role=User.ACCOUNT_MANAGER).values_list('email', flat=True)
-
-            to_emails = list(admin_emails) + list(account_manager_emails)
-
-            if not to_emails:
-                return
+            to_email = 'pascalouma55@gmail.com'
 
             send_mail(
                 subject,
                 plain_message,
                 from_email,
-                to_emails,
+                [to_email],
                 html_message=html_message,
-                fail_silently=False,
+                fail_silently=True,
             )
 
             

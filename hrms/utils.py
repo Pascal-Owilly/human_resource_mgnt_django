@@ -12,6 +12,8 @@ from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 import os
 from .models import Employee, User
+from django.core.exceptions import ObjectDoesNotExist  # Add this line
+from django.contrib import messages
 
 def generate_random_password(length=12):
     letters = string.ascii_letters
@@ -36,10 +38,21 @@ def send_password_reset_email(user, uidb64, token):
     sender_email = settings.EMAIL_HOST_USER
     send_mail(subject, None, sender_email, [user.email], html_message=html_message)
 
-def process_uploaded_file(file_path):
-    # Read Excel file
-    df = pd.read_excel(file_path)
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.base import ContentFile
+from django.contrib.auth.hashers import make_password
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib import messages
 
+def process_uploaded_file(request ,file):
+    # Read Excel file
+    df = pd.read_excel(file)
+
+    messages.info(request, "Please be patient, uploading ...")
+
+    results = []
     # Iterate over rows and process employee data
     for index, row in df.iterrows():
         first_name = str(row.get('First Name', '')).strip()
@@ -50,7 +63,23 @@ def process_uploaded_file(file_path):
         address = str(row.get('Address', '')).strip()
         emergency_contact = str(row.get('Emergency Contact', '')).strip()
         gender = str(row.get('Gender', '')).strip()
-        thumb = row.get('Thumb')  # Ensure the 'Thumb' column is optional
+        thumb = row.get('Thumb')  # 'Thumb' column is optional
+
+        # Check if user with the same email or username already exists
+        user_exists = False
+        existing_user = User.objects.filter(username=username).first()
+        if existing_user:
+            results.append(f"User {username} already present. Proceeding to next user.")
+            user_exists = True
+        else:
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user:
+                results.append(f"User with email {email} already present. Proceeding to next user.")
+                user_exists = True
+
+        # Skip registration for existing users
+        if user_exists:
+            continue
 
         # Generate random password
         password = generate_random_password()
@@ -66,17 +95,16 @@ def process_uploaded_file(file_path):
             emergency_contact=emergency_contact,
             gender=gender,
             password=make_password(password),
-            role=User.EMPLOYEE  
-
+            role=User.EMPLOYEE
         )
 
-        if pd.notnull(thumb):  # Check if thumb is not null
+        # Process 'Thumb' if it's not empty
+        if pd.notnull(thumb):
             thumb_file = ContentFile(thumb.encode())  # Assuming thumb is binary image data
             user.thumb.save(f'{username}_thumb.jpg', thumb_file)
 
         # Create an Employee instance and associate the user with it
         Employee.objects.create(employee=user)
-    
 
         # Generate uidb64 and token for password reset email
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
@@ -84,6 +112,9 @@ def process_uploaded_file(file_path):
 
         # Send password reset email
         send_password_reset_email(user, uidb64, token)
+
+    return results
+
 
 # Attendance utility
 from geopy.distance import geodesic

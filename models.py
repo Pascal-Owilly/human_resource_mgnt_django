@@ -91,7 +91,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     thumb = models.ImageField(blank=True, null=True)
     email = models.EmailField(unique=True, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, null=True, blank=True, unique=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
     address = models.CharField(max_length=100, null=True, blank=True)
     imei = models.CharField(max_length=255, null=True, blank=True)  # Add this field
 
@@ -141,10 +141,8 @@ class AccountManager(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        if self.account_manager:
-            return f'{self.account_manager.first_name} {self.account_manager.last_name}'
-        return 'Account Manager with missing user'
-    
+        return f'{self.account_manager.first_name} {self.account_manager.last_name}'
+        
     def get_absolute_url(self):
         return reverse("hrms:account_manager_view", kwargs={"pk": self.pk})
     
@@ -220,7 +218,7 @@ class Attendance (models.Model):
     first_in = models.TimeField(null=True, blank=True)
     last_out = models.TimeField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    imei = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True, blank=True)  # Link to the device
+    imei = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)  # Link to the device
     name = models.CharField(max_length=255, null=True, blank=True)  # Field to store user's full name
     status = models.CharField(choices=STATUS, max_length=15, null=True, blank=True )
     staff = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)

@@ -186,6 +186,12 @@ body {
                 <span class="menu-title">&emsp;Employee</span>
             </a>
         </li>
+         <li class="nav-item">
+            <a class="nav-link" href="{% url 'hrms:assign_role' %}" aria-expanded="false" aria-controls="ui-basic">
+                <i class="fa fa-user "></i>
+                <span class="menu-title">&emsp;Roles</span>
+            </a>
+        </li>
         {% endif %}
         {% if request.user.is_superuser %}
         

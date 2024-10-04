@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User, Location
+from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User, Location, AccountManager, Admin, Employee, HumanResourceManager
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django import forms
 from django.core import validators
@@ -95,7 +95,7 @@ class HumanResourceManagerRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -122,7 +122,12 @@ class AccountManagerRegistrationForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'department', 'privileges' , 'password1', 'password2',)
+        fields = ('username', 'email', 'thumb', 'first_name', 'last_name', 'assigned_location', 'mobile', 'address', 'emergency', 'gender', 'privileges' , 'password1', 'password2')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "Username"
+        self.fields['email'].label = "Email"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -243,4 +248,27 @@ class RecruitmentForm(forms.ModelForm):
             'phone':forms.TextInput(attrs={'class':'form-control'}),
         }
     
+    
+class AssignRoleForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=User.objects.all(), required=True, label='Select User')
+    role = forms.ChoiceField(choices=User.ROLE_CHOICES, required=True, label='Select Role')
+
+    def save(self):
+        user = self.cleaned_data['user']
+        role = self.cleaned_data['role']
+        
+        # Update user's role
+        user.role = role
+        user.save()
+        
+        # Assign the user to the relevant model based on the role
+        if role == User.ACCOUNT_MANAGER:
+            AccountManager.objects.update_or_create(account_manager=user)
+        elif role == User.HUMAN_RESOURCE_MANAGER:
+            HumanResourceManager.objects.update_or_create(human_resource_manager=user)
+        elif role == User.SUPERUSER:
+            Admin.objects.update_or_create(admin=user)
+        elif role == User.EMPLOYEE:
+            Employee.objects.update_or_create(employee=user)
+        # Handle other roles if necessary
         

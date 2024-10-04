@@ -29,6 +29,8 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth import authenticate, login
 from datetime import datetime, timedelta
 from .serializers import AttendanceSerializer
+from .forms import AssignRoleForm
+from django.contrib.auth.decorators import login_required
 
 # OTP
 
@@ -73,6 +75,7 @@ class UserListView(View):
             users = paginator.page(paginator.num_pages)
 
         users_data = [
+            
             {
                 'id': user.id,
                 'username': user.username,
@@ -101,6 +104,28 @@ class UserDetailView(View, LoginRequiredMixin):
         return redirect('hrms:user_detail', user_id=user_id)
 
 from .forms import UserUpdateForm
+
+
+# views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import AssignRoleForm
+
+@login_required
+def assign_role(request):
+    if request.method == 'POST':
+        form = AssignRoleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Role assigned successfully.')
+            form = AssignRoleForm()  # Clear the form after submission
+        else:
+            messages.error(request, 'There was an error assigning the role. Please try again.')
+    else:
+        form = AssignRoleForm()
+
+    return render(request, 'auth/assign_role.html', {'form': form})
 
 # User UpdateView
 
@@ -626,13 +651,15 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES['file']
-            process_uploaded_file(file)
+            results = process_uploaded_file(request, file)
+            for result in results:
+                messages.info(request, result)
+            messages.success(request, 'File processed successfully.')
             return render(request, 'auth/employee_bulk_upload_success.html')
     else:
         form = UploadFileForm()
     return render(request, 'auth/employee_bulk_upload.html', {'form': form})
-
-
+    
 class Employee_All(LoginRequiredMixin, ListView):
     template_name = 'hrms/employee/index.html'
     model = Employee
@@ -789,7 +816,6 @@ class Employee_Kin_Add (LoginRequiredMixin,CreateView):
     template_name = 'hrms/employee/kin_add.html'
     login_url = 'hrms:login'
 
-
     def get_context_data(self):
         context = super().get_context_data()
         if 'id' in self.kwargs:
@@ -869,7 +895,7 @@ class Department_Update(LoginRequiredMixin,UpdateView):
 
 class ClientListView(View, LoginRequiredMixin):
     template_name = 'hrms/client/client_list.html'
-    paginate_by = 5  # Number of users per page
+    paginate_by = 15  # Number of users per page
 
     def get(self, request):
         client_list = Client.objects.all().order_by('-id')
@@ -1290,14 +1316,16 @@ class LocationListView(ListView):
     model = Location
     template_name = 'hrms/attendance/list_location.html'
     context_object_name = 'locations'
+    paginate_by = 25  # Set the number of items per page
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        locations = Location.objects.all()
-        print('Locations:', locations)  # Debug print
-        context['locations'] = locations
+        locations = Location.objects.all()  # Fetch all locations
+        paginator = Paginator(locations, self.paginate_by)  # Create a paginator
+        page_number = self.request.GET.get('page')  # Get the page number from the request
+        page_obj = paginator.get_page(page_number)  # Get the page object
+        context['locations'] = page_obj  # Update the context with the page object
         return context
-
 
 class LocationUpdateView(UpdateView):
     model = Location
@@ -1481,7 +1509,7 @@ class DownloadPDF(View, LoginRequiredMixin):
             io.BytesIO(html.encode('UTF-8')),
             dest=response,
         )
-
+        
         if pisa_status.err:
             return HttpResponse('We had some errors with your request', status=500)
         return response

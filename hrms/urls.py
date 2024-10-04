@@ -17,6 +17,7 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/complete/', views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('unauthorized/', views.unauthorized, name='unauthorized'),
+    path('assign-role/', views.assign_role, name='assign_role'),
 
 # Users
     path('dashboard/user-list/', views.UserListView.as_view(), name='user_list'),
@@ -44,7 +45,6 @@ urlpatterns = [
 # Account managers
 
     path('dashboard/account-manager/', views.AccountManagerDashboard.as_view(), name='account_manager_dashboard'),
-    path('dashboard/account-manager/add/', views.AccountManager_New.as_view(), name='account_manager_add'),
     path('dashboard/account-manager-list/', views.Account_Manager_All.as_view(), name='account_manager_all'),
     path('dashboard/account-manager/<int:pk>/view/', views.Account_Manager_View.as_view(), name='account_manager_single_view'),
 
@@ -107,5 +107,6 @@ urlpatterns = [
 
 #Payroll
     path("employee/pay/",views.Pay.as_view(), name="payroll")
+    
 
 ]

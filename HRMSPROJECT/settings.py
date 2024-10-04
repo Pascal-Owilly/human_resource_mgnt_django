@@ -26,14 +26,15 @@ SECRET_KEY = '#=a7f+o=$5#uln!f9$)d)ax225+(tq&5i613&l^cg2h_$pjg_v'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
+
 EMAIL_HOST_USER = 'intellima.tech@gmail.com'  
 EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
 # EMAIL_HOST_USER = 'pascalouma54@gmail.com'
@@ -170,7 +171,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
-LOGIN_REDIRECT_URL = 'hrms:dashboard'
+# LOGIN_REDIRECT_URL = 'hrms:dashboard'
+
+LOGOUT_REDIRECT_URL = '/login/' 
+
+# LOGIN_REDIRECT_URL = '/'  # Redirect all users to the homepage after login
+
+
 # LOGIN_URL = 'hrms:login'
 MEDIA_URL = '/media/'  # This is just for URL i.e https://l.me/media/l.jpg
 MEDIA_ROOT = BASE_DIR / 'media'  # This is the folder the image will be uploaded

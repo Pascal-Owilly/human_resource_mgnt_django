@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+      /* General Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+}
+
+.container {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(to right, #fff 70%, #733793 70%);
+    overflow: hidden; /* Hide any overflow to keep the layout clean */
+}
+
+/* Curved Shape at the Top */
+.container::before {
+    content: '';
+    position: absolute;
+    top: -50px; /* Adjust based on the curve size */
+    left: 0;
+    width: 100%;
+    height: 100px; /* Height of the curved shape */
+    background: #773697;
+    border-radius: 0 0 50% 50%; /* Create the curved effect */
+    z-index: 0;
+}
+
+.navbar {
+    position: fixed;
+    top: 20px; /* Adjust to fit within the curved shape */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+border-radius: 10px;}
+
+.logo {
+    max-height: 40px;
+}
+
+.content {
+    position: relative;
+    margin-top: 80px; /* Adjust based on navbar height and curved shape */
+    text-align: center;
+    padding: 20px;
+    color: #333;
+    z-index: 1; /* Ensure content is above the curved shape */
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.login-form {
+    display: inline-block;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.input-group img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+input {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    width: calc(100% - 30px);
+}
+
+button {
+    background-color: #733793;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 30px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.forgot-password {
+    display: block;
+    margin-top: 10px;
+    color: orange;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+footer {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+    z-index: 1; /* Ensure footer is above the green background */
+}
+
+.social-media a {
+    margin: 0 10px;
+    color: blue;
+    text-decoration: none;
+}
+
+.social-media a:hover {
+    text-decoration: underline;
+}
+
+.separator-logo {
+    position: absolute;
+    top: 50%;
+    left: calc(70% - 75px); /* Adjust to fit nicely between the green and white backgrounds */
+    transform: translateY(-50%);
+    max-height: 150px;
+    z-index: 1; /* Ensure it appears between backgrounds */
+}
+
+@media (max-width: 768px) {
+    .navbar, .separator-logo {
+        width: 100%;
+        left: 0;
+        transform: none;
+    }
+
+    .navbar {
+        padding: 5px;
+    }
+
+    .separator-logo {
+        display: none;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <img src="{% static '../../../hrms/logo/logo.png %}" alt="Logo" class="logo">
+        </div>
+        
+        <div class="content">
+            <h1>Login</h1>
+            <form class="login-form">
+                <div class="input-group">
+                    <label for="username">
+                        <img src="{% static 'icons/username-icon.png' %}" alt="Username Icon">
+                    </label>
+                    <input type="text" id="username" name="username" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <label for="password">
+                        <img src="{% static 'icons/password-icon.png' %}" alt="Password Icon">
+                    </label>
+                    <input type="password" id="password" name="password" placeholder="Password">
+                </div>
+                <button type="submit">Submit</button>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </form>
+        </div>
+        
+        <footer>
+            <div class="social-media">
+                <!-- Add social media links here -->
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+                <a href="#">LinkedIn</a>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 - {{ current_year }} JWABU Best Limited</p>
+            </div>
+        </footer>
+    </div>
+    <img src="{% static 'images/separator-logo.png' %}" alt="Separator Logo" class="separator-logo">
+</body>
+</html>

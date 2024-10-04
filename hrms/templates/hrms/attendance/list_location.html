@@ -2,8 +2,38 @@
 {% load static %}
 {% block title %} Location List | JBL {% endblock title %}
 {% block content %}
-   
+<style>
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
 
+.step-links {
+    display: inline-block;
+}
+
+.step-links a {
+    margin: 0 5px;
+    padding: 10px 15px;
+    border-radius: 30px; /* Rounded corners */
+    text-decoration: none;
+    color: #007bff; /* Bootstrap primary color */
+    background-color: #f8f9fa; /* Light background */
+    border: 1px solid #007bff; /* Border color */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+}
+
+.step-links a:hover {
+    background-color: #007bff; /* Darker background on hover */
+    color: white; /* White text on hover */
+}
+
+.current {
+    margin: 0 10px;
+    font-weight: bold;
+    color: #333;
+}
+</style>
 <div class="container mt-5">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'hrms:admin_dashboard' %}">Dashboard</a></li>
@@ -38,8 +68,30 @@
                     </a>
                 </td>
             </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No locations available.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if locations.has_previous %}
+            <a href="?page=1" class="btn btn-outline-primary">&laquo; First</a>
+            <a href="?page={{ locations.previous_page_number }}" class="btn btn-outline-primary">Previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ locations.number }} of {{ locations.paginator.num_pages }}.
+        </span>
+
+        {% if locations.has_next %}
+            <a href="?page={{ locations.next_page_number }}" class="btn btn-outline-primary">Next</a>
+            <a href="?page={{ locations.paginator.num_pages }}" class="btn btn-outline-primary">Last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 </div>
 {% endblock %}

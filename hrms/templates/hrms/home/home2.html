@@ -1,0 +1,224 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'hrms/css/style.css'%}">
+    <style>
+        /* Background and general styling */
+        .body-bg {
+            background: url('{% static 'hrms/images/board.jpg' %}') no-repeat center center fixed; /* Add background image */
+            background-size: cover;
+            min-height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevents scrollbars */
+            position: relative; /* Necessary for z-index stacking */
+        }
+
+    .bg-blue-opacity {
+        background-color: rgba(11, 114, 185, 0.5); /* Updated bluish color with opacity */
+        padding: 20px; /* Add padding to separate content */
+        min-height: 100vh; /* Occupy full viewport height */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+
+        /* Carousel styling */
+        .carousel-item img {
+            width: 100%;
+            height: 100vh; /* Full viewport height for carousel images */
+            object-fit: cover;
+            transition: opacity 0.5s ease; /* Fade transition */
+        }
+
+        /* Card styling */
+        .card {
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for card */
+            color: #333; /* Text color */
+            border: none; /* Remove border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        }
+
+        /* Text and button styling */
+        .card-body {
+            opacity: 0.8; /* Slightly transparent text */
+            text-align: center; /* Center text */
+            padding: 3rem; /* Padding for text */
+        }
+
+        .lead {
+            font-size: 1.2rem;
+        }
+
+        .btn-download {
+            background: #773697;
+            background: -webkit-linear-gradient(to right, #773697, #773697);
+            background: linear-gradient(to right, #773697, #773697);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            width: 200px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background-color: #FFA500; /* Lighter shade on hover */
+            color: #fff;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #773697;
+            color: #fff;
+        }
+
+        .navbar-brand img {
+            width: 50px;
+        }
+
+        .navbar .nav-link {
+            color: #fff;
+        }
+
+        .navbar .dropdown-menu {
+            background-color: #773697;
+        }
+
+        /* Login/logout button */
+.login-btn {
+        background-color: #fdeb3d; /* Yellowish background color */
+        border: none;
+        color: #000; /* Black text color */
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px 20px; /* Adjust padding for button size */
+        border-radius: 5px; /* Add rounded corners */
+        transition: background-color 0.3s ease; /* Smooth transition on hover */
+    }
+
+    .login-btn:hover {
+        background-color: #FFD700; /* Lighter shade on hover */
+        color: #000; /* Maintain black text on hover */
+    }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .carousel-item img {
+                height: 50vh; /* Adjust height on smaller screens */
+            }
+        }
+    </style>
+    <title>Home</title>
+</head>
+
+<body class='body-bg'>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'hrms/images/logo.png' %}" class="brand-logo" alt="Logo" style="width: 44px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="" >
+                    <li class="nav-item" style="list-style-type: none;">
+                        <a href="{% url 'hrms:login' %}" class=" login-btn btn btn-sm text-info">Log In</a>
+                    </li>
+            </div>
+        </div>
+    </nav>
+
+<section class="bg-blue-opacity">
+        <div class="container mx-auto">
+            <div class="row">
+                <div class="col-lg-6 mb-4 order-lg-2">
+                    <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <div class="card-body">
+                                    <h5>Employee Management</h5>
+                                    <p>Efficiently manage your workforce with our comprehensive HRMS.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="card-body">
+                                    <h5>Time Tracking</h5>
+                                    <p>Track attendance and time records effortlessly.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="card-body">
+                                    <h5>Company Management</h5>
+                                    <p>Streamline operations with powerful administrative tools.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="carousel-control-prev" href="#carouselExampleControls" role="button"
+                           data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carouselExampleControls" role="button"
+                           data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4 order-lg-1">
+                    <div class="p-5 text-center rounded-3">
+                        <div class="mask">
+                            <div class="d-flex justify-content-center align-items-center h-100">
+                                <div class="text-white">
+                                    <h2 class="mb-4">Welcome to Jawabu Best Limited</h2>
+                                    <p class="lead mb-4">Download our android app to manage your workforce effectively.</p>
+<a href="https://raw.githubusercontent.com/Pascal-Owilly/My-Portfolio/master/app/app-release.apk" download="jawabu-best-limited-v2.apk" class="btn btn-download">
+    Download App &rarr;
+</a>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set interval for carousels
+            $('#carouselExampleControls').carousel({
+                interval: 5000 // Interval in milliseconds (5 seconds)
+            });
+
+            // Fade images on slide change
+            $('.carousel-item').addClass('carousel-fade');
+
+            // Slide text on slide change
+            $('#carouselExampleControls').on('slide.bs.carousel', function () {
+                $('.carousel-item').css('opacity', '0.5'); // Fade out
+            });
+
+            $('#carouselExampleControls').on('slid.bs.carousel', function () {
+                $('.carousel-item.active').css('opacity', '1'); // Fade in active slide
+            });
+        });
+    </script>
+</body>
+</html>
