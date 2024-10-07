@@ -62,18 +62,22 @@
                         </div>
                         <hr>
                         <!-- Add buttons for printing and downloading -->
-
+                        
                         <form class="form-inline mb-3 justify-content-between" method="GET">
                             <div class="form-group">
-                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Date</span>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date|default:today|date:'Y-m-d' }}">
+                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Start Date</span>
+                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default:today|date:'Y-m-d' }}">
                             </div>
-                            
+                            <div class="form-group">
+                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by End Date</span>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default:today|date:'Y-m-d' }}">
+                            </div>
                             <div class="form-group">
                                 <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by username, email, first name, last name" value="{{ keyword|default:'' }}">
                                 <button type="submit" id="search-btn" class="btn btn-info btn-sm ml-2"><i class="fa fa-search"></i></button>
                             </div>
                         </form>
+                        
 
                         {% if present_staffers %}
                             <div id="printable-section">
@@ -182,48 +186,50 @@
         document.body.innerHTML = originalContent;
     }
 
+    // Handle form submission for clock-in
     document.getElementById('clockin-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const form = this;
-    const otpSection = document.getElementById('otp-section');
-    const clockinButton = document.getElementById('clockin-button');
-    const otpField = document.getElementById('otp');
+        event.preventDefault();
+        const form = this;
+        const otpSection = document.getElementById('otp-section');
+        const clockinButton = document.getElementById('clockin-button');
+        const otpField = document.getElementById('otp');
 
-    toastr.info('Processing your request...');
+        toastr.info('Processing your request...');
 
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': form.csrfmiddlewaretoken.value
-        }
-    })
-    .then(response => {
-        if (response.redirected) {
-            window.location.href = response.url; // Handle redirect
-        } else {
-            return response.json();
-        }
-    })
-    .then(data => {
-        if (data) {
-            if (data.otp_sent) {
-                toastr.success('OTP sent. Please enter it to verify.');
-                clockinButton.style.display = 'none';
-                otpSection.style.display = 'block';
-                otpField.focus();
-            } else if (data.error) {
-                toastr.error(data.error);
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': form.csrfmiddlewaretoken.value
             }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        toastr.error('An error occurred. Please try again.');
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // Handle redirect
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data) {
+                if (data.otp_sent) {
+                    toastr.success('OTP sent. Please enter it to verify.');
+                    clockinButton.style.display = 'none';
+                    otpSection.style.display = 'block';
+                    otpField.focus();
+                } else if (data.error) {
+                    toastr.error(data.error);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            toastr.error('An error occurred. Please try again.');
+        });
     });
-});
 
+    // Get user's geolocation
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             document.getElementById('latitude').value = position.coords.latitude;
@@ -238,5 +244,27 @@
         // Submit the form when the date is changed
         this.form.submit();
     });
+
+    // Function to handle filter functionality
+    document.getElementById('filter-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const startDate = document.getElementById('start-date').value; // Assuming you have an input with this ID
+        const endDate = document.getElementById('end-date').value; // Assuming you have an input with this ID
+        const otherFilter = document.getElementById('other-filter').value; // Replace with your actual filter inputs
+
+        toastr.info('Applying filters...');
+
+        // Create a query string with the filters
+        const queryString = new URLSearchParams({
+            start_date: startDate,
+            end_date: endDate,
+            other_filter: otherFilter // Include other filters as needed
+        }).toString();
+
+        // Redirect to the same page with the filter query
+        window.location.href = `${window.location.pathname}?${queryString}`;
+    });
 </script>
+
 {% endblock content %}

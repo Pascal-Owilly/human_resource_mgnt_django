@@ -593,7 +593,7 @@ class AdminClockInView(APIView):
             self.clock_in(user, latitude, longitude, distance_km, device)
             
             # Send late arrival notification if the clock-in is after a specific time
-            self.send_late_arrival_notification(user)
+            # self.send_late_arrival_notification(user)
             return Response({'message': 'Clock-in successful!'}, status=status.HTTP_200_OK)
 
     def get(self, request, *args, **kwargs):
@@ -617,8 +617,10 @@ class AdminClockInView(APIView):
                 longitude=longitude,
                 first_in=timezone.localtime(),
                 imei=device,  # Use the Device instance here
-                status='PRESENT'
+                status='PRESENT',
+                distance=distance_km  # Save the distance during clock-in
             )
+            
             print(f'Clock-in successful! Latitude: {latitude}, Longitude: {longitude}. Distance from geofence center: {distance_km:.2f} km' if distance_km else '')
 
     def send_late_arrival_notification(self, user):

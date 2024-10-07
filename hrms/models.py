@@ -215,6 +215,7 @@ class Device(models.Model):
         return f"{self.user} - {self.imei}"
 
 class Attendance (models.Model):
+    
     STATUS = (('SHORT BREAK', 'SHORT BREAK'), ('LUNCH BREAK', 'LUNCH BREAK'), ('ON LEAVE', 'ON LEAVE'))
     date = models.DateField(auto_now_add=True, null=True, blank=True)
     first_in = models.TimeField(null=True, blank=True)

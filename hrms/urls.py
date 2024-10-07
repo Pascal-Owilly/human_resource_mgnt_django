@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views_absent_satffes import AbsentStaffersView, download_excel, download_pdf
 
 app_name = 'hrms'
 
@@ -92,8 +93,15 @@ urlpatterns = [
     path('dashboard/attendance/clock_in_emp/', views.ClockInView.as_view(), name='clock_in_emp'),
     path('dashboard/attendance/clock_in_acct_mng/', views.ClockInView.as_view(), name='clock_in_acct_mng'),
 
+    path('dashboard/absent-staffers/', AbsentStaffersView.as_view(), name='absent-staffers'),
+
     path('download_pdf/', views.DownloadPDF.as_view(), name='download_pdf'),
     path('download_excel/', views.DownloadExcel.as_view(), name='download_excel'),
+
+    # Absent staffers
+    path('dashboard/absent-staffers/', AbsentStaffersView.as_view(), name='absent_staffers'),
+    path('dashboard/absent-staffers/download-excel/', download_excel, name='download_absent_staffers_excel'),
+    path('dashboard/absent-staffers/download-pdf/', download_pdf, name='download_absent_staffers_pdf'),
     
 #Leave Routes
 
@@ -108,5 +116,4 @@ urlpatterns = [
 #Payroll
     path("employee/pay/",views.Pay.as_view(), name="payroll")
     
-
 ]

@@ -20,6 +20,7 @@
                   <a href="{% url 'hrms:add_location' %}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Location
                   </a>
+                  <br><br>
                 </div>
               </nav>
             <div class="col-lg-12 grid-margin">
@@ -56,22 +57,28 @@
                         <br>
                         <h4 class="" style="color: #773697;font-size: 13px;"><i class="fa fa-sign-in"></i>&emsp; List of employee(s) that clocked-in today</h4>
                         <div class="d-flex justify-content-end mb-3">
+                            
                             <button class="btn btn-info btn-sm mr-2" style="font-size: 10px;" onclick="printAttendance()">Print</button>
-                            <a href="{% url 'hrms:download_pdf' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-danger btn-sm mr-2" style="font-size: 10px;">Download PDF</a>
-                            <a href="{% url 'hrms:download_excel' %}?date={{ selected_date|default:today|date:'Y-m-d' }}&keyword={{ keyword|default:'' }}" class="btn btn-success btn-sm mr-2" style="font-size: 10px;">Download Excel</a>
-                        </div>
+                            <!-- <a href="{% url 'download_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}" class="btn btn-primary">Download PDF</a> -->
+                                                      <!-- ?start_date=2023-10-01&end_date=2024-10-04&keyword= -->
+                            <a href="{% url 'hrms:download_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}" class="btn btn-danger btn-sm mr-2" style="font-size: 10px;">Download PDF</a>
+                            <a href="{% url 'hrms:download_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}" class="btn btn-success btn-sm mr-2" style="font-size: 10px;">Download Excel</a>
+                    </div>
                         <hr>
                         <!-- Add buttons for printing and downloading -->
+                        <form class="form-inline mb-3 justify-content-between" method="GET" id="filter-form">
+                            <div class="form-group">
+                                <span style="display: inline-block; margin-right: 10px; font-weight: 500; font-size: 12px;">Filter by Date Range</span>
+                                <input type="date" class="form-control mr-2" id="start_date" name="start_date" value="{{ start_date|default:today }}" onchange="submitFilterForm()">
+                                <span class="mr-2" style="font-size: 12px;">to</span>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default:today }}" onchange="submitFilterForm()">
+                            </div>
+
+                                <a href="{% url 'hrms:absent_staffers' %}">
+                                    <span style="display: inline-block; margin-right: 10px; font-weight: 500; font-size: 12px;" class="btn btn-outline-danger btn-sm">Absent Employees</span>
+
+                                </a>
                         
-                        <form class="form-inline mb-3 justify-content-between" method="GET">
-                            <div class="form-group">
-                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by Start Date</span>
-                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default:today|date:'Y-m-d' }}">
-                            </div>
-                            <div class="form-group">
-                                <span style="display: inline-block; margin-right: 10px; font-weight: 500;font-size: 12px;">Filter by End Date</span>
-                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default:today|date:'Y-m-d' }}">
-                            </div>
                             <div class="form-group">
                                 <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Search by username, email, first name, last name" value="{{ keyword|default:'' }}">
                                 <button type="submit" id="search-btn" class="btn btn-info btn-sm ml-2"><i class="fa fa-search"></i></button>
@@ -186,50 +193,48 @@
         document.body.innerHTML = originalContent;
     }
 
-    // Handle form submission for clock-in
     document.getElementById('clockin-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const form = this;
-        const otpSection = document.getElementById('otp-section');
-        const clockinButton = document.getElementById('clockin-button');
-        const otpField = document.getElementById('otp');
+    event.preventDefault();
+    const form = this;
+    const otpSection = document.getElementById('otp-section');
+    const clockinButton = document.getElementById('clockin-button');
+    const otpField = document.getElementById('otp');
 
-        toastr.info('Processing your request...');
+    toastr.info('Processing your request...');
 
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': form.csrfmiddlewaretoken.value
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': form.csrfmiddlewaretoken.value
+        }
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url; // Handle redirect
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data) {
+            if (data.otp_sent) {
+                toastr.success('OTP sent. Please enter it to verify.');
+                clockinButton.style.display = 'none';
+                otpSection.style.display = 'block';
+                otpField.focus();
+            } else if (data.error) {
+                toastr.error(data.error);
             }
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url; // Handle redirect
-            } else {
-                return response.json();
-            }
-        })
-        .then(data => {
-            if (data) {
-                if (data.otp_sent) {
-                    toastr.success('OTP sent. Please enter it to verify.');
-                    clockinButton.style.display = 'none';
-                    otpSection.style.display = 'block';
-                    otpField.focus();
-                } else if (data.error) {
-                    toastr.error(data.error);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            toastr.error('An error occurred. Please try again.');
-        });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        toastr.error('An error occurred. Please try again.');
     });
+});
 
-    // Get user's geolocation
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             document.getElementById('latitude').value = position.coords.latitude;
@@ -245,26 +250,12 @@
         this.form.submit();
     });
 
-    // Function to handle filter functionality
-    document.getElementById('filter-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        const startDate = document.getElementById('start-date').value; // Assuming you have an input with this ID
-        const endDate = document.getElementById('end-date').value; // Assuming you have an input with this ID
-        const otherFilter = document.getElementById('other-filter').value; // Replace with your actual filter inputs
-
-        toastr.info('Applying filters...');
-
-        // Create a query string with the filters
-        const queryString = new URLSearchParams({
-            start_date: startDate,
-            end_date: endDate,
-            other_filter: otherFilter // Include other filters as needed
-        }).toString();
-
-        // Redirect to the same page with the filter query
-        window.location.href = `${window.location.pathname}?${queryString}`;
-    });
+    function submitFilterForm() {
+        document.getElementById('filter-form').submit();
+    }
+    
 </script>
 
 {% endblock content %}
+
+

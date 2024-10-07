@@ -4,28 +4,22 @@
 <html>
 <head>
     <title>Attendance PDF</title>
+</head>
+<body>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
         .header, .footer {
-            width: 100%;
-            text-align: center;
-            position: fixed;
-        }
-        .header {
-            top: 0;
-        }
-        .footer {
-            bottom: 0;
-        }
-        .footer .page:after {
-            content: counter(page);
+            background-color: #fdeb3d;
+            color: white;
+            padding: 10px 20px;
         }
         .content {
-            margin-top: 100px;
-            margin-bottom: 50px;
+            padding: 20px;
         }
         table {
             width: 100%;
@@ -35,24 +29,25 @@
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
+            text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #773697;
+            color: white;
         }
-        h2 {
-            text-align: center;
+        tr:hover {
+            background-color: #f1f1f1;
         }
-        img.logo {
-            max-height: 80px;
+        .page {
+            float: right;
         }
     </style>
-</head>
-<body>
+
     <div class="header">
-       <h4>Jawabu best Limited</h4>
+        <h4>Jawabu Best Limited</h4>
     </div>
     <div class="content">
-        <h2>Attendance for {{ date }}</h2>
+        <h2>Attendance from {{ start_date|date:"F j, Y" }} to {{ end_date|date:"F j, Y" }}</h2>
         <table>
             <thead>
                 <tr>
@@ -72,6 +67,10 @@
                         <td>{{ ps.user.first_name }} {{ ps.user.last_name }}</td>
                         <td>{{ ps.distance_meters }} m</td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center;">No attendance records found for this date range.</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -81,4 +80,5 @@
         <p class="page">Page </p>
     </div>
 </body>
+
 </html>

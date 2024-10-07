@@ -275,6 +275,27 @@ class Register(CreateView):
     template_name = 'hrms/registrations/register.html'
     success_url = reverse_lazy('hrms:login')
 
+    @staticmethod
+    def send_password_reset_email(uidb64, token, email, first_name, last_name, username):
+        # Construct the reset password URL
+        reset_url = f"{settings.PROTOCOL}://{settings.DOMAIN}/reset/{uidb64}/{token}/"
+
+        # Construct the email message
+        subject = 'Set Your Password'
+        context = {
+            'reset_url': reset_url,
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'theme_color': '#fdeb3d',
+            'secondary_color': '#773697',
+        }
+        html_message = render_to_string('auth/password_reset_email.html', context)
+        sender_email = settings.EMAIL_HOST_USER
+
+        # Send the email
+        send_mail(subject, None, sender_email, [email], html_message=html_message)
+
     def form_valid(self, form):
         user = form.save(commit=False)
         user.role = User.SUPERUSER
@@ -283,7 +304,13 @@ class Register(CreateView):
         user.save()
         Admin.objects.create(admin=user)
 
+        # Call the send_password_reset_email method here
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        self.send_password_reset_email(uidb64, token, user.email, user.first_name, user.last_name, user.username)
+
         return redirect(self.success_url)
+
 
 class CustomLoginView(LoginView):
     template_name = 'hrms/registrations/login.html'
@@ -392,7 +419,7 @@ from .models import AccountManager
 
 class AccountManagerDashboard(LoginRequiredMixin, ListView):
     login_url = 'hrms:login'
-    model = AccountManager  # Adjust model to AccountManager if needed
+    model = AccountManager
     template_name = 'hrms/account_managers/index.html'
     context_object_name = 'clients'
 
@@ -403,7 +430,7 @@ class AccountManagerDashboard(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         try:
-            # Get the account manager instance
+            # Get the account manager instance for the current user
             account_manager = AccountManager.objects.get(account_manager=self.request.user)
             return account_manager.client_set.all()  # Assuming reverse relation is "client_set"
         except AccountManager.DoesNotExist:
@@ -411,7 +438,14 @@ class AccountManagerDashboard(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
+        # Add details about the logged-in user (account manager)
+        try:
+            account_manager = AccountManager.objects.get(account_manager=self.request.user)
+            context['account_manager'] = account_manager
+        except AccountManager.DoesNotExist:
+            context['account_manager'] = None
+
         # Total number of employees (if needed)
         context['mng_emp_total'] = Employee.objects.all().count()
         
@@ -422,6 +456,7 @@ class AccountManagerDashboard(LoginRequiredMixin, ListView):
         context['workers'] = Employee.objects.filter(employee__is_archived=False).order_by('-id')
         
         return context
+
 
 
 class AccountManager_New(LoginRequiredMixin, CreateView):
@@ -999,29 +1034,33 @@ class Attendance_Admin(LoginRequiredMixin, View):
     login_url = 'hrms:login'
 
     def dispatch(self, request, *args, **kwargs):
-            if request.user.role != 'human_resource_manager' and not request.user.is_superuser:
-                return render(request, 'auth/unauthorized.html')
-            return super().dispatch(request, *args, **kwargs)
+        if request.user.role != 'human_resource_manager' and not request.user.is_superuser:
+            return render(request, 'auth/unauthorized.html')
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        # Get query parameters
-        date = request.GET.get('date')
-        keyword = request.GET.get('keyword')
-        geofence_center = (-1.315638, 36.862129)  # Example: Nairobi coordinates
-        
+        # Get today's date
+        today = timezone.localdate()
+
+        # Get query parameters with default values set to today if not provided
+        start_date = request.GET.get('start_date', str(today))  # Default to today's date
+        end_date = request.GET.get('end_date', str(today))      # Default to today's date
+        keyword = request.GET.get('keyword', '')
+
+        # Geofence center example coordinates (Nairobi)
+        geofence_center = (-1.315638, 36.862129)  
         employee = request.user
 
-        # Retrieve attendance records based on the provided date
-        if date:
-            try:
-                selected_date = datetime.strptime(date, '%Y-%m-%d').date()
-                present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date)).order_by('-id')
-            except ValueError:
-                selected_date = None
-                present_staffers = Attendance.objects.none()
-        else:
-            selected_date = timezone.localdate()
-            present_staffers = Attendance.objects.filter(Q(status='PRESENT') & Q(date=selected_date)).order_by('-id')
+        # Retrieve attendance records based on the provided date range
+        present_staffers = Attendance.objects.filter(status='PRESENT')
+
+        # Filter by date range if provided
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            present_staffers = present_staffers.filter(date__range=(start_date_obj, end_date_obj))
+        except ValueError:
+            pass  # If invalid date format is provided, skip the date range filtering
 
         # Perform search if keyword is provided
         if keyword:
@@ -1031,7 +1070,7 @@ class Attendance_Admin(LoginRequiredMixin, View):
                 Q(user__username__icontains=keyword) |
                 Q(user__email__icontains=keyword)
             )
-         
+
         # Calculate distance for each present staffer
         for staff in present_staffers:
             if staff.latitude and staff.longitude:
@@ -1040,19 +1079,20 @@ class Attendance_Admin(LoginRequiredMixin, View):
                 staff.distance = None
 
         # Pagination
-        paginator = Paginator(present_staffers, 10)
+        paginator = Paginator(present_staffers, 100)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-            
+
         # Check if the logged-in user is clocked in
         clocked_in = Attendance.objects.filter(
-            user=employee, date=timezone.localdate(), last_out__isnull=True
+            user=employee, date=today, last_out__isnull=True
         ).exists()
 
         context = {
-            'today': timezone.localdate(),
+            'today': today,
             'present_staffers': page_obj,
-            'selected_date': selected_date,
+            'start_date': start_date,
+            'end_date': end_date,
             'keyword': keyword,
             'page_obj': page_obj,
             'clocked_in': clocked_in
@@ -1466,14 +1506,29 @@ from xhtml2pdf import pisa
 import openpyxl
 from .models import Attendance
 from django.utils import timezone
+from openpyxl.utils import get_column_letter
 
-class DownloadPDF(View, LoginRequiredMixin):
+
+class DownloadPDF(View):
     def get(self, request, *args, **kwargs):
-        date = request.GET.get('date', timezone.localdate())
+        # Get query parameters for date range and keyword
+        start_date = request.GET.get('start_date', str(timezone.localdate()))  # Default to today if not provided
+        end_date = request.GET.get('end_date', str(timezone.localdate()))      # Default to today if not provided
         keyword = request.GET.get('keyword', '')
 
-        # Filter Attendance records based on date and keyword
-        attendances = Attendance.objects.filter(date=date)
+        # Parse start_date and end_date strings into date objects
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        except ValueError:
+            start_date_obj = timezone.localdate()  # Default to today if parsing fails
+
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            end_date_obj = timezone.localdate()  # Default to today if parsing fails
+
+        # Filter Attendance records based on date range and keyword
+        attendances = Attendance.objects.filter(date__range=(start_date_obj, end_date_obj))
 
         if keyword:
             attendances = attendances.filter(
@@ -1490,38 +1545,49 @@ class DownloadPDF(View, LoginRequiredMixin):
             else:
                 attendance.distance_meters = 'N/A'
 
-        # Pass the context to the template
+        # Prepare context for the PDF template
         context = {
+            'today': timezone.localdate(),
             'attendances': attendances,
-            'date': date,
+            'start_date': start_date,
+            'end_date': end_date,
             'keyword': keyword,
         }
 
-        # Render the PDF template
+        # Render the template and create the PDF
         template = get_template('hrms/attendance/download_data/pdf_template.html')
         html = template.render(context)
 
-        # Create a PDF response
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="attendance.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="attendance_report.pdf"'
 
-        pisa_status = pisa.CreatePDF(
-            io.BytesIO(html.encode('UTF-8')),
-            dest=response,
-        )
+        pisa_status = pisa.CreatePDF(io.BytesIO(html.encode('UTF-8')), dest=response)
         
         if pisa_status.err:
             return HttpResponse('We had some errors with your request', status=500)
         return response
 
-class DownloadExcel(View, LoginRequiredMixin):
+
+class DownloadExcel(View):
     def get(self, request, *args, **kwargs):
-        # Extract query parameters
-        date = request.GET.get('date', timezone.localdate())
+        # Get query parameters for date range and keyword
+        start_date = request.GET.get('start_date', str(timezone.localdate()))  # Default to today if not provided
+        end_date = request.GET.get('end_date', str(timezone.localdate()))      # Default to today if not provided
         keyword = request.GET.get('keyword', '')
 
-        # Filter Attendance records based on date and keyword
-        attendances = Attendance.objects.filter(date=date)
+        # Ensure start_date and end_date are strings and convert to date objects
+        try:
+            start_date_obj = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
+        except ValueError:
+            start_date_obj = timezone.localdate()  # Default to today on error
+
+        try:
+            end_date_obj = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            end_date_obj = timezone.localdate()  # Default to today on error
+
+        # Filter Attendance records based on date range and keyword
+        attendances = Attendance.objects.filter(date__range=(start_date_obj, end_date_obj))
 
         if keyword:
             attendances = attendances.filter(
@@ -1535,36 +1601,35 @@ class DownloadExcel(View, LoginRequiredMixin):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
-        response['Content-Disposition'] = 'attachment; filename="attendance_users.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="attendance_users_{start_date}_to_{end_date}.xlsx"'
 
-        # Create a workbook and select the active worksheet
+        # Create an Excel workbook and worksheet
         workbook = openpyxl.Workbook()
         worksheet = workbook.active
         worksheet.title = 'Attendance and Users'
 
-        # Define the header row
-        columns = ['Username', 'First Name', 'Last Name', 'Email', 'Date', 'First-In (Arrival)', 'Last-Out (Departure)', 'Distance (m)']
-        row_num = 1
+        # Define the column headers
+        columns = [
+            'Username', 'First Name', 'Last Name', 'Email', 'Date', 'First-In (Arrival)',
+            'Last-Out (Departure)', 'Distance (m)'
+        ]
 
-        # Write the header row
+        # Set the first row as the column headers
+        row_num = 1
         for col_num, column_title in enumerate(columns, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
             cell.value = column_title
+            cell.font = openpyxl.styles.Font(bold=True)
 
-        # Write attendance and user data rows
+        # Populate the data rows
         for attendance in attendances:
             row_num += 1
+            distance_meters = attendance.distance * 1000 if attendance.distance else 0  # Convert km to meters
+            formatted_date = attendance.date.strftime('%Y-%m-%d') if attendance.date else 'N/A'
+            formatted_first_in = attendance.first_in.strftime('%H:%M:%S') if attendance.first_in else 'N/A'
+            formatted_last_out = attendance.last_out.strftime('%H:%M:%S') if attendance.last_out else 'N/A'
 
-            # Convert distance from km to meters and format to 2 decimal places
-            distance_meters = attendance.distance * 1000 if attendance.distance else 'None'
-            if isinstance(distance_meters, float):
-                distance_meters = f"{distance_meters:.2f}"
-
-            # Format the date in YYYY-MM-DD format
-            formatted_date = attendance.date.strftime('%Y-%m-%d') if attendance.date else 'None'
-            formatted_first_in = attendance.first_in.strftime('%H:%M:%S') if attendance.first_in else 'None'
-            formatted_last_out = attendance.last_out.strftime('%H:%M:%S') if attendance.last_out else 'None'
-
+            # Fill the row with data
             row = [
                 attendance.user.username,
                 attendance.user.first_name,
@@ -1573,15 +1638,21 @@ class DownloadExcel(View, LoginRequiredMixin):
                 formatted_date,
                 formatted_first_in,
                 formatted_last_out,
-                f"{distance_meters} m",
+                f"{distance_meters:.2f} m" if attendance.distance is not None else "N/A",
             ]
             for col_num, cell_value in enumerate(row, 1):
                 cell = worksheet.cell(row=row_num, column=col_num)
                 cell.value = cell_value
 
+        # Set column widths for better visibility
+        for col_num, column_title in enumerate(columns, 1):
+            column_width = max(len(column_title), 12)  # Set a minimum width
+            worksheet.column_dimensions[get_column_letter(col_num)].width = column_width
+
         # Save the workbook to the HTTP response
         workbook.save(response)
         return response
+
 
 class LeaveNew (LoginRequiredMixin,CreateView, ListView):
     model = Leave
