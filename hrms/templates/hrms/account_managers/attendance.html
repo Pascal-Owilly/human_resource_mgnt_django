@@ -33,7 +33,7 @@
                             {% endfor %}
                         </div>
 
-                        <form id="clockin-form" method="POST" action="{% url 'hrms:clock_in_acct_mng' %}">
+                        <!-- <form id="clockin-form" method="POST" action="{% url 'hrms:clock_in_acct_mng' %}">
                             {% csrf_token %}
                             {{ form.errors }}
                             <input type="hidden" name="latitude" id="latitude">
@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                             
-                        </form>
+                        </form> -->
 
                         <br>
                         <h4 class="text-primary" style="font-size: 13px;"><i class="fa fa-sign-in"></i>&emsp; List of employee(s) that clocked-in today</h4>
@@ -84,6 +84,10 @@
                                                 <th style="font-size: 10px;">First-In (Arrival)</th>
                                                 <th style="font-size: 10px;">Last-Out (Departure)</th>
                                                 <th style="font-size: 10px;">Name</th>
+                                                <th style="font-size: 10px;">Distance</th>
+
+                                                <th style="font-size: 10px;">Assigned Location</th>
+
                                                 <th style="font-size: 10px;">Action(s)</th>
                                             </tr>
                                         </thead>
@@ -96,6 +100,11 @@
                                                 <td style="font-size: 10px;"><strong>{{ attendance.last_out }}</strong></td>
                                                 <td style="font-size: 10px;">
                                                     {{ attendance.user.first_name }} {{ attendance.user.last_name }}
+                                                </td>
+                                                <td style="font-size: 10px;"><strong>{{ attendance.distance|floatformat:2 }}</strong> km from <span class="barge badge-sm badge-info mx-1" style="border-radius: 30px;font-size: 9px;margin: 2px;"> {{ attendance.user.assigned_location }} </span></td>
+
+                                                <td style="font-size: 10px;">
+                                                    {{ attendance.user.assigned_location }} 
                                                 </td>
                                                 <td style="font-size: 10px;"> 
                                                     {% if attendance.last_out %}
@@ -118,6 +127,7 @@
                                                 <td style="font-size: 10px;">
                                                     {{ client_attendance.staff.employee.first_name }} {{ client_attendance.staff.employee.last_name }}
                                                 </td>
+                                              
                                                 <td style="font-size: 10px;">
                                                     {% if client_attendance.last_out %}
                                                         <span class="btn btn-sm btn-secondary disabled" style="font-size: 12px;">Clocked Out</span>
@@ -130,9 +140,9 @@
                                             </tr>
                                             {% endfor %}
                                         </tbody>
-                                        
                                     </table>
                                 </div>
+
                                 <!-- Pagination controls -->
                                 <div class="pagination-controls">
                                     <nav aria-label="Page navigation">

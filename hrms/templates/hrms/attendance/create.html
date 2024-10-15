@@ -96,6 +96,8 @@
                                                 <th>First-In (Arrival)</th>
                                                 <th>Last-Out (Departure)</th>
                                                 <th>Name</th>
+                                                <th>Assigned Location</th>
+
                                                 <th>Distance (m)</th>
                                                 <th>Action(s)</th>
                                             </tr>
@@ -113,7 +115,9 @@
                                                             N/A
                                                         {% endif %}
                                                     </td>
-                                                    <td>{{ ps.distance|default_if_none:'N/A'|floatformat:2 }} m</td>
+                                                    <td style="font-size: 10px;"><strong>{{ ps.distance|floatformat:2 }}</strong> km from <span class="barge badge-sm badge-info mx-1" style="border-radius: 30px;font-size: 9px;margin: 2px;"> {{ ps.user.assigned_location }} </span></td>
+                                                  
+                                                    
                                                     <td>
                                                         {% if ps.last_out %}
                                                             <span class="btn btn-sm btn-secondary disabled">Clocked Out</span>

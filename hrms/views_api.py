@@ -546,7 +546,11 @@ class AdminClockInView(APIView):
             return Response({'error': 'IMEI is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if the device already exists or create a new one
-        device, created = Device.objects.get_or_create(imei=imei)
+        # device, created = Device.objects.get_or_create(imei=imei)
+        device, created = Device.objects.get_or_create(imei=imei, defaults={'user': user})
+        if not created:
+            device.user = user  # Update user if the device already exists
+            device.save()
 
         # Fetch user's assigned location from a dynamic setting
         location = user.assigned_location  # Assuming user has an assigned location (latitude, longitude, radius)
@@ -554,7 +558,7 @@ class AdminClockInView(APIView):
         if not location and user.clockin_privileges != User.CAN_CLOCK_IN_ANYWHERE:
             return Response({'error': 'You do not have an assigned location.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Initialize distance_km variable
+        # Initialize distance_km    variable
         distance_km = None
 
         # If the user does not have the "Can clock in from anywhere" privilege, perform geofence check

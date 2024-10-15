@@ -32,13 +32,15 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST = 'smtp-relay.gmail.com'
 EMAIL_PORT = 587 
-EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
-
-EMAIL_HOST_USER = 'intellima.tech@gmail.com'  
-EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
-# EMAIL_HOST_USER = 'pascalouma54@gmail.com'
-# EMAIL_HOST_PASSWORD = 'jcfgolmahddantnv'
+EMAIL_USE_TLS = True  
+# EMAIL_HOST_USER = 'intellima.tech@gmail.com'  
+# EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
+# EMAIL_HOST_USER = 'wms-support@jawabubest.co.ke'  
+# EMAIL_HOST_PASSWORD = 'JBL@WMS2024'
+EMAIL_HOST_USER = 'pascalouma54@gmail.com'
+EMAIL_HOST_PASSWORD = 'icjhyqcwkptbyszt'
 # EMAIL_HOST_USER = 'pascal.owilly@student.moringaschool.com'
 # EMAIL_HOST_PASSWORD = 'ymxllqbalildvjri'
 

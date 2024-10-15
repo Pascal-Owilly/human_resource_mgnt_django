@@ -55,6 +55,8 @@
                     <th>First-In (Arrival)</th>
                     <th>Last-Out (Departure)</th>
                     <th>Name</th>
+                    <th>Assigned Location</th>
+
                     <th>Distance (m)</th>
                 </tr>
             </thead>
@@ -65,7 +67,9 @@
                         <td>{{ ps.first_in }}</td>
                         <td>{{ ps.last_out }}</td>
                         <td>{{ ps.user.first_name }} {{ ps.user.last_name }}</td>
-                        <td>{{ ps.distance_meters }} m</td>
+                        <td>{{ ps.user.assigned_location }} m</td>
+                        <td style="font-size: 10px;"><strong>{{ ps.distance_meters|floatformat:2 }}</strong> km from <span class="barge badge-sm badge-info mx-1" style="border-radius: 30px;font-size: 9px;margin: 2px;"> {{ ps.user.assigned_location }} </span></td>
+
                     </tr>
                 {% empty %}
                     <tr>

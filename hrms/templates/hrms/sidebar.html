@@ -30,8 +30,6 @@ ul li > a {
 
 }
 
-
-
 .sidebar {
     background: linear-gradient(90deg, rgb(119, 54, 151), #773697); /* Adjust the angle and colors as needed */
 
@@ -113,7 +111,7 @@ body {
                 </div>
                 {% if request.user.is_superuser %}
                 <div class="d-flex justify-content-between wrap">
-  
+
                   <a href="{% url 'hrms:employee_new' %}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 10px;">
                     New employee <i class="mdi mdi-plus"></i>
                     </a>
@@ -121,7 +119,6 @@ body {
                         Multiple <i class="mdi mdi-plus"></i>
                     </a>
                 </div>
-                <br> 
                 {% endif %}
             </div>
         </li>
@@ -205,6 +202,13 @@ body {
             <a class="nav-link" href="{% url 'hrms:location_list' %}">
                 <i class="fa fa-map-marker"></i>
                 <span class="menu-title ">&emsp;Locations</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'hrms:device_list' %}">
+                <i class="fa fa-mobile-alt"></i>
+            <span class="menu-title ">&emsp;Imei Management</span>
             </a>
         </li>
         {% endif %}

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views_absent_satffes import AbsentStaffersView, download_excel, download_pdf
+from .views_reset_imei import DeviceListView, reset_all_imeis, reset_single_imei
 
 app_name = 'hrms'
 
@@ -102,6 +103,12 @@ urlpatterns = [
     path('dashboard/absent-staffers/', AbsentStaffersView.as_view(), name='absent_staffers'),
     path('dashboard/absent-staffers/download-excel/', download_excel, name='download_absent_staffers_excel'),
     path('dashboard/absent-staffers/download-pdf/', download_pdf, name='download_absent_staffers_pdf'),
+
+    # RESET Imei
+    path('devices/list', DeviceListView.as_view(), name='device_list'),  # URL for resetting a specific IMEI
+    path('devices/reset-imei/<int:pk>/', reset_single_imei, name='reset_single_imei'),  # URL for resetting a specific IMEI
+    path('devices/reset_all/', reset_all_imeis, name='reset_all_imeis'),  # URL for resetting all IMEIs
+
     
 #Leave Routes
 
