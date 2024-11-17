@@ -31,7 +31,8 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.hostinger.com'
 # EMAIL_HOST = 'smtp-relay.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True  
@@ -39,12 +40,11 @@ EMAIL_USE_TLS = True
 # EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
 # EMAIL_HOST_USER = 'wms-support@jawabubest.co.ke'  
 # EMAIL_HOST_PASSWORD = 'JBL@WMS2024'
-EMAIL_HOST_USER = 'pascalouma54@gmail.com'
-EMAIL_HOST_PASSWORD = 'icjhyqcwkptbyszt'
+
+EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
+EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
 # EMAIL_HOST_USER = 'pascal.owilly@student.moringaschool.com'
 # EMAIL_HOST_PASSWORD = 'ymxllqbalildvjri'
-
-EMAIL_USE_SSL = False
 
 BASE_URL = '127.0.0.1:8000'
 

@@ -274,6 +274,7 @@ class Contract(models.Model):
     employee_signed = models.BooleanField(default=False)
     signed_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('completed', 'Completed')], default='pending')
+    current_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def is_fully_signed(self):
         return self.admin_signed and self.employee_signed
@@ -283,3 +284,4 @@ class Contract(models.Model):
         last_name = self.employee.employee.last_name or ''
         email = self.employee.employee.email or ''
         return f"{first_name} - {last_name} - {email}"
+

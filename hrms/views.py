@@ -1761,73 +1761,122 @@ from openpyxl import load_workbook
 from reportlab.pdfgen import canvas
 from .models import Contract  # Assuming the Contract model is in the same directory
 
+from weasyprint import HTML
+from django.core.files.base import ContentFile
+from io import BytesIO
+from django.core.exceptions import ValidationError
+from django.core.mail import EmailMessage
+
 class UploadExcelView(LoginRequiredMixin, View):
     login_url = 'hrms:login'
-    
+
+    # Define valid roles for mapping
+    valid_roles = {
+        'superuser': 'Superuser',
+        'employee': 'Employee',
+        'account_manager': 'Account Manager',
+        'human_resource_manager': 'Human Resource Manager',
+        'client': 'Client',
+    }
+
     def get(self, request, *args, **kwargs):
         return render(request, 'hrms/contract/upload_excel.html')
 
     def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get('excelFile')
+        excel_file = request.FILES.get('fileInput')
         if not excel_file:
             return render(request, 'hrms/contract/upload_excel.html', {'error': 'Please upload a valid Excel file.'})
 
         try:
             wb = load_workbook(excel_file)
             sheet = wb.active
-            preview_data = []
+            errors = []
+            success_count = 0
 
-            for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip header row
-                email = row[4]  # Assuming Email is in column 5
-                username = email.split('@')[0] if email else ''
-                preview_data.append({
-                    'username': username,
-                    'first_name': row[0],
-                    'last_name': row[1],
-                    'id_number': row[2],
-                    'email': email,
-                    'role': row[5],
-                    'position': row[6],
-                    'start_date': row[7],
-                    'end_date': row[8],
-                })
+            for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):  # Start from row 2
+                first_name, last_name, id_number, email, role, position, start_date, end_date = row[:8]
 
-                # Generate PDF contract for each user
-                pdf_buffer = io.BytesIO()
-                c = canvas.Canvas(pdf_buffer)
-                c.drawString(100, 750, f"Hello user: {row[0]}") 
-                c.drawString(100, 735, f"First Name: {row[0]}")
-                c.drawString(100, 720, f"Last Name: {row[1]}")
-                c.drawString(100, 705, f"Role: {row[5]}")
-                c.drawString(100, 690, f"Position: {row[6]}")
-                c.drawString(100, 675, f"Start Date: {row[7]}")
-                c.drawString(100, 660, f"End Date: {row[8]}")
-                # You can continue adding contract details here...
+                # Check for mandatory fields
+                if not all([email, role, position, start_date, end_date]):
+                    errors.append(f"Row {idx}: Missing mandatory fields (first_name, last_name, id_number, email, role, position, start_date, or end_date).")
+                    continue
 
-                c.save()
+                # Normalize and validate the role
+                role = role.lower()  # Normalize the role to lowercase
+                if role not in self.valid_roles:
+                    errors.append(f"Row {idx}: Invalid role '{role}'. Expected one of {', '.join(self.valid_roles.keys())}.")
+                    continue
 
-                # Save the generated PDF in the database
-                pdf_file = ContentFile(pdf_buffer.getvalue())
-                contract = Contract.objects.create(
-                    user_email=email,
-                    title=row[0],  # Assuming the title is in the first column
-                    contract_pdf=pdf_file
-                )
+                try:
+                    # Fetch or create the User instance (this is the model containing email)
+                    user, created = User.objects.get_or_create(
+                        email=email, 
+                        defaults={
+                            'first_name': first_name,
+                            'last_name': last_name,
+                            'role': role,
+                        }
+                    )
 
-                # Send email to user with the contract PDF attached
-                send_mail(
-                    "Contract for Signing",
-                    "Please review and sign the attached contract.",
-                    "from_email@example.com",
-                    [email],
-                    files=[('contract.pdf', pdf_file, 'application/pdf')]
-                )
+                    # Now create or fetch the Employee associated with the User instance
+                    employee, created = Employee.objects.get_or_create(
+                        employee=user,  # Reference to User model
+                        client=None,     # or use the appropriate client if provided in the Excel row
+                    )
 
-            return render(request, 'hrms/preview_contracts.html', {'preview_data': preview_data})
+                    # Create Contract
+                    contract = Contract.objects.create(
+                        employee=employee,  # Reference to Employee model
+                        role=self.valid_roles.get(role),  # Ensure the correct role is saved
+                        start_date=start_date,
+                        end_date=end_date,
+                        id_number=id_number,
+                    )
+
+                    # Generate PDF Contract with WeasyPrint
+                    html_content = render_to_string('hrms/contract/contract_template.html', {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'role': self.valid_roles.get(role),
+                        'position': position,
+                        'start_date': start_date,
+                        'end_date': end_date,
+                    })
+                    pdf_file = BytesIO()
+                    HTML(string=html_content).write_pdf(pdf_file)
+                    
+                    # Save the PDF to the contract
+                    pdf_file.seek(0)  # Reset the file pointer
+                    contract.document.save(f"contract_{email}.pdf", ContentFile(pdf_file.read()))
+                    contract.save()
+    
+                    # Send Email with Contract
+                    email_message = EmailMessage(
+                        "Contract for Signing",
+                        "Dear candidate, please review and sign the attached contract.",
+                        settings.EMAIL_HOST_USER,  # Get the default sender email from settings
+                        [employee.employee.email],  # Use the email from the related User model
+                    )
+                    email_message.attach(f"contract_{email}.pdf", pdf_file.getvalue(), "application/pdf")
+                    email_message.send()
+
+                    success_count += 1
+
+                except Exception as e:
+                    errors.append(f"Row {idx}: Error while processing this row - {str(e)}")
+                    continue
+
+            context = {
+                'success_count': success_count,
+                'errors': errors,
+            }
+            return render(request, 'hrms/contract/upload_result.html', context)
+
+        except ValidationError as e:
+            return render(request, 'hrms/contract/upload_excel.html', {'error': f'Validation error: {str(e)}'})
 
         except Exception as e:
-            return render(request, 'hrms/contract/upload_excel.html', {'error': f'Error processing file: {e}'})
-
+            return render(request, 'hrms/contract/upload_excel.html', {'error': f'Error processing file: {str(e)}'})
 
 from django.views.generic import TemplateView
 from django.db.models import Q
@@ -1851,7 +1900,6 @@ class SearchResultsView(LoginRequiredMixin, TemplateView):
 
 # View to capture employee's signature
 from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth.models import User
 from .forms import SignContractForm
 
 def sign_contract(request, contract_id):

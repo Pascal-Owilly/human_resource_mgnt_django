@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employment Contract</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            background-color: #fdeb3d;
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .contract-details {
+            margin-bottom: 30px;
+        }
+        .contract-details p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .contract-footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #773697;
+            color: #fff;
+            margin-top: 20px;
+            font-size: 14px;
+            border-radius: 0 0 8px 8px;
+        }
+        .highlight {
+            color: #773697;
+            font-weight: bold;
+        }
+        .footer-text {
+            font-size: 12px;
+        }
+        .contract-body p {
+            font-size: 16px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        .contract-body p span {
+            color: #773697;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Employment Contract</h1>
+        </div>
+
+        <!-- Contract Body Section -->
+        <div class="contract-body">
+            <p>This Employment Contract ("Contract") is entered into on the <span>{{ current_date }}</span> by and between <span class="highlight">Jawabu Best Limited WMS</span>, hereinafter referred to as the "Employer", and <span class="highlight">{{ first_name }} {{ last_name }}</span>, hereinafter referred to as the "Employee".</p>
+            
+            <p>WHEREAS, the Employer agrees to employ the Employee, and the Employee agrees to work under the terms and conditions set forth in this Contract, the parties hereby agree as follows:</p>
+
+            <h3>1. Job Position and Duties</h3>
+            <p>The Employer agrees to employ the Employee as a <span class="highlight">{{ position }}</span> in the role of <span class="highlight">{{ role }}</span>. The Employee agrees to perform all duties as assigned by the Employer, which may include, but are not limited to, responsibilities associated with the role of <span class="highlight">{{ role }}</span>. These duties may evolve as per the business needs of the Employer.</p>
+
+            <h3>2. Term of Employment</h3>
+            <p>This employment shall begin on <span class="highlight">{{ start_date }}</span> and shall continue until <span class="highlight">{{ end_date }}</span>, unless terminated earlier as provided herein.</p>
+
+            <h3>3. Compensation</h3>
+            <p>The Employee shall receive a compensation package as discussed and agreed upon at the time of hiring. The salary shall be paid on a [monthly/bi-weekly] basis, subject to deductions for taxes and other withholdings as required by law.</p>
+
+            <h3>4. Responsibilities of the Employee</h3>
+            <p>The Employee agrees to perform their duties in a professional and diligent manner, adhering to the rules and regulations set forth by the Employer. The Employee shall act in the best interest of the Employer, maintaining the confidentiality of all proprietary information.</p>
+
+            <h3>5. Termination of Employment</h3>
+            <p>Either party may terminate this agreement at any time with appropriate notice as specified by the Employer’s policies or applicable law. If the Employee breaches the terms of this agreement, the Employer may terminate the agreement without notice.</p>
+
+            <h3>6. Confidentiality</h3>
+            <p>The Employee agrees to maintain confidentiality regarding all proprietary information learned during the course of employment. This obligation continues after the termination of employment.</p>
+
+            <h3>7. Miscellaneous</h3>
+            <p>This Contract constitutes the entire understanding between the parties with respect to the subject matter hereof. Any amendments to this Contract must be made in writing and signed by both parties.</p>
+
+            <h3>8. Governing Law</h3>
+            <p>This Contract shall be governed by and construed in accordance with the laws of [Insert jurisdiction].</p>
+
+            <p>IN WITNESS WHEREOF, the parties hereto have executed this Employment Contract as of the date first above written.</p>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="contract-footer">
+            <p class="footer-text">This contract is provided by <span class="highlight">Jawabu Best Limited WMS</span>.</p>
+            <p>&copy; {{ current_year }} Jawabu Best Limited WMS. All Rights Reserved.</p>
+        </div>
+    </div>
+
+</body>
+</html>
