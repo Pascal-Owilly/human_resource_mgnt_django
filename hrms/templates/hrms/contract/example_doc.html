@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        h1, h2 {
+            color: #773697;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .signature {
+            margin-top: 30px;
+        }
+        .signature div {
+            display: inline-block;
+            width: 45%;
+            text-align: center;
+            margin: 10px 2.5%;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 30px;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contract Agreement</h1>
+        <h2>Employment Contract</h2>
+
+        <div class="section">
+            <p>
+                This Employment Contract (the "Contract") is entered into on 
+                <strong>{{ start_date }}</strong> between <strong>{{ company_name }}</strong>, 
+                located at <strong>{{ company_address }}</strong>, and 
+                <strong>{{ employee_name }}</strong> (the "Employee").
+            </p>
+        </div>
+
+        <div class="section">
+            <h3>Role and Responsibilities</h3>
+            <p>
+                The Employee is hired as <strong>{{ role }}</strong> in the position of 
+                <strong>{{ position }}</strong>. The Employee agrees to perform all duties 
+                associated with this role and to adhere to the company's policies and guidelines.
+            </p>
+        </div>
+
+        <div class="section">
+            <h3>Contract Duration</h3>
+            <p>
+                The Contract is effective from <strong>{{ start_date }}</strong> to 
+                <strong>{{ end_date }}</strong>. Either party may terminate this contract in 
+                accordance with the company’s termination policy.
+            </p>
+        </div>
+
+        <div class="section">
+            <h3>Confidentiality</h3>
+            <p>
+                The Employee agrees to maintain the confidentiality of all company information 
+                during and after the period of employment.
+            </p>
+        </div>
+
+        <div class="section signature">
+            <div>
+                <p>__________________________</p>
+                <p><strong>Employee Signature</strong></p>
+                <p>Date: ___________________</p>
+            </div>
+            <div>
+                <p>__________________________</p>
+                <p><strong>Admin Signature</strong></p>
+                <p>Date: ___________________</p>
+            </div>
+        </div>
+
+        <hr>
+        <div class="footer">
+            <p>
+                This document is a legal agreement between the parties. Please ensure all 
+                information is accurate and that signatures are provided as required.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

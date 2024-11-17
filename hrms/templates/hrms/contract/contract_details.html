@@ -1,0 +1,15 @@
+{% extends 'hrms/layout.html' %}
+{% block content %}
+<h2>Contract for {{ contract.employee.username }}</h2>
+<p>Client: {{ contract.client }}</p>
+<p>Role: {{ contract.role }}</p>
+<p>Start Date: {{ contract.start_date }}</p>
+<p>End Date: {{ contract.end_date }}</p>
+<p>Status: {{ contract.status }}</p>
+
+{% if not contract.is_fully_signed %}
+    <a href="{% url 'sign_contract' contract.id %}" class="btn btn-primary">Sign Contract</a>
+{% else %}
+    <p>This contract is fully signed on {{ contract.signed_date }}.</p>
+{% endif %}
+{% endblock %}

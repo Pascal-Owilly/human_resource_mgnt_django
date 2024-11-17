@@ -1,0 +1,224 @@
+{% extends 'hrms/layout.html' %} {% load static %} {% block title %} Contract
+Dashboard | JBL {% endblock title %} {% block content %}
+<style>
+  body {
+    background-color: #d3d3d3;
+    color: #333;
+  }
+  .card {
+    background-color: #fff;
+    border-radius: 8px;
+    color: #333;
+  }
+  .card .card-title,
+  .card .card-subtitle,
+  .card .card-text {
+    color: #333;
+  }
+  .table {
+    background-color: #f0f0f0;
+    border-radius: 30px;
+    /* color: #fff; */
+  }
+  .table th,
+  .table td {
+    color: #333;
+  }
+</style>
+
+<div class="container my-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2
+                class="mb-4"
+                style="
+                  letter-spacing: 7px;
+                  font-weight: 900;
+                  opacity: 0.2;
+                  font-family: 'Times New Roman', Times, serif;
+                "
+                >
+                WMS Contracting Module
+              </h2>   
+            </div>
+            <div class="col-md-6">
+  <!-- Excel Multiple Uploads Section -->
+  <div class=" mt-3 ">
+
+    <div class="d-flex justify-content-betwee " style='float: right;'>
+        
+
+          <p class="">
+            <a href="{% url 'hrms:upload_excel' %}" class="btn btn-success"
+              > <i class="mdi mdi-plus"></i> Upload Excel File</a
+            >
+          </p>
+    </div>
+
+  </div>    
+            </div>
+        </div>
+    </div>
+
+
+  <!-- Search Bar -->
+  <div class="input-group mb-4">
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search for WMS contracts and more..."
+      aria-label="Search"
+    />
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">Search</button>
+    </div>
+  </div>
+
+  <!-- Current Contracts Section -->
+  <div id="contract-cards" class="row mb-5">
+    {% for contract in contracts %}
+    <div class="col-md-3 mb-4 card-item" style="display: none">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ contract.title }}</h5>
+          <p class="card-text">
+            Location: {{ contract.location }}<br />
+          </p>
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4>{{ contract.applications }}</h4>
+              <small>applications</small>
+            </div>
+            <div>
+              <span class="badge badge-lg" style="background-color: #fdeb3d"
+                >{{ contract.last_week }} in last week</span
+              >
+            </div>
+          </div>
+          <a href="" class="btn btn-primary mt-3">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="d-flex justify-content-between m-auto">
+      <button class="btn mx-5 btn-secondary" onclick="showPrevPage()">
+        Previous
+      </button>
+      <button class="btn btn-secondary" onclick="showNextPage()">Next</button>
+    </div>
+  </div>
+
+  <!-- Contract Candidates Table Section -->
+  <h2
+    class="mb-4"
+    style="
+      letter-spacing: 7px;
+      font-weight: 900;
+      opacity: 0.2;
+      font-family: 'Times New Roman', Times, serif;
+    "
+  >
+    Candidates
+  </h2>
+  <div class="table-responsive">
+    <table class="table table-stripe  ">
+      <thead>
+        <tr>
+          <th>Employee Name</th>
+          <th>Stages</th>
+          <th>Applied Role</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Attachments</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for candidate in page_obj %}
+        <tr>
+          <td>{{ candidate.first_name }} {{ candidate.last_name }}</td>
+          <td>{{ candidate.status }}</td>
+          <td>{{ candidate.role }}</td>
+          <td>{{ candidate.start_date }}</td>
+          <td>{{ candidate.end_date }}</td>
+          <td><a href="#">{{ candidate.files }} files</a></td>
+          <td>
+            {% if candidate.signed %}
+            <span class="badge badge-success">Signed</span>
+            {% else %}
+            <a href="" class="btn btn-warning btn-sm">Sent for Signature</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Candidate pagination">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ page_obj.previous_page_number }}"
+            aria-label="Previous"
+          >
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% endif %} {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %} {% if page_obj.has_next %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ page_obj.next_page_number }}"
+            aria-label="Next"
+          >
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<script>
+  const pageSize = 4;
+  let currentPage = 1;
+  const cards = document.querySelectorAll(".card-item");
+
+  function updateCardVisibility() {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+
+    cards.forEach((card, index) => {
+      card.style.display = index >= start && index < end ? "block" : "none";
+    });
+  }
+
+  function showNextPage() {
+    if (currentPage * pageSize < cards.length) {
+      currentPage++;
+      updateCardVisibility();
+    }
+  }
+
+  function showPrevPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      updateCardVisibility();
+    }
+  }
+
+  updateCardVisibility();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

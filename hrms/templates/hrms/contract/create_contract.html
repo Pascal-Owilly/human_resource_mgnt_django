@@ -1,0 +1,74 @@
+{% extends 'hrms/layout.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-primary">Upload Contracts</h2>
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="excelFile" class="form-label">Upload Excel File</label>
+            <input type="file" id="excelFile" name="excel_file" class="form-control" accept=".xlsx" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Preview</button>
+    </form>
+
+    <div class="mt-5" id="previewSection" style="display: none;">
+        <h3>Preview Contracts</h3>
+        <table class="table table-bordered" id="previewTable">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Position</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="btn btn-success mt-3" id="submitContracts">Submit Contracts</button>
+    </div>
+</div>
+
+<script>
+    const uploadForm = document.getElementById('uploadForm');
+    const previewSection = document.getElementById('previewSection');
+    const previewTable = document.getElementById('previewTable').querySelector('tbody');
+    const submitContracts = document.getElementById('submitContracts');
+
+    uploadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch("{% url 'hrms:create_contract' %}", {
+            method: "POST",
+            body: formData,
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            previewSection.style.display = 'block';
+            previewTable.innerHTML = '';
+            data.data.forEach(contract => {
+                previewTable.innerHTML += `
+                    <tr>
+                        <td>${contract.first_name}</td>
+                        <td>${contract.last_name}</td>
+                        <td>${contract.email}</td>
+                        <td>${contract.role}</td>
+                        <td>${contract.position}</td>
+                        <td>${contract.start_date}</td>
+                        <td>${contract.end_date}</td>
+                    </tr>
+                `;
+            });
+        });
+    });
+
+    submitContracts.addEventListener('click', function () {
+        alert('Contracts submitted successfully!');
+        // Add additional logic to send data to the server for saving.
+    });
+</script>
+{% endblock %}

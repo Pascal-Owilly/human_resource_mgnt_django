@@ -1,0 +1,13 @@
+{% extends 'hrms/layout.html' %}
+{% block content %}
+<h2>Sign Contract for {{ contract.employee.username }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {% if not contract.admin_signed %}
+        <button type="submit" name="admin_sign" class="btn btn-success">Admin Sign</button>
+    {% endif %}
+    {% if not contract.employee_signed %}
+        <button type="submit" name="employee_sign" class="btn btn-success">Employee Sign</button>
+    {% endif %}
+</form>
+{% endblock %}

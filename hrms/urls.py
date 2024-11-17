@@ -121,6 +121,13 @@ urlpatterns = [
     path("recruitment/<int:pk>/delete/", views.RecruitmentDelete.as_view(), name="recruitmentdelete"),
 
 #Payroll
-    path("employee/pay/",views.Pay.as_view(), name="payroll")
-    
+    path("employee/pay/",views.Pay.as_view(), name="payroll"),
+
+# contract_dashboard
+    path('contracts-dashboard/', views.ContractDashboardView.as_view(), name='contract_dashboard'),
+    path('upload_excel/', views.UploadExcelView.as_view(), name='upload_excel'),
+    path('search/', views.SearchResultsView.as_view(), name='search_results'),
+    path('contract/<int:contract_id>/', views.contract_detail, name='contract_detail'),
+    path('contract/sign/<int:contract_id>/', views.sign_contract, name='sign_contract'),
 ]
+    

@@ -183,3 +183,9 @@ LOGOUT_REDIRECT_URL = '/login/'
 # LOGIN_URL = 'hrms:login'
 MEDIA_URL = '/media/'  # This is just for URL i.e https://l.me/media/l.jpg
 MEDIA_ROOT = BASE_DIR / 'media'  # This is the folder the image will be uploaded
+
+# Maximum size of the file that can be uploaded (in bytes)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
+# This limit includes form data and file content, adjust if necessary
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB

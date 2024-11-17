@@ -1,0 +1,233 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Upload Contracts | JBL {% endblock title %}
+
+{% block content %}
+
+<style>
+    .modal-dialog-fullscreen {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    position: absolute;
+    top: -2rem;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.modal-content {
+    height: 100%;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body {
+    overflow-y: auto; /* Allow scrolling if the content exceeds the screen size */
+}
+
+</style>
+
+<div class="container my-5">
+    <h3 class="text-center text-primary">Upload Excel File for Single/Bulk Contracts</h3>
+    <p class="text-muted text-center">Upload an Excel file with contract details to send to multiple candidates. Review the data below before submitting.</p>
+
+    <!-- Help Icon -->
+    <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
+        <i class="fa fa-question-circle"></i> Help
+    </button>
+<hr>
+    <!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="helpModalLabel">How It Works</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                            <h6>Step 1: Upload Excel File</h6>
+                            <p>Select an Excel file that contains contract details for one or more candidates.</p>
+    
+                            <h6>Step 2: Preview Data</h6>
+                            <p>Click the "Preview Data" button to see a preview of the contract details from the uploaded Excel file.</p>
+    
+                            <h6>Step 3: Generate PDF</h6>
+                            <p>Once the data looks good, click the "Generate PDF" button to create a PDF of the contract details for all selected candidates.</p>
+                            <h6>Step 4: Submit</h6>
+                            <p>Finally, upon submission the generated PDF contracts are sent to the relevant candidates via email for them to sign.</p>
+    
+                            <h6>Step 5: Admin Signature</h6>
+                            <p>Once the candidate has successfully submitted the signed document, the admin is notified to input the signature.</p>
+    
+                            <h6>Step 6: Candidate Auto Registration</h6>
+                            <p>If the candidate is not yet registered in the system, after the admin submits the signed document, the candidate will be automatically registered, given the roles and position outlined in the Excel document, and assigned to the client as well.</p>
+    
+                            <h6>Step 7: Candidate Receives Email to Set Password</h6>
+                            <p>The candidate will receive an email to set their password and successfully log in or download the Android app to start using the system.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom CSS to adjust backdrop opacity -->
+    <style>
+        .modal-backdrop {
+            opacity:  0.5 !important; 
+            z-index: 2;
+        }
+    </style>
+    
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'hrms:upload_excel' %}" id="uploadForm">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="fileInput" class="form-label">Select Excel File</label>
+            <input type="file" name="fileInput" id="fileInput" class="form-control" accept=".xls,.xlsx" required>
+        </div>
+        <div class="text-center">
+            <button type="button" class="btn btn-info btn-lg" id="previewButton">Preview Data</button>
+        </div>
+    </form>
+
+    <div class="table-responsive mt-5" id="previewTableContainer" style="display: none;">
+        <h3 class="text-center text-success">Review the Uploaded Data</h3>
+        <table class="table table-bordered table-striped">
+            <thead id="tableHeaders">
+                <!-- Headers will be dynamically populated -->
+            </thead>
+            <tbody id="previewTableBody">
+                <!-- Data will be dynamically populated -->
+            </tbody>
+        </table>
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-success btn-lg" id="generatePdfButton">Generate PDF</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<script>
+    // Wait until pdf-lib is loaded before running any code that uses it
+    document.getElementById('previewButton').addEventListener('click', function () {
+        const fileInput = document.getElementById('fileInput');
+        const previewTableContainer = document.getElementById('previewTableContainer');
+        const previewTableBody = document.getElementById('previewTableBody');
+        const tableHeaders = document.getElementById('tableHeaders');
+
+        if (fileInput.files.length === 0) {
+            alert('Please select an Excel file to preview.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            // Clear previous table rows
+            previewTableBody.innerHTML = '';
+            tableHeaders.innerHTML = '';
+
+            // Populate headers
+            const headers = Object.keys(jsonData[0] || {});
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            tableHeaders.appendChild(headerRow);
+
+            // Populate the table with data
+            jsonData.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] || '';
+                    tr.appendChild(td);
+                });
+                previewTableBody.appendChild(tr);
+            });
+
+            previewTableContainer.style.display = 'block';
+        };
+
+        reader.onerror = function () {
+            alert('Error reading the file. Please try again.');
+        };
+
+        reader.readAsBinaryString(file);
+    });
+
+    document.getElementById('generatePdfButton').addEventListener('click', function () {
+        const previewTableBody = document.getElementById('previewTableBody');
+        const rows = Array.from(previewTableBody.rows);
+        const contractData = rows.map(row => {
+            const cells = Array.from(row.cells);
+            return cells.map(cell => cell.textContent);
+        });
+
+        // Make sure the pdf-lib is loaded before calling generatePdf
+        if (typeof window.pdfLib === 'undefined' || !window.pdfLib.PDFDocument) {
+            alert('pdf-lib is not loaded correctly.');
+            return;
+        }
+
+        generatePdf(contractData);
+    });
+
+    // PDF Generation Logic using pdf-lib
+    async function generatePdf(data) {
+        const { PDFDocument, rgb } = window.pdfLib; // Destructure only if pdf-lib is loaded
+
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([600, 800]);
+        const { width, height } = page.getSize();
+
+        const font = await pdfDoc.embedFont(window.pdfLib.StandardFonts.Helvetica);
+
+        let yOffset = height - 40; // Start from the top
+
+        // Add headers (contract details)
+        data.forEach(row => {
+            row.forEach((cell, index) => {
+                page.drawText(cell, {
+                    x: 50 + (index * 100), // Adjust based on table structure
+                    y: yOffset,
+                    size: 12,
+                    font,
+                    color: rgb(0, 0, 0),
+                });
+            });
+            yOffset -= 20; // Space between rows
+        });
+
+        // Add signature section
+        yOffset -= 40;
+        page.drawText('Sign Here:', { x: 50, y: yOffset, size: 12, font, color: rgb(0, 0, 0) });
+
+        // Generate the PDF as a Blob
+        const pdfBytes = await pdfDoc.save();
+        const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Open the PDF in a new window/tab
+        window.open(pdfUrl, '_blank');
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+{% endblock %}

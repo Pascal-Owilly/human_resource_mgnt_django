@@ -93,15 +93,15 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True, unique=True)
     address = models.CharField(max_length=100, null=True, blank=True)
-    imei = models.CharField(max_length=255, null=True, blank=True)  # Add this field
+    imei = models.CharField(max_length=255, null=True, blank=True)  
 
     emp_id = models.CharField(max_length=70, unique=True, editable=False)
     mng_id = models.CharField(max_length=70, unique=True, editable=False)
     emergency_contact = models.CharField(max_length=11, null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10, null=True, blank=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
-    assigned_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
+    assigned_location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True)
 
     is_archived = models.BooleanField(default=False)
 
@@ -180,7 +180,6 @@ class Admin(models.Model):
     def get_absolute_url(self):
         return reverse("hrms:admin_view", kwargs={"pk": self.pk})
     
-
 class Kin(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
@@ -262,3 +261,25 @@ class Recruitment(models.Model):
 
     def __str__(self):
         return self.first_name +' - '+self.position
+
+# Contract
+class Contract(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    role = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    id_number = models.CharField(max_length=25, null=True, blank=True)
+    document = models.FileField(upload_to='contracts/', blank=True, null=True)
+    admin_signed = models.BooleanField(default=False)
+    employee_signed = models.BooleanField(default=False)
+    signed_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('completed', 'Completed')], default='pending')
+
+    def is_fully_signed(self):
+        return self.admin_signed and self.employee_signed
+
+    def __str__(self):
+        first_name = self.employee.employee.first_name or ''
+        last_name = self.employee.employee.last_name or ''
+        email = self.employee.employee.email or ''
+        return f"{first_name} - {last_name} - {email}"

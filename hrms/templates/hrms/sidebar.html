@@ -6,39 +6,40 @@
     <title>Responsive Sidebar</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
     <style>
+
 /* General sidebar styles */
 
 .nav-item > a:hover{
     background-color: #fdeb3d !important;
-
 }
 
 ul li > a:hover {
-    background-color: #fdeb3d !important;
+    background-color: rgb(253, 235, 61) !important;
     border-radius: 30px 0 0 30px !important;
     padding: 10px !important;
     color: #773697 !important;
     transition: .5s ease-in-out;
 }
 
-
 ul li > a {
 
     color: #fff !important;
-    font-weight: bold;
+    font-weight: 500;
     font-family: Arial, Helvetica, sans-serif;
-
+    border-bottom: 3px solid rgb(253, 235, 61, 0.2);
+    letter-spacing: 2px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 14px !important;
 }
 
 .sidebar {
     background: linear-gradient(90deg, rgb(119, 54, 151), #773697); /* Adjust the angle and colors as needed */
-
     width: 250px;
     /* position: fixed; */
     top: auto;
     left: 0;
     height: auto;
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s eas  e-in-out;
 }
 
 /* Hide sidebar by default on small screens */
@@ -76,12 +77,22 @@ ul li > a {
     background-color: #d1c62a; /* Slightly darker on hover */
 }
 
+i.fa {
+      font-size: 18px; /* Icon size */
+      color: rgb(209, 198, 42, 0.8);  /* Icon color */
+      transition: color 0.3s ease; /* Smooth transition for hover effect */
+    }
+
+    i.fa:hover {
+      color: #2ecc71; /* Change color on hover */
+    }
+
 body {
     overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 
-    </style>
+</style>
 </head>
 <body>
 
@@ -111,7 +122,6 @@ body {
                 </div>
                 {% if request.user.is_superuser %}
                 <div class="d-flex justify-content-between wrap">
-
                   <a href="{% url 'hrms:employee_new' %}" class="btn mx-2 btn-sm me-2" style="background-color: #fdeb3d;font-size: 10px;">
                     New employee <i class="mdi mdi-plus"></i>
                     </a>
@@ -158,8 +168,8 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#client-basic" aria-expanded="false" aria-controls="client-basic">
-                <i class="fa fa-folder "></i>
-                <span class="menu-title ">&emsp;Client</span>
+                <i class="fa fa-briefcase"></i>
+                <span class="menu-title ">&emsp;Clients</span>
                 <i class="menu-arrow "></i>
             </a>
         </li>
@@ -179,13 +189,13 @@ body {
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:employee_all' %}" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-user "></i>
+                <i class="fa fa-users"></i>
                 <span class="menu-title">&emsp;Employee</span>
             </a>
         </li>
          <li class="nav-item">
             <a class="nav-link" href="{% url 'hrms:assign_role' %}" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-user "></i>
+                <i class="fa fa-user-shield"></i>
                 <span class="menu-title">&emsp;Roles</span>
             </a>
         </li>
@@ -248,11 +258,39 @@ body {
             </a>    
         </li>
         {% endif %}
+   
+        {% if request.user.is_superuser %}
+
+<li class="nav-item">
+    <a class="nav-link" data-toggle="collapse" href="#contract-basic" aria-expanded="false" aria-controls="contract-basic">
+        <i class="fa fa-file-contract "></i>
+        <span class="menu-title ">&emsp;Contract Module</span>
+        <i class="menu-arrow "></i>
+    </a>
+</li>
+<div class="collapse mx-1 mt-1" id="contract-basic" >
+    <ul class="nav flex-column sub-menu" style="border-radius: 30px;">
+        <li class="nav-item bg-light">
+            
+            <a class="nav-link text-dark" href="{% url 'hrms:contract_dashboard' %}"> 
+                <i class="fa fa-tachometer-alt"></i>
+                &emsp;
+                Dashboard</a>
+        </li>
+        <li class="nav-item bg-light ">
+            <a class="nav-link text-dark" href="{% url 'hrms:clnt_new' %}">
+                <i class="fa fa-plus text-dark"></i>&emsp;New Contract</a>
+        </li>
+    </ul>
+
+</div>
+{% endif %}
+
          
         {% if request.user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic_registration" aria-expanded="false" aria-controls="ui-basic">
-                <i class="fa fa-folder "></i>
+                <i class="fa fa-user-plus "></i>
                 <span class="menu-title ">&emsp;Registration</span>
                 <i class="menu-arrow "></i>
             </a>

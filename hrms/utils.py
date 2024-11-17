@@ -153,3 +153,32 @@ def verify_otp(user, otp):
     except OTP.DoesNotExist:
         return False
 
+# Contract
+import PyPDF2
+
+def parse_contract_document(file_path):
+    # Open the PDF file
+    with open(file_path, 'rb') as pdf_file:
+        reader = PyPDF2.PdfReader(pdf_file)
+        text = ""   
+        for page in reader.pages:
+            text += page.extract_text()
+
+    # Extract details (this depends on the document structure)
+    details = {}
+    lines = text.splitlines()
+    for line in lines:
+        if "Email:" in line:
+            details['email'] = line.split("Email:")[1].strip()
+        if "First Name:" in line:
+            details['first_name'] = line.split("First Name:")[1].strip()
+        if "Last Name:" in line:
+            details['last_name'] = line.split("Last Name:")[1].strip()
+        if "Role:" in line:
+            details['role'] = line.split("Role:")[1].strip()
+        if "Position:" in line:
+            details['position'] = line.split("Position:")[1].strip()
+    
+    return details
+
+

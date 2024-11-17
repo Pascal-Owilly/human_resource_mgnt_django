@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect, resolve_url,reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User, Admin, Client, HumanResourceManager
+from .models  import Employee, Department,Kin, Attendance, Leave, Recruitment, User, Admin, Client, HumanResourceManager, Contract
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -1497,7 +1497,6 @@ from django.http import JsonResponse
 from django.utils import timezone
 from geopy.distance import geodesic
 from .models import Attendance, Employee
-
 import io
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -1508,7 +1507,6 @@ from .models import Attendance
 from django.utils import timezone
 from openpyxl.utils import get_column_letter
 
-
 class DownloadPDF(View):
     def get(self, request, *args, **kwargs):
         # Get query parameters for date range and keyword
@@ -1517,6 +1515,7 @@ class DownloadPDF(View):
         keyword = request.GET.get('keyword', '')
 
         # Parse start_date and end_date strings into date objects
+        
         try:
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
         except ValueError:
@@ -1696,3 +1695,203 @@ class Pay(LoginRequiredMixin,ListView):
     template_name = 'hrms/payroll/index.html'
     context_object_name = 'emps'
     login_url = 'hrms:login'
+
+# CONTRACT
+
+from django.core.paginator import Paginator
+
+class ContractDashboardView(LoginRequiredMixin, ListView):
+    model = Contract
+    template_name = 'hrms/contract/dashboard.html'
+    context_object_name = 'contracts'
+    login_url = 'hrms:login'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add hardcoded contracts data for testing or real data
+        context['contracts'] = [
+            {"title": "JBL HQ", "sent_days": "2 days ago", "location": "MBS ROAD", "exp": "3 weeks exp.", "applications": 45, "last_week": 25},
+            {"title": "MAJOREL", "sent_days": "5 days ago", "location": "Kisumu", "exp": "1 month exp.", "applications": 38, "last_week": 10},
+            {"title": "JBL HQ", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
+            {"title": "MASCHA", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
+            {"title": "Kasala", "sent_days": "4 days ago", "location": "Kisolo", "exp": "300 weeks exp.", "applications": 90, "last_week": 3},
+            {"title": "Mululo", "sent_days": "5 days ago", "location": "Kisumu", "exp": "1 month exp.", "applications": 38, "last_week": 10},
+            {"title": "Kusimu", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
+            {"title": "kos", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
+
+        ]
+        
+        candidates = [
+            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
+            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
+            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
+            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
+            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
+            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
+            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
+            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
+        ]
+        paginator = Paginator(candidates, 25)  # Show 25 candidates per page
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        return context
+
+class ContractDetailView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = 'hrms/contract/contract_details.html'
+    context_object_name = 'contract'
+    login_url = 'hrms:login'
+    
+
+from django.views.generic.edit import FormView
+from django.core.files.storage import FileSystemStorage
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from openpyxl import load_workbook
+
+import io
+from django.core.files.base import ContentFile
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.views import View
+from openpyxl import load_workbook
+from reportlab.pdfgen import canvas
+from .models import Contract  # Assuming the Contract model is in the same directory
+
+class UploadExcelView(LoginRequiredMixin, View):
+    login_url = 'hrms:login'
+    
+    def get(self, request, *args, **kwargs):
+        return render(request, 'hrms/contract/upload_excel.html')
+
+    def post(self, request, *args, **kwargs):
+        excel_file = request.FILES.get('excelFile')
+        if not excel_file:
+            return render(request, 'hrms/contract/upload_excel.html', {'error': 'Please upload a valid Excel file.'})
+
+        try:
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            preview_data = []
+
+            for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip header row
+                email = row[4]  # Assuming Email is in column 5
+                username = email.split('@')[0] if email else ''
+                preview_data.append({
+                    'username': username,
+                    'first_name': row[0],
+                    'last_name': row[1],
+                    'id_number': row[2],
+                    'email': email,
+                    'role': row[5],
+                    'position': row[6],
+                    'start_date': row[7],
+                    'end_date': row[8],
+                })
+
+                # Generate PDF contract for each user
+                pdf_buffer = io.BytesIO()
+                c = canvas.Canvas(pdf_buffer)
+                c.drawString(100, 750, f"Hello user: {row[0]}") 
+                c.drawString(100, 735, f"First Name: {row[0]}")
+                c.drawString(100, 720, f"Last Name: {row[1]}")
+                c.drawString(100, 705, f"Role: {row[5]}")
+                c.drawString(100, 690, f"Position: {row[6]}")
+                c.drawString(100, 675, f"Start Date: {row[7]}")
+                c.drawString(100, 660, f"End Date: {row[8]}")
+                # You can continue adding contract details here...
+
+                c.save()
+
+                # Save the generated PDF in the database
+                pdf_file = ContentFile(pdf_buffer.getvalue())
+                contract = Contract.objects.create(
+                    user_email=email,
+                    title=row[0],  # Assuming the title is in the first column
+                    contract_pdf=pdf_file
+                )
+
+                # Send email to user with the contract PDF attached
+                send_mail(
+                    "Contract for Signing",
+                    "Please review and sign the attached contract.",
+                    "from_email@example.com",
+                    [email],
+                    files=[('contract.pdf', pdf_file, 'application/pdf')]
+                )
+
+            return render(request, 'hrms/preview_contracts.html', {'preview_data': preview_data})
+
+        except Exception as e:
+            return render(request, 'hrms/contract/upload_excel.html', {'error': f'Error processing file: {e}'})
+
+
+from django.views.generic import TemplateView
+from django.db.models import Q
+from .forms import ContractForm
+
+class SearchResultsView(LoginRequiredMixin, TemplateView):
+    template_name = 'hrms/contract/search_results.html'
+    login_url = 'hrms:login'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get('query', '')
+        context['query'] = query
+        context['contract_results'] = Contract.objects.filter(
+            Q(title__icontains=query) | Q(location__icontains=query)
+        )
+        context['candidate_results'] = Candidate.objects.filter(
+            Q(name__icontains=query) | Q(role__icontains=query)
+        )
+        return context
+
+# View to capture employee's signature
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.models import User
+from .forms import SignContractForm
+
+def sign_contract(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+    
+    if request.method == 'POST':
+        form = SignContractForm(request.POST)
+        if form.is_valid():
+            contract.employee_signed = True
+            contract.save()
+
+            if contract.is_fully_signed():
+                # Create a user if not already associated with the contract
+                if not User.objects.filter(email=contract.employee.email).exists():
+                    username = contract.employee.email.split('@')[0]
+                    user = User.objects.create_user(
+                        username=username,
+                        email=contract.employee.email,
+                        first_name=contract.employee.employee.first_name,
+                        last_name=contract.employee.employee.last_name,
+                    )
+                    # Assign to a group/role if needed
+                    user.groups.add(contract.role)
+                return redirect('hrms:contract_detail', contract_id=contract.id)
+
+    else:
+        form = SignContractForm()
+    
+    return render(request, 'hrms/contract/sign_contract.html', {'form': form, 'contract': contract})
+
+def admin_sign_contract(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+    if request.method == 'POST':
+        contract.admin_signed = True
+        contract.save()
+        return redirect('admin_dashboard')
+    return render(request, 'hrms/contract/admin_sign_contract.html', {'contract': contract})
+
+# View to display contract details and initiate signature
+def contract_detail(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+    return render(request, 'hrms/contract/contract_detail.html', {'contract': contract})
+

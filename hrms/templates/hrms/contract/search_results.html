@@ -1,0 +1,40 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Search Results | JBL {% endblock title %}
+
+{% block content %}
+<div class="container my-5">
+    <h2>Search Results</h2>
+    {% if query %}
+        <p>Results for "{{ query }}":</p>
+        
+        <h3>Contracts</h3>
+        {% if contract_results %}
+            <ul class="list-group mb-4">
+                {% for contract in contract_results %}
+                    <li class="list-group-item">
+                        <a href="{% url 'hrms:contract_detail' contract.id %}">{{ contract.title }}</a> - {{ contract.location }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No contracts found matching your search.</p>
+        {% endif %}
+
+        <h3>Candidates</h3>
+        {% if candidate_results %}
+            <ul class="list-group">
+                {% for candidate in candidate_results %}
+                    <li class="list-group-item">
+                        {{ candidate.name }} - {{ candidate.role }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No candidates found matching your search.</p>
+        {% endif %}
+    {% else %}
+        <p>Please enter a search query.</p>
+    {% endif %}
+</div>
+{% endblock %}

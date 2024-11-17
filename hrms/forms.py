@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User, Location, AccountManager, Admin, Employee, HumanResourceManager
+from .models import Employee,Department,Kin,Attendance, Leave, Recruitment, Client, User, Location, AccountManager, Admin, Employee, HumanResourceManager, Contract
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django import forms
 from django.core import validators
@@ -272,3 +272,12 @@ class AssignRoleForm(forms.Form):
             Employee.objects.update_or_create(employee=user)
         # Handle other roles if necessary
         
+        
+# Contract
+class ContractForm(forms.ModelForm):
+    class Meta:
+        model = Contract
+        fields = ['document']
+
+class SignContractForm(forms.Form):
+    signature = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Your Signature'}))
