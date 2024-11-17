@@ -36,15 +36,6 @@ EMAIL_HOST = 'smtp.hostinger.com'
 # EMAIL_HOST = 'smtp-relay.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True  
-# EMAIL_HOST_USER = 'intellima.tech@gmail.com'  
-# EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
-# EMAIL_HOST_USER = 'wms-support@jawabubest.co.ke'  
-# EMAIL_HOST_PASSWORD = 'JBL@WMS2024'
-
-EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
-EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
-# EMAIL_HOST_USER = 'pascal.owilly@student.moringaschool.com'
-# EMAIL_HOST_PASSWORD = 'ymxllqbalildvjri'
 
 BASE_URL = '127.0.0.1:8000'
 
