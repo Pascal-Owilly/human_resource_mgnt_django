@@ -36,10 +36,11 @@ EMAIL_HOST = 'smtp.hostinger.com'
 # EMAIL_HOST = 'smtp-relay.gmail.com'
 EMAIL_PORT = 587 
 EMAIL_USE_TLS = True  
-
+EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
+EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
 BASE_URL = '127.0.0.1:8000'
 
-PROTOCOL = 'http'
+PROTOCOL = 'http'   
 DOMAIN = '127.0.0.1:8000'
 
 SITE_NAME = '127.0.0.1'

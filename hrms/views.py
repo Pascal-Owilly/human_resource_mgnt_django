@@ -1852,8 +1852,8 @@ class UploadExcelView(LoginRequiredMixin, View):
     
                     # Send Email with Contract
                     email_message = EmailMessage(
-                        "Contract for Signing",
-                        "Dear candidate, please review and sign the attached contract.",
+                        "Job Contract",
+                        f"Dear {employee.employee.first_name} {employee.employee.last_name},\n\nPlease review and sign the attached contract.",
                         settings.EMAIL_HOST_USER,  # Get the default sender email from settings
                         [employee.employee.email],  # Use the email from the related User model
                     )
