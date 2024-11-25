@@ -3,67 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Employment Contract</title>
+
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
         .container {
-            width: 80%;
+            width: 99%;
             margin: 0 auto;
             background-color: #f0f0f0;
             padding: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
+
         .header {
             text-align: center;
-            background-color: #773697;
-            color: #fff;
-            padding: 20px 0;
+            background-color: #fff;
+            color: #333;
+            padding: 10px 0;
             margin-bottom: 20px;
             border-radius: 8px 8px 0 0;
         }
+
         h1 {
             font-size: 36px;
             margin: 0;
         }
+
+        h3 {
+            opacity: 0.7;
+            font-size: 16px;
+            letter-spacing: 2px;
+        }
+
         .contract-details {
             margin-bottom: 30px;
         }
+
         .contract-details p {
-            font-size: 16px;
+            font-size: 14px;
             margin: 10px 0;
         }
+
         .contract-footer {
             text-align: center;
-            padding: 10px;
-            background-color: #773697;
-            color: #fff;
+            padding: 5px;
+            background-color: #fdeb3d;
+            color: #333;
             margin-top: 20px;
             font-size: 14px;
             border-radius: 0 0 8px 8px;
         }
+
         .highlight {
             color: #773697;
             font-weight: bold;
         }
+
         .footer-text {
             font-size: 12px;
         }
+
         .contract-body p {
-            font-size: 16px;
-            margin: 15px 0;
+            font-size: 14px;
+            margin: 10px 0;
             line-height: 1.6;
         }
+
         .contract-body p span {
             color: #773697;
             font-weight: bold;
         }
+
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #773697;
+            text-align: center;
+        }
+
+        .signature-section div {
+            margin: 20px 0;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 300px;
+            margin: 10px auto;
+        }
+
+        .signature-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -71,11 +104,19 @@
     <div class="container">
         <!-- Header Section -->
         <div class="header">
-            <h1>Employment Contract</h1>
+            <h3 
+            style="
+            letter-spacing: 3px;
+            font-weight: 900;
+            opacity: 0.9;
+            font-family: 'Times New Roman', Times, serif;
+          "
+            >Employment Contract</h3>
         </div>
 
         <!-- Contract Body Section -->
         <div class="contract-body">
+
             <p>This Employment Contract is entered into on the <span>{{ current_date }}</span> by and between <span class="highlight">Jawabu Best Limited WMS</span>, hereinafter referred to as the "Employer", and <span class="highlight">{{ first_name }} {{ last_name }}</span>, hereinafter referred to as the "Employee".</p>
             
             <p>WHEREAS, the Employer agrees to employ the Employee, and the Employee agrees to work under the terms and conditions set forth in this Contract, the parties hereby agree as follows:</p>
@@ -107,12 +148,58 @@
             <p>IN WITNESS WHEREOF, the parties hereto have executed this Employment Contract as of the date first above written.</p>
         </div>
 
-        <!-- Footer Section -->
-        <div class="contract-footer">
-            <p class="footer-text">This contract is provided by <span class="highlight">Jawabu Best Limited WMS</span>.</p>
-            <p>&copy; {{ current_year }} Jawabu Best Limited WMS. All Rights Reserved.</p>
-        </div>
+ <!-- Signature Section -->
+ <div class="signature-box">
+    <h3>Employer Signature</h3>
+    <div id="employer-signature" class="signature-pad"></div>
+    <button class="btn" id="clear-employer-signature">Clear Signature</button>
+
+    <h3>Employee Signature</h3>
+    <div id="employee-signature" class="signature-pad"></div>
+    <button class="btn" id="clear-employee-signature">Clear Signature</button>
+
+    <div class="signature-buttons">
+        <button class="btn" id="submit-signature">Submit Signature</button>
     </div>
+</div>
+
+<!-- Footer Section -->
+<div class="contract-footer">
+    <p class="footer-text">This contract is provided by <span class="highlight">Jawabu Best Limited WMS</span>.</p>
+    <p>&copy; {{ current_year }} Jawabu Best Limited WMS. All Rights Reserved.</p>
+</div>
+</div>
+
+<!-- Signature Pad Library -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+// Initialize Signature Pads
+const employerSignaturePad = new SignaturePad(document.getElementById('employer-signature'));
+const employeeSignaturePad = new SignaturePad(document.getElementById('employee-signature'));
+
+// Clear Signature buttons
+document.getElementById('clear-employer-signature').addEventListener('click', () => {
+    employerSignaturePad.clear();
+});
+
+document.getElementById('clear-employee-signature').addEventListener('click', () => {
+    employeeSignaturePad.clear();
+});
+
+// Submit Signature button
+document.getElementById('submit-signature').addEventListener('click', () => {
+    if (employerSignaturePad.isEmpty() || employeeSignaturePad.isEmpty()) {
+        alert('Both signatures are required.');
+    } else {
+        const employerSignatureData = employerSignaturePad.toDataURL();
+        const employeeSignatureData = employeeSignaturePad.toDataURL();
+        console.log('Employer Signature:', employerSignatureData);
+        console.log('Employee Signature:', employeeSignatureData);
+        
+        // Submit or save the signature data as needed (e.g., send it to a server)
+    }
+});
+</script>
 
 </body>
 </html>

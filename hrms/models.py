@@ -285,3 +285,5 @@ class Contract(models.Model):
         email = self.employee.employee.email or ''
         return f"{first_name} - {last_name} - {email}"
 
+
+

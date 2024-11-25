@@ -1708,33 +1708,55 @@ class ContractDashboardView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add hardcoded contracts data for testing or real data
-        context['contracts'] = [
-            {"title": "JBL HQ", "sent_days": "2 days ago", "location": "MBS ROAD", "exp": "3 weeks exp.", "applications": 45, "last_week": 25},
-            {"title": "MAJOREL", "sent_days": "5 days ago", "location": "Kisumu", "exp": "1 month exp.", "applications": 38, "last_week": 10},
-            {"title": "JBL HQ", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
-            {"title": "MASCHA", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
-            {"title": "Kasala", "sent_days": "4 days ago", "location": "Kisolo", "exp": "300 weeks exp.", "applications": 90, "last_week": 3},
-            {"title": "Mululo", "sent_days": "5 days ago", "location": "Kisumu", "exp": "1 month exp.", "applications": 38, "last_week": 10},
-            {"title": "Kusimu", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
-            {"title": "kos", "sent_days": "10 days ago", "location": "Mombasa", "exp": "2 days", "applications": 25, "last_week": 25},
 
+        # Fetch contracts data from the database
+        contracts = Contract.objects.all().select_related('employee__employee')
+        context['contracts'] = [
+            {
+                "title": f"{contract.employee.employee.first_name} {contract.employee.employee.last_name}",
+                "sent_days": f"{(contract.current_date.date() - contract.start_date).days} days ago",
+                "location": contract.employee.employee.location if hasattr(contract.employee.employee, 'location') else "Unknown",
+                "exp": f"{(contract.end_date - contract.start_date).days} days exp.",
+                "applications": contracts.count(),  # Example, update this as needed
+                "last_week": 0,  # Update this logic as per your requirements
+            }
+            for contract in contracts
         ]
-        
-        candidates = [
-            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
-            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
-            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
-            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
-            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
-            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
-            {"name": "Charlie Kimani", "status": "Not Signed", "role": "Account Manager", "start_date": "12/02/24", "files": 3},
-            {"name": "Malaika Momanyi", "status": "Signed", "role": "Waiter", "start_date": "18/02/24", "files": 1},
+
+        # Fetch candidates related to contracts
+        candidates = contracts.values(
+            "employee__employee__first_name",
+            "employee__employee__last_name",
+            "role",
+            'current_date',
+            "start_date",
+            "end_date",
+            "admin_signed",
+            "employee_signed",
+            "document",  
+
+        )
+        formatted_candidates = [
+            {
+                "name": f"{candidate['employee__employee__first_name']} {candidate['employee__employee__last_name']}",
+                "status": "Signed" if candidate["admin_signed"] and candidate["employee_signed"] else "Not Signed",
+                "role": candidate["role"],
+                "current_date": candidate["current_date"].strftime("%d-%b-%y"),      # Format day-month-year with abbreviated month
+                "start_date": candidate["start_date"].strftime("%d-%b-%y"),  # Format day-month-year with abbreviated month
+                "end_date": candidate["end_date"].strftime("%d-%b-%y"),      # Format day-month-year with abbreviated month
+                "files": 1 if candidate["document"] else 0,
+                "document_url": f"{settings.MEDIA_URL}{candidate['document']}" if candidate["document"] else None,
+
+            }
+            for candidate in candidates
         ]
-        paginator = Paginator(candidates, 25)  # Show 25 candidates per page
+
+        # Add pagination for candidates
+        paginator = Paginator(formatted_candidates, 25)  # Show 25 candidates per page
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
+
         return context
 
 class ContractDetailView(LoginRequiredMixin, DetailView):
@@ -1758,7 +1780,7 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.views import View
 from openpyxl import load_workbook
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen import canvas 
 from .models import Contract  # Assuming the Contract model is in the same directory
 
 from weasyprint import HTML
@@ -1766,6 +1788,8 @@ from django.core.files.base import ContentFile
 from io import BytesIO
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
+
+from datetime import datetime  # Import datetime module
 
 class UploadExcelView(LoginRequiredMixin, View):
     login_url = 'hrms:login'
@@ -1792,6 +1816,9 @@ class UploadExcelView(LoginRequiredMixin, View):
             sheet = wb.active
             errors = []
             success_count = 0
+
+            # Get current date and time
+            current_date = datetime.now()
 
             for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):  # Start from row 2
                 first_name, last_name, id_number, email, role, position, start_date, end_date = row[:8]
@@ -1831,6 +1858,7 @@ class UploadExcelView(LoginRequiredMixin, View):
                         start_date=start_date,
                         end_date=end_date,
                         id_number=id_number,
+                        current_date=current_date,  # Use the dynamic current date
                     )
 
                     # Generate PDF Contract with WeasyPrint
@@ -1841,6 +1869,7 @@ class UploadExcelView(LoginRequiredMixin, View):
                         'position': position,
                         'start_date': start_date,
                         'end_date': end_date,
+                        'current_date': current_date,  # Include current date in the PDF content
                     })
                     pdf_file = BytesIO()
                     HTML(string=html_content).write_pdf(pdf_file)
@@ -1881,6 +1910,22 @@ class UploadExcelView(LoginRequiredMixin, View):
 from django.views.generic import TemplateView
 from django.db.models import Q
 from .forms import ContractForm
+
+from openpyxl import Workbook
+from django.shortcuts import render
+from django.http import FileResponse
+import os
+from django.conf import settings
+
+
+def download_sample_excel(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'excel_files/sample.xlsx')
+    try:
+        return FileResponse(open(file_path, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except FileNotFoundError:
+        from django.http import HttpResponse
+        return HttpResponse("File not found.", status=404)
+
 
 class SearchResultsView(LoginRequiredMixin, TemplateView):
     template_name = 'hrms/contract/search_results.html'

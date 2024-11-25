@@ -9,27 +9,51 @@
         opacity: 0.5 !important;
         z-index: 2;
     }
+    .sample-table-container {
+        margin: 30px 0;
+    }
+    .sample-table {
+        margin: 0 auto;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+    }
+    .sample-table th,
+    .sample-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .sample-table th {
+        background-color: #f4f4f4;
+    }
 </style>
 
 <div class="container my-5">
-    <h3 class="text-center text-primary">Upload Excel File for Single/Bulk Contracts</h3>
-    <p class="text-muted text-center">Upload an Excel file with contract details to send to multiple candidates. Review the data below before submitting.</p>
+    <h2
+        class="mb-4"
+            style="
+                  letter-spacing: 3px;
+                  font-weight: 900;
+                  opacity: 0.6;
+                  font-family: 'Times New Roman', Times, serif;
+                "
+                >
+                Upload Excel File for Single/Bulk Contract(s)
+            </h2>   
 
-    <!-- Help Icon -->
-    <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
-        <i class="fa fa-question-circle"></i> Help
-    </button>
-    <hr>
+    <p class="" style="opacity: 0.5;letter-spacing: 2px;">Upload an Excel file with contract details to send to multiple or single candidate(s). <br> Review the data below before submitting.</p>
 
     <!-- Help Modal -->
     <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-fullscreen">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-fullscreen" >
+            <div class="modal-content" >
+
                 <div class="modal-header">
                     <h5 class="modal-title" id="helpModalLabel">How It Works</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+
+                <div class="modal-body" style="width: 100%;">
                     <h6>Step 1: Upload Excel File</h6>
                     <p>Select an Excel file that contains contract details for one or more candidates.</p>
 
@@ -40,8 +64,38 @@
                     <p>The data will be submitted to the server for processing and PDF generation.</p>
 
                     <h6>Step 4: Submission</h6>
-                    <p>Upon submission, the generated PDF contracts are sent to the relevant candidates as email attachments.</p>
+                    <p>Upon submission, the generated PDF contracts are sent to the relevant candidates as email attachments to be signed.</p>
+                    <hr>
+                    <h4><em><i>******** In Progress *******</i></em></h4>
+                    <h6>Step 6: Candidate Auto Registration</h6>
+                    <p>
+                        If the candidate is not yet registered in the system, they will be automatically registered after the admin submits the signed document. The candidate will be assigned the roles, position, and location specified in the uploaded Excel document and linked to the respective client.
+
+                    </p>
+                    <h6>Step 5: Admin Signature</h6>
+                    <p>
+                        Once the candidate successfully signs the document, the admin will be notified to review and provide their signature.                    </p>
+
+                    <h6>Step 6: Candidate Auto Registration</h6>
+                    <p>
+                        If the candidate is not yet registered in the system, they will be automatically registered after the admin submits the signed document. The candidate will be assigned the roles, position, and location specified in the uploaded Excel document and linked to the respective client.
+
+                    </p>
+
+                    <h6>Step 7: Candidate Receives Email to Set Password</h6>
+                    <p>
+                        The candidate will receive an email prompting them to set a password. Upon successful setup, they can log in to the system or download the Android app to begin using the platform.
+                    </p>
+
+                    <h6>Step 8: Docusign API Integration</h6>
+                    <p>
+                        In progress ...
+                        Will allow candidates and admin to electroncally sign the contract document
+                    </p>
                 </div>
+                <h4>Important Note</h4>
+                <p>
+                    The system is designed for simplicity and efficiency. The admin's primary task is to upload the Excel file and await candidate signatures. Once the admin inputs their signature the candidates are automatically registered and assigned to varous clients.</p>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -49,6 +103,88 @@
         </div>
     </div>
 
+    <div class="container sample-table-container">
+        <!-- Icons Row -->
+        <div class="d-flex flex-wrap justify-content-betwee align-items-center mb-3">
+            <!-- Toggle Button -->
+            <button type="button" id="toggleSampleTable" class="btn btn-outline-secondary btn-sm w-auto mx-1" style="font-size: 12px;">
+                <i class="fa fa-eye"></i> Show Sample Format
+            </button>
+              <!-- Excel Download Icon -->
+         <a href="{% url 'hrms:download_sample_excel' %}" class="btn btn-outline-success btn-sm w-auto" style="font-size: 12px;">
+            <i class="fa fa-download"></i> Download and Edit Excel
+        </a>
+        <div class="">
+            <!-- Help Icon -->
+            <button type="button" class="btn btn-outline-info btn-sm w-auto mx-1" data-bs-toggle="modal" data-bs-target="#helpModal" style="font-size: 12px;">
+                <i class="fa fa-question-circle"></i> Help
+            </button>
+        </div>
+        </div>
+      
+        <!-- Sample Table (Initially Hidden) -->
+        <div id="sampleTable" style="display: none; margin-top: 20px;">
+            <table class="sample-table table-responsive" style="font-size: 12px;">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>ID Number</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Position</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John</td>
+                        <td>Doe</td>
+                        <td>12345678</td>
+                        <td>johndoe@example.com</td>
+                        <td>account_manager</td>
+                        <td>HR</td>
+                        <td>2024-01-01</td>
+                        <td>2024-12-31</td>
+                    </tr>
+                    <tr>
+                        <td>Jane</td>
+                        <td>Smith</td>
+                        <td>87654321</td>
+                        <td>janesmith@example.com</td>
+                        <td>human_resource_manager</td>
+                        <td>IT</td>
+                        <td>2024-02-01</td>
+                        <td>2024-12-31</td>
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <td>John</td>
+                        <td>Doe</td>
+                        <td>12345678</td>
+                        <td>johndoe@example.com</td>
+                        <td>account_manager</td>
+                        <td>HR</td>
+                        <td>2024-01-01</td>
+                        <td>2024-12-31</td>
+                    </tr>
+                    <tr>
+                        <td>Jane</td>
+                        <td>Smith</td>
+                        <td>87654321</td>
+                        <td>janesmith@example.com</td>
+                        <td>employee</td>
+                        <td>Cleaner</td>
+                        <td>2024-02-01</td>
+                        <td>2024-12-31</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+ 
     <form method="post" enctype="multipart/form-data" action="{% url 'hrms:upload_excel' %}" id="uploadForm">
         {% csrf_token %}
         <div class="mb-4">
@@ -127,9 +263,24 @@
         reader.onerror = function () {
             alert('Error reading the file. Please try again.');
         };
-
         reader.readAsBinaryString(file);
     });
 </script>
+
+<script>
+    document.getElementById('toggleSampleTable').addEventListener('click', function () {
+        const sampleTable = document.getElementById('sampleTable');
+        const toggleButton = document.getElementById('toggleSampleTable');
+
+        if (sampleTable.style.display === 'none') {
+            sampleTable.style.display = 'block';
+            toggleButton.innerHTML = '<i class="fa fa-eye-slash"></i> Hide Sample Format';
+        } else {
+            sampleTable.style.display = 'none';
+            toggleButton.innerHTML = '<i class="fa fa-eye"></i> Show Sample Format';
+        }
+    });
+</script>
+
 
 {% endblock %}

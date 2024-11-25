@@ -129,5 +129,7 @@ urlpatterns = [
     path('search/', views.SearchResultsView.as_view(), name='search_results'),
     path('contract/<int:contract_id>/', views.contract_detail, name='contract_detail'),
     path('contract/sign/<int:contract_id>/', views.sign_contract, name='sign_contract'),
+    path('download/sample-excel/', views.download_sample_excel, name='download_sample_excel'),
+
 ]
     
