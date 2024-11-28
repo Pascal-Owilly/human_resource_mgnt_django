@@ -1,0 +1,264 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Create Template | JBL {% endblock title %}
+{% block content %}
+
+<style>
+    form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .help-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+        color: #007BFF;
+        font-size: 24px;
+    }
+
+    .help-icon:hover {
+        color: #0056b3;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin: 10px 0 5px;
+        color: #555;
+    }
+
+    input[type="text"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+
+    button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        text-align: left;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content h3 {
+        margin-top: 0;
+    }
+
+    .modal-content ul {
+        padding-left: 20px;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+    }
+
+    /* Modal style */
+    .modal-content {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+    
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+        }
+    
+        .close-btn:hover {
+            color: #000;
+        }
+    
+        h3 {
+            text-align: center;
+            color: #773697;
+            margin-bottom: 10px;
+        }
+    
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+    
+        .highlight {
+            font-weight: bold;
+            color: #0056b3;
+        }
+    
+        .key-highlight {
+            font-weight: bold;
+            color: #773697;
+        }
+    
+        .placeholder-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    
+        .placeholder-list li {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-left: 4px solid #773697;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+    
+        .placeholder-name {
+            font-weight: bold;
+            color: #333;
+        }
+    
+        .placeholder-key {
+            font-family: 'Courier New', monospace;
+            color: #0056b3;
+        }
+</style>
+
+<form method="post">
+    {% csrf_token %}
+    <h2>Create Contract Template</h2>
+    <span class="help-icon" id="help-icon" title="Click for help" 
+    style="box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3); border-radius: 50%; padding: 10px; background-color: #f9f9f9; display: inline-block;width: 40px;height: 40px;">
+  <i class="fa fa-question " style="co  lor: blue; font-size: 20px;"></i>
+</span>
+
+    <label for="name">Contract Title:</label>
+    <input type="text" name="name" id="name" placeholder="Enter template name" required>
+    <label for="template_content">Template Content:</label>
+    <textarea name="template_content" id="template_content" placeholder="Paste or create your contract content here..." required></textarea>
+    <button type="submit">Create Template</button>
+</form>
+
+<!-- Help Modal -->
+<div id="help-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="close-modal">&times;</span>
+        <h3>Designing a Contract Document</h3>
+        <p>We have <span class="highlight">20 placeholders</span>  Each placeholder includes a <span class="key-highlight">name</span> and a <span class="key-highlight">key</span>  Here's a list of available placeholders:</p>
+        
+        <ul class="placeholder-list">
+            <li><span class="placeholder-name">Full Name</span>: <span class="placeholder-key">full_name</span></li>
+            <li><span class="placeholder-name">ID Number</span>: <span class="placeholder-key">id_number</span></li>
+            <li><span class="placeholder-name">Phone Number</span>: <span class="placeholder-key">phone_number</span></li>
+            <li><span class="placeholder-name">Employee Name</span>: <span class="placeholder-key">employee_name</span></li>
+            <li><span class="placeholder-name">Employer Name</span>: <span class="placeholder-key">employer_name</span></li>
+            <li><span class="placeholder-name">Client Name</span>: <span class="placeholder-key">client_name</span></li>
+            <li><span class="placeholder-name">Start Date</span>: <span class="placeholder-key">start_date</span></li>
+            <li><span class="placeholder-name">End Date</span>: <span class="placeholder-key">end_date</span></li>
+            <li><span class="placeholder-name">Position</span>: <span class="placeholder-key">position</span></li>
+            <li><span class="placeholder-name">Salary</span>: <span class="placeholder-key">salary</span></li>
+            <li><span class="placeholder-name">Contract Type</span>: <span class="placeholder-key">contract_type</span></li>
+            <li><span class="placeholder-name">Department</span>: <span class="placeholder-key">department</span></li>
+            <li><span class="placeholder-name">Supervisor</span>: <span class="placeholder-key">supervisor</span></li>
+            <li><span class="placeholder-name">Address</span>: <span class="placeholder-key">address</span></li>
+            <li><span class="placeholder-name">Project Name</span>: <span class="placeholder-key">project_name</span></li>
+            <li><span class="placeholder-name">Payment Terms</span>: <span class="placeholder-key">payment_terms</span></li>
+            <li><span class="placeholder-name">Deliverables</span>: <span class="placeholder-key">deliverables</span></li>
+            <li><span class="placeholder-name">Working Hours</span>: <span class="placeholder-key">working_hours</span></li>
+            <li><span class="placeholder-name">Agreement Date</span>: <span class="placeholder-key">agreement_date</span></li>
+            <li><span class="placeholder-name">Termination Clause</span>: <span class="placeholder-key">termination_clause</span></li>
+        </ul>
+    </div>
+    
+    
+</div>
+
+<script>
+    // Modal Script
+    const helpIcon = document.getElementById('help-icon');
+    const modal = document.getElementById('help-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    helpIcon.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
+
+{% endblock %}

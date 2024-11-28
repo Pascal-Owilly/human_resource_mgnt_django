@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views_absent_satffes import AbsentStaffersView, download_excel, download_pdf
 from .views_reset_imei import DeviceListView, reset_all_imeis, reset_single_imei
+from contract_management import views as contract_management_views
 
 app_name = 'hrms'
 
@@ -130,6 +131,18 @@ urlpatterns = [
     path('contract/<int:contract_id>/', views.contract_detail, name='contract_detail'),
     path('contract/sign/<int:contract_id>/', views.sign_contract, name='sign_contract'),
     path('download/sample-excel/', views.download_sample_excel, name='download_sample_excel'),
+
+# CONTRACT MANAGEMENT
+
+  # Create a contract template
+
+    path('contract_management/create-template/', contract_management_views.create_contract_template, name='create_contract_template'),
+    path('contract_management/create-contract/<int:template_id>/', contract_management_views.create_contract, name='create_contract'),
+    path('contract_management/bulk-upload/<int:template_id>/', contract_management_views.bulk_upload_contracts, name='bulk_upload_contracts'),
+    path('contract_management/templates/', contract_management_views.template_list, name='template_list'),
+    path('contract_management/contracts/', contract_management_views.contract_list, name='contract_list'),
+    path('contract_management/contract-preview/<int:contract_id>/', contract_management_views.contract_preview, name='contract_preview'),
+    path('user-search/', contract_management_views.user_search, name='user_search'),
 
 ]
     

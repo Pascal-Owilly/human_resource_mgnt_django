@@ -1,0 +1,196 @@
+{% extends 'hrms/layout.html' %}
+{% block title %} Contract Preview | JBL {% endblock title %}
+{% block content %}
+<div class="contract-preview-container">
+    <h2>Contract Preview</h2>
+    <div class="contract-content">
+        {{ contract.content|safe }}
+    </div>
+    <form method="post" class="send-contract-form">
+        {% csrf_token %}
+        
+        <label for="recipient_phone">Send To (Phone):</label>
+        <input type="text" name="recipient_phone" id="recipient_phone" placeholder="Enter recipient phone number" autocomplete="off">
+        <div id="user-suggestions" class="suggestions-box"></div>
+
+        <!-- Agreement Checkbox -->
+        <div class="agreement-section d-flex">
+            <input type="checkbox" id="agree_to_contract" name="agree_to_contract" required>
+            <label for="agree_to_contract">I agree to the terms of this contract.</label>
+        </div>
+
+        <!-- Signature with DocuSign -->    
+        <div class="signature-section">
+            <p>To sign the contract, click the "Sign with DocuSign" button below. Both your signature and JBL's signature will be appended to the contract.</p>
+            <button type="button" id="docusign-button" class="action-button">Sign with DocuSign</button>
+        </div>
+
+        <input type="hidden" name="docusign_signature" id="docusign_signature">
+
+        <!-- Notify User Button -->
+        <button type="submit" name="notify_user">Notify User</button>
+    </form>
+</div>
+
+<style>
+    .contract-preview-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .contract-content {
+        padding: 15px;
+        background: #f9f9f9;
+        border-left: 4px solid #773697;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+        font-family: 'Courier New', monospace;
+    }
+    .send-contract-form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+    .send-contract-form input,
+    .send-contract-form button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .agreement-section {
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .agreement-section input {
+        margin-right: 10px;
+    }
+    .signature-section {
+        margin-bottom: 20px;
+    }
+    .action-button {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #773697;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 1em;
+        cursor: pointer;
+    }
+    .action-button:hover {
+        background-color: #5e2d73;
+    }
+
+    .agreement-section {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.agreement-section input[type="checkbox"] {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    accent-color: #773697; /* Custom color for modern browsers */
+    cursor: pointer;
+}
+
+.agreement-section label {
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+.agreement-section:hover {
+    background-color: #f4f4f4;
+    border-color: #ccc;
+}
+
+.agreement-section input[type="checkbox"]:focus {
+    outline: 2px solid #773697;
+    outline-offset: 2px;
+}
+
+.suggestions-box {
+        border: 1px solid #ddd;
+        background-color: #fff;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1000;
+        width: 100%;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    .suggestion-item {
+        padding: 8px 10px;
+        cursor: pointer;
+    }
+    .suggestion-item:hover {
+        background-color: #f4f4f4;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("recipient_phone");  // Ensure this is the correct input ID for phone number
+        const suggestionsBox = document.getElementById("user-suggestions");
+
+        input.addEventListener("input", function () {
+            const query = input.value.trim();
+
+            if (query.length > 1) {
+                fetch(`/user-search/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.length > 0) {
+                            suggestionsBox.style.display = "block";
+                            data.forEach(user => {
+                                const suggestion = document.createElement("div");
+                                suggestion.classList.add("suggestion-item");
+                                suggestion.textContent = `${user.name} (${user.phone_number})`;
+                                suggestion.dataset.phone_number = user.phone_number;
+
+                                suggestion.addEventListener("click", function () {
+                                    input.value = user.phone_number;  // Set input to the selected phone number
+                                    suggestionsBox.style.display = "none";  // Hide suggestions box
+                                });
+
+                                suggestionsBox.appendChild(suggestion);
+                            });
+                        } else {
+                            suggestionsBox.style.display = "none";  // Hide suggestions box if no data
+                        }
+                    });
+            } else {
+                suggestionsBox.style.display = "none";  // Hide suggestions box if query is too short
+            }
+        });
+
+        // Hide suggestions box when clicking outside the suggestions list
+        document.addEventListener("click", function (event) {
+            if (!suggestionsBox.contains(event.target) && event.target !== input) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    });
+</script>
+{% endblock %}

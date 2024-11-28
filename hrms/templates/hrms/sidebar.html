@@ -258,34 +258,18 @@ body {
             </a>    
         </li>
         {% endif %}
-   
         {% if request.user.is_superuser %}
 
 <li class="nav-item">
-    <a class="nav-link" data-toggle="collapse" href="#contract-basic" aria-expanded="false" aria-controls="contract-basic">
+    <a class="nav-link"  href="{% url 'hrms:template_list' %}" >
         <i class="fa fa-file-contract "></i>
         <span class="menu-title ">&emsp;Contract Module</span>
         <i class="menu-arrow "></i>
     </a>
+   
 </li>
-<div class="collapse mx-1 mt-1" id="contract-basic" >
-    <ul class="nav flex-column sub-menu" style="border-radius: 30px;">
-        <li class="nav-item bg-light">
-            
-            <a class="nav-link text-dark" href="{% url 'hrms:contract_dashboard' %}"> 
-                <i class="fa fa-tachometer-alt"></i>
-                &emsp;
-                Dashboard</a>
-        </li>
-        <li class="nav-item bg-light ">
-            <a class="nav-link text-dark" href="{% url 'hrms:clnt_new' %}">
-                <i class="fa fa-plus text-dark"></i>&emsp;New Contract</a>
-        </li>
-    </ul>
 
-</div>
 {% endif %}
-
          
         {% if request.user.is_superuser %}
         <li class="nav-item">

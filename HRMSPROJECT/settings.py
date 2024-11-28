@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     'hrms',
     'rest_framework',
     'corsheaders',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
+    'contract_management'
 ]
 
 REST_FRAMEWORK = {
@@ -181,3 +182,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 
 # This limit includes form data and file content, adjust if necessary
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
+# Twilio
+TWILIO_ACCOUNT_SID = 'your_twilio_account_sid'
+TWILIO_AUTH_TOKEN = 'your_twilio_auth_token'
+TWILIO_PHONE_NUMBER = '+254712154175'  # Replace with your Twilio phone number
+

@@ -1,0 +1,16 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Create Template | JBL {% endblock title %}
+{% block content %}
+    <h1>Generated Contracts</h1>
+    <ul>
+        {% for contract in contracts %}
+            <li>
+                Contract from Template: {{ contract.template.name }} <br>
+                Content Preview: {{ contract.content|truncatechars:100 }} <br>
+                <a href="#">Download Contract</a> <!-- Add download functionality later -->
+            </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+

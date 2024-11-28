@@ -1,0 +1,116 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Create Template | JBL {% endblock title %}
+{% block content %}
+
+<style>
+    .container {
+        width: 90%;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #444;
+        text-align: center;
+    }
+
+    .action-button {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .action-button:hover {
+        background-color: #45a049;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .list > ul li {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #f1f1f1;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    ul li a {
+        color: #007BFF;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    ul li a:hover {
+        text-decoration: underline;
+    }
+
+    .template-name {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        color: #ccc;
+        margin-bottom: 10px;
+    }
+
+    .empty-state-message {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container">
+    <h1>Contract Templates</h1>
+
+    <a href="{% url 'hrms:create_contract_template' %}" class="action-button bg-primary create-template">Create New Template</a>
+
+    {% if templates %}
+        <div class="list">
+            <ul>
+                {% for template in templates %}
+                    <li>
+                        <span class="template-name">{{ template.name }}</span>
+                        <div>
+                            <a href="{% url 'hrms:create_contract' template.id %}">Use Template</a>
+                            <a href="{% url 'hrms:bulk_upload_contracts' template.id %}">Bulk Upload</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📄</div>
+            <p class="empty-state-message">No templates available. Create your first template to get started!</p>
+            <a href="{% url 'hrms:create_contract_template' %}" class="action-button">Create Template</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

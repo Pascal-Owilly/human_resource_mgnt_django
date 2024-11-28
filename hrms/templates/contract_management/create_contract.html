@@ -1,0 +1,105 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Create Contract | JBL {% endblock title %}
+{% block content %}
+
+<div class="create-contract-container">
+    <form method="post" class="contract-form">
+        {% csrf_token %}
+        <h3 class="template-name">Template: {{ template.name }}</h3>
+        <p class="template-content">{{ template.template_content }}</p>
+        <hr class="divider">
+        <div class="placeholders-container">
+            
+        </div>
+        <button type="submit" class="generate-button">Generate Contract</button>
+    </form>
+</div>
+
+<style>
+    .create-contract-container {
+        max-width: 700px;
+        margin: 20px auto;
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    .contract-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .template-name {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .template-content {
+        font-size: 1em;
+        color: #666;
+        margin-bottom: 10px;
+        background: #f9f9f9;
+        padding: 10px;
+        border-left: 4px solid #773697;
+        border-radius: 4px;
+    }
+
+    .divider {
+        border: 0;
+        height: 1px;
+        background: #ddd;
+        margin: 20px 0;
+    }
+
+    .placeholder-heading {
+        font-size: 1.2em;
+        color: #444;
+        margin-bottom: 10px;
+    }
+
+    .placeholders-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .placeholder-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .placeholder-label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .placeholder-input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+        width: 100%;
+    }
+
+    .generate-button {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #773697;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .generate-button:hover {
+        background-color: #5e2d73;
+    }
+</style>
+{% endblock %}
