@@ -86,12 +86,12 @@
 </style>
 
 <div class="container">
-    <h1>Contract Templates</h1>
 
+    <h1>Contract Templates</h1>
     <a href="{% url 'hrms:create_contract_template' %}" class="action-button bg-primary create-template">Create New Template</a>
 
     {% if templates %}
-        <div class="list">
+        <div class="list">      
             <ul>
                 {% for template in templates %}
                     <li>

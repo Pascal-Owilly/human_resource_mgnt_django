@@ -1,0 +1,329 @@
+{% extends 'hrms/layout.html' %}
+{% block title %} Contract Signature {% endblock %}
+
+{% block content %}
+<div class="contract-signature-container">
+    <div class="header">
+        <h2>Sign Your Contract</h2>
+        <p class="subheading">Please review and sign the contract below to proceed.</p>
+    </div>
+
+    <form method="post" class="contract-signature-form">
+        {% csrf_token %}
+
+        <!-- Signature Field -->
+        <div class="signature-section">
+            <label for="signature" class="section-title">Draw Your Signature</label>
+            <div id="signaturePad" class="signature-pad">
+                <div class="signature-placeholder">
+                    <i class="fas fa-pen"></i>
+                    <span>Sign here...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Preview Section -->
+        <div class="signature-preview-section">
+            <h3 class="section-title">Your Signature:</h3>
+            {% if contract.signature %}
+            <div class="signature-status signed">
+                <p class="status-text">Signed</p>
+                <img src="data:image/png;base64,{{ contract.signature|safe }}" alt="User Signature" class="signature-img">
+            </div>
+        {% else %}
+            <div class="signature-status not-signed">
+                <p class="status-text">Not Signed</p>
+            </div>
+            <!-- Signature Preview -->
+            <div class="signature-field">
+                <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                <button type="button" onclick="showPreview()" class="btn-preview">Preview Signature</button>
+                <img id="signaturePreview" alt="Preview Signature" class="signature-preview-img" />
+            </div>
+        {% endif %}
+        
+        </div>
+
+        <!-- Agreement Section -->
+        <div class="agreement-section">
+            <div class="agreement-container">
+                <input type="checkbox" id="agree_to_contract" name="agree_to_contract" required>
+                <label for="agree_to_contract">I agree to the terms of this contract.</label>
+            </div>
+        </div>
+
+        <!-- Hidden Input for Signature Data -->
+        <input type="hidden" name="signature_data" id="signature_data">
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button" {% if not contract.signature %}disabled{% endif %}>Submit Signature</button>
+    </form>
+</div>
+
+<!-- Styles -->
+<style>
+    /* body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;  
+        padding: 0;
+        color: #333;
+    } */
+
+    .contract-signature-container {
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 40px;
+        background: linear-gradient(to right, #f0f0f0, #fafafa);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        color: #333;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .header h2 {
+        font-size: 2.3rem;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .subheading {
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        color: #777;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .contract-signature-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signature-pad {
+        margin-top: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        border: 2px solid #773697;
+        padding: 10px;
+        width: 100%;
+        height: 200px;
+        margin-bottom: 20px;
+    }
+
+    .signature-preview-section {
+        margin-top: 30px;
+    }
+
+    .signature-status {
+        margin-top: 20px;
+        font-size: 1.1rem;
+    }
+
+    .signed {
+        color: #4CAF50;
+    }
+
+    .not-signed {
+        color: #f44336;
+    }
+
+    .status-text {
+        font-weight: bold;
+    }
+
+    .signature-canvas {
+        width: 100%;
+        height: 200px;
+        border: 2px solid #773697;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+
+    .btn-preview {
+        padding: 10px 20px;
+        margin-top: 15px;
+        background-color: #5e2d73;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+    }
+
+    .btn-preview:hover {
+        background-color: #773697;
+    }
+
+    .signature-preview-img {
+        margin-top: 20px;
+        max-width: 300px;
+        border: 2px solid #773697;
+        border-radius: 10px;
+    }
+
+    .agreement-section {
+        margin-top: 40px;
+    }
+
+    .agreement-container {
+        text-align: left;
+        font-size: 1rem;
+        color: #f5f5f5;
+        margin-bottom: 20px;
+    }
+
+    .submit-button {
+        padding: 12px 30px;
+        background-color: #773697;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 30px;
+    }
+
+    .submit-button:hover {
+        background-color: #5e2d73;
+    }
+
+    .submit-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .signature-pad {
+        position: relative;
+        margin-top: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        border: 2px dashed #773697;
+        padding: 10px;
+        width: 100%;
+        max-width: 600px;
+        height: 200px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #bbb;
+        pointer-events: none;
+        text-align: center;
+        user-select: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .signature-placeholder i {
+        font-size: 2rem;
+        margin-bottom: 5px;
+        color: #bbb;
+    }
+
+    .signature-pad.drawing .signature-placeholder {
+        opacity: 0; /* Hide placeholder when drawing starts */
+    }
+
+    .signature-section .section-title {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    /* Responsive Styling */
+    @media (max-width: 768px) {
+        .contract-signature-container {
+            width: 95%;
+            padding: 20px;
+        }
+
+        .signature-pad {
+            width: 100%;
+            height: 180px;
+        }
+
+        .signature-canvas {
+            height: 180px;
+        }
+
+        .signature-preview-img {
+            width: 80%;
+            margin-top: 20px;
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jSignature/2.1.2/jSignature.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize the signature pad
+        var $signaturePad = $("#signatureCanvas").jSignature();
+
+        // Show preview function
+        window.showPreview = function () {
+            var dataURL = $signaturePad.jSignature("getData", "base64");
+            $("#signaturePreview").attr("src", "data:image/png;base64," + dataURL[1]); // Display signature preview
+            $("#signature_data").val(dataURL[1]); // Store the signature data
+
+            // Enable submit button after preview
+            if (dataURL[1]) {
+                $(".submit-button").prop("disabled", false);
+            }
+        };
+
+        // Optional: Clear button to reset signature
+        $('#clear-signature').click(function () {
+            $signaturePad.jSignature("reset");
+            $("#signaturePreview").attr("src", ""); // Reset preview image
+            $("#signature_data").val(""); // Clear the hidden field
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        var $signaturePad = $("#signaturePad");
+        var $signaturePlaceholder = $(".signature-placeholder");
+        
+        // Initialize signature pad
+        var $signatureCanvas = $signaturePad.jSignature();
+
+        // Detect drawing to hide the placeholder
+        $signatureCanvas.on("change", function () {
+            $signaturePad.addClass("drawing");
+        });
+
+        // Optional: Reset placeholder when cleared
+        $("#clear-signature").on("click", function () {
+            $signatureCanvas.jSignature("reset");
+            $signaturePad.removeClass("drawing");
+        });
+    });
+</script>
+
+
+{% endblock %}

@@ -23,3 +23,14 @@ class Contract(models.Model):
 
     def __str__(self):
         return f"Contract for {self.template.name} ({self.created_at})"
+
+# Contract signature
+from jsignature.fields import JSignatureField
+
+class ContractSignature(models.Model):
+    full_name = models.CharField(max_length=255)    
+    signature = JSignatureField()
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+
+    def __str__(self):
+        return f"Signature for {self.full_name} - ({self.created_at})"

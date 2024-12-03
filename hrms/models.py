@@ -120,8 +120,12 @@ class User(AbstractUser):
             self.mng_id = self.generate_mng_id()
         super().save(*args, **kwargs)
 
+    def get_full_name(self):
+        full_name = f"{self.first_name} {self.last_name} ({self.username})".strip()
+        return full_name
+
     def generate_emp_id(self):
-        return self.generate_short_id('emp-', 'emp_id')
+        return self.generate_short_id('emp-', 'emp_id') 
 
     def generate_mng_id(self):
         return self.generate_short_id('mng-', 'mng_id')
@@ -259,12 +263,12 @@ class Recruitment(models.Model):
     email = models.EmailField(max_length=25)
     phone = models.CharField(max_length=11)
 
-    def __str__(self):
+    def __str__(    self):
         return self.first_name +' - '+self.position
 
 # Contract
 class Contract(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -280,9 +284,9 @@ class Contract(models.Model):
         return self.admin_signed and self.employee_signed
 
     def __str__(self):
-        first_name = self.employee.employee.first_name or ''
-        last_name = self.employee.employee.last_name or ''
-        email = self.employee.employee.email or ''
+        first_name = self.user.first_name or ''
+        last_name = self.user.last_name or ''
+        email = self.user.email or ''
         return f"{first_name} - {last_name} - {email}"
 
 

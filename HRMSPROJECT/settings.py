@@ -38,7 +38,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True  
 EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
 EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
-BASE_URL = '127.0.0.1:8000'
+BASE_URL = '127.0.0.1:8000  '
 
 PROTOCOL = 'http'   
 DOMAIN = '127.0.0.1:8000'
@@ -67,7 +67,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django.contrib.humanize',
-    'contract_management'
+    'contract_management',
+
+    # 3rd party
+    'jsignature',
 ]
 
 REST_FRAMEWORK = {
@@ -187,4 +190,8 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 TWILIO_ACCOUNT_SID = 'your_twilio_account_sid'
 TWILIO_AUTH_TOKEN = 'your_twilio_auth_token'
 TWILIO_PHONE_NUMBER = '+254712154175'  # Replace with your Twilio phone number
+
+# Signature
+JSIGNATURE_WIDTH = 500
+JSIGNATURE_HEIGHT = 200
 
