@@ -191,24 +191,137 @@
     background-color: #28a745 !important; /* Ensure green background */
 }
 
-</style>
+.signed {
+    color: green;
+    font-weight: bold;
+}
 
+.not-signed {
+    color: red;
+    font-weight: bold;
+}
+
+.fully-signed {
+    color: blue;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.4em 0.8em;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+
+</style>
 
 <div class="contract-preview-container">
     <h2 class="section-title">Contract Preview</h2>
     <div class="contract-content">
         {{ contract.content|safe }}
     </div>
- 
-    <form method="post" class="send-contract-form">
-        {% csrf_token %}
-        <label for="recipient_email">Send To (Email):</label>
-        <input type="text" name="recipient_email" id="recipient_email" placeholder="Search user by email, phone number or name" autocomplete="off" required>
-        <div id="user-suggestions" class="suggestions-box"></div>
-    
-        <button type="submit" class="btn-notify btn-success text-light">Notify User</button>
-    </form>
-</div>  
+
+    <!-- Notify User Form -->
+    {% if not contract.user_signed and not contract.admin_signed %}
+        <form method="post" class="send-contract-form">
+            {% csrf_token %}
+            <label for="recipient_email">Send To (Email):</label>
+            <input type="text" name="recipient_email" id="recipient_email" placeholder="Search user by email, phone number, or name" autocomplete="off" required>
+            <div id="user-suggestions" class="suggestions-box"></div>
+            <button type="submit" class="btn-notify btn-success text-light">Notify User</button>
+        </form>
+    {% elif contract.user_signed and not contract.admin_signed %}
+        <p class="email-sent-notification badge badge-info">
+            Contract has been successfully sent to {{ recipient_name }} ({{ recipient_email }}).
+        </p>
+    {% endif %}
+
+    <!-- Signature Status -->
+    {% if contract.user_signed and contract.admin_signed %}
+        <!-- Fully Signed Badge -->
+        <p class="badge badge-primary">
+            This contract is fully signed by {{ contract.user.get_full_name|default:contract.user.username }} and Admin.
+        </p>
+    {% else %}
+        <div class="signature-status">
+            <div class="badge-container">
+                <!-- Employee Signature Status -->
+                <span class="badge {% if contract.user_signed %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if contract.user_signed %}
+                        Signed by Employee {{ contract.user.get_full_name|default:contract.user.username }}
+                    {% else %}
+                        Awaiting Employee Signature
+                    {% endif %}
+                </span>
+
+                <!-- Admin Signature Status -->
+                <span class="badge {% if contract.admin_signed %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if contract.admin_signed %}
+                        Signed by Admin
+                    {% else %}
+                        Awaiting Admin Signature
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Signature Actions -->
+    {% if not contract.user_signed and not contract.admin_signed %}
+        <!-- Employee signature action -->
+        {% if request.user.role == 'employee' %}
+        <form method="post" action="{% url 'hrms:sign_contract' contract.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-preview-signature">Sign as Employee</button>
+        </form>
+        {% endif %}
+
+        <!-- Admin signature action -->
+        {% if request.user.role == 'superuser' or request.user.role == 'human_resource_manager' %}
+        <form method="post" action="{% url 'hrms:sign_contract' contract.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-preview-signature">Sign as Admin</button>
+        </form>
+        {% endif %}
+    {% endif %}
+</div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

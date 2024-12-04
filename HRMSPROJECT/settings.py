@@ -38,7 +38,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True  
 EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
 EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
-BASE_URL = '127.0.0.1:8000  '
+BASE_URL = '127.0.0.1:8000'
 
 PROTOCOL = 'http'   
 DOMAIN = '127.0.0.1:8000'
@@ -170,6 +170,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
 # LOGIN_REDIRECT_URL = 'hrms:dashboard'
+LOGIN_URL = '/login/'  # Replace with your actual login URL
 
 LOGOUT_REDIRECT_URL = '/login/' 
 

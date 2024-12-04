@@ -1,4 +1,5 @@
 from django.db import models
+from hrms.models import User
 
 class Placeholder(models.Model):
     name = models.CharField(max_length=255)  # Placeholder name (e.g., 'Full Name')
@@ -17,9 +18,16 @@ class ContractTemplate(models.Model):
         return self.name
 
 class Contract(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     template = models.ForeignKey(ContractTemplate, on_delete=models.CASCADE)
     content = models.TextField()
+    user_signed = models.BooleanField(default=False)
+    admin_signed = models.BooleanField(default=False)
+    email_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_fully_signed(self):
+        return self.user_signed and self.admin_signed
 
     def __str__(self):
         return f"Contract for {self.template.name} ({self.created_at})"

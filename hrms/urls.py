@@ -144,8 +144,11 @@ urlpatterns = [
     path('contract_management/contract-preview/<int:contract_id>/', contract_management_views.contract_preview, name='contract_preview'),
     path('user-search/', contract_management_views.user_search, name='user_search'),
     # path('contract_management/js-signature/<int:contract_id>/', contract_management_views.sign_contract, name='sign_contract'),
-    path('contract/<int:contract_id>/review/', contract_management_views.contract_preview, name='sign_contract'),
+    # path('contract/<int:contract_id>/review/', contract_management_views.contract_preview, name='sign_contract'),
     path('contract/<int:contract_id>/sign/', contract_management_views.sign_contract, name='sign_contract'),
+
+    path('sign/user/<int:contract_id>/', contract_management_views.sign_contract_user, name='sign_contract_user'),
+    path('sign/admin/<int:contract_id>/', contract_management_views.sign_contract_admin, name='sign_contract_admin'),
 
 ]   
     
