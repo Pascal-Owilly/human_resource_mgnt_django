@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 # User Search for Contract Signatories
 @login_required
@@ -71,6 +72,14 @@ def create_contract(request, template_id):
         return redirect('hrms:contract_preview', contract_id=contract.id)
 
     return render(request, 'contract_management/create_contract.html', {'template': template})
+
+@login_required
+def contract_list(request):
+    # Fetch all contracts
+    contracts = Contract.objects.all().select_related('template', 'user').order_by('-created_at')
+    
+    # Pass contracts to the template for rendering
+    return render(request, 'contract_management/contract_list.html', {'contracts': contracts})
 
 @login_required
 def contract_preview(request, contract_id):
@@ -172,9 +181,27 @@ def sign_contract_admin(request, contract_id):
     return JsonResponse({"status": "error", "message": "Invalid request."})
     
 @login_required
-def template_list(request):
+def combined_contract_and_template_list(request):
+    # Fetch contracts and templates
+    contracts = Contract.objects.all().select_related('template', 'user').order_by('-created_at')
     templates = ContractTemplate.objects.all()
-    return render(request, 'contract_management/template_list.html', {'templates': templates})
+
+    # Pagination for contracts (15 per page)
+    contract_paginator = Paginator(contracts, 15)  # 15 contracts per page
+    contract_page_number = request.GET.get('contract_page')  # Get current page number
+    contract_page = contract_paginator.get_page(contract_page_number)
+
+    # Pagination for templates (5 per page)
+    template_paginator = Paginator(templates, 5)  # 5 templates per page
+    template_page_number = request.GET.get('template_page')  # Get current page number
+    template_page = template_paginator.get_page(template_page_number)
+
+    # Pass both paginated contracts and templates to the template
+    return render(request, 'contract_management/template_list.html', {
+        'contracts': contract_page,
+        'templates': template_page
+    })
+
 
 # List all Generated Contracts
 @login_required

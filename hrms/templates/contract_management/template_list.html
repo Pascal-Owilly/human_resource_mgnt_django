@@ -1,116 +1,340 @@
 {% extends 'hrms/layout.html' %}
-{% load static %}
-{% block title %} Create Template | JBL {% endblock title %}
+{% block title %} Contracts & Templates List | JBL {% endblock title %}
 {% block content %}
 
 <style>
+    /* Global Styles */
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+    }
+
     .container {
-        width: 90%;
-        max-width: 800px;
-        margin: 20px auto;
+        width: 95%;
+        max-width: 1100px;
+        margin: 40px auto;
         padding: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
         border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-        color: #444;
+        font-size: 22px;
+        color: #333;
         text-align: center;
+        margin-bottom: 20px;
+        font-weight: 600;
     }
 
+    /* Section Titles */
+    .section-title {
+        font-size: 18px;
+        color: #444;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #ddd;
+        font-weight: 500;
+    }
+
+    /* Action Button */
     .action-button {
         display: inline-block;
+        background-color: #007bff;
         color: white;
-        text-decoration: none;
-        padding: 10px 20px;
-        margin-bottom: 20px;
+        padding: 8px 15px;
+        font-size: 14px;
         border-radius: 4px;
         font-weight: bold;
         text-align: center;
+        margin-bottom: 10px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
     }
 
     .action-button:hover {
-        background-color: #45a049;
+        background-color: #0056b3;
     }
 
-    ul {
-        list-style-type: none;
+    /* Table Styles */
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+    }
+
+    th {
+        background-color: #f4f7fb;
+        color: #444;
+    }
+
+    td {
+        color: #555;
+    }
+
+    /* Pagination Styles */
+    .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination {
+        display: inline-block;
         padding: 0;
+        margin: 0;
     }
 
-    .list > ul li {
-        margin: 10px 0;
-        padding: 10px;
-        background-color: #f1f1f1;
+    .pagination a {
+        color: #007bff;
+        padding: 6px 12px;
+        margin: 0 4px;
+        text-decoration: none;
         border: 1px solid #ddd;
         border-radius: 4px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        font-size: 12px;
+        transition: background-color 0.3s ease;
     }
 
-    ul li a {
-        color: #007BFF;
-        text-decoration: none;
-        font-weight: bold;
-        margin-left: 10px;
+    .pagination a:hover {
+        background-color: #f4f7fb;
+        border-color: #007bff;
     }
 
-    ul li a:hover {
-        text-decoration: underline;
+    .pagination .current {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
     }
 
-    .template-name {
-        font-weight: bold;
-        color: #333;
+    .pagination a.disabled {
+        color: #ccc;
+        pointer-events: none;
     }
 
+    /* Badge Styles */
+    .badge-success {
+        background-color: #28a745;
+        padding: 4px 8px;
+        color: white;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+    .badge-primary {
+        background-color: #007bff;
+        padding: 4px 8px;
+        color: white;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        padding: 4px 8px;
+        color: white;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+    .badge-danger {
+        background-color: #dc3545;
+        padding: 4px 8px;
+        color: white;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+    /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 40px 20px;
+        padding: 15px;
         color: #888;
+        font-size: 14px;
     }
 
-    .empty-state-icon {
-        font-size: 64px;
-        color: #ccc;
+    /* Grid System */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .grid-item {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .grid-item h3 {
+        font-size: 16px;
         margin-bottom: 10px;
     }
 
-    .empty-state-message {
-        font-size: 18px;
-        margin-bottom: 20px;
+    /* .grid-item a {
+        display: inline-block;
+        background-color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        text-decoration: none;
+        margin-top: 10px;
+        transition: background-color 0.3s ease;
+    } */
+
+    .grid-item a:hover {
+        background-color: #0056b3;  
+    }
+
+    .section-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 5px;
+        margin-top: 30px;
+        position: relative; /* Allow absolute positioning of button */
+    }
+
+    .button-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .action-button {
+        background-color: #fff;
+        text-decoration: none;
+        padding:10px 20px;
+        border-radius: 4px;
+    }
+
+    .action-button:hover {
+        background-color: #0056b3;
+    }
+    .template-btn{
+        font-size: 11px;
     }
 </style>
 
 <div class="container">
-
-    <h1>Contract Templates</h1>
-    <a href="{% url 'hrms:create_contract_template' %}" class="action-button bg-primary create-template">Create New Template</a>
-
-    {% if templates %}
-        <div class="list">      
-            <ul>
-                {% for template in templates %}
-                    <li>
-                        <span class="template-name">{{ template.name }}</span>
-                        <div>
-                            <a href="{% url 'hrms:create_contract' template.id %}">Use Template</a>
-                            <a href="{% url 'hrms:bulk_upload_contracts' template.id %}">Bulk Upload</a>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
+    <div class="section-title">
+        Contract Dashboard 
+        <div class="button-container">
+            <a href="{% url 'hrms:create_contract_template' %}" class="action-button btn btn-sm btn-warning text-dark">Create New Template</a>
         </div>
-    {% else %}
+    </div>
+    
+    <!-- Template List Section -->
+    <div>
+        {% if templates %}
+        <div class="grid-container">
+            {% for template in templates %}
+            <div class="grid-item">
+                <h3>{{ template.name }}</h3>
+                <a href="{% url 'hrms:create_contract' template.id %}" class="btn-sm template-btn btn btn-warning text-dark" style="font-size: 11px;">Use Template</a>
+                <a href="{% url 'hrms:bulk_upload_contracts' template.id %}" class="btn-sm btn btn-success text-dark" style="font-size: 11px;">Bulk Upload</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination for Templates -->
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if templates.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ templates.previous_page_number }}">Previous</a>
+                {% endif %}
+                
+                <span class="current">Page {{ templates.number }} of {{ templates.paginator.num_pages }}</span>
+                
+                {% if templates.has_next %}
+                    <a href="?page={{ templates.next_page_number }}">Next</a>
+                    <a href="?page={{ templates.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
         <div class="empty-state">
-            <div class="empty-state-icon">📄</div>
-            <p class="empty-state-message">No templates available. Create your first template to get started!</p>
-            <a href="{% url 'hrms:create_contract_template' %}" class="action-button">Create Template</a>
+            <p>No templates available. Create your first template to get started!</p>
         </div>
-    {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Contract List Section -->
+    <div>
+        <div class="section-title">Contracts</div>
+        <table class="table-responsive">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Contract Template</th>
+                    <th>Created At</th>
+                    <th>Employee</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ contract.template.name }}</td>
+                    <td>{{ contract.created_at|date:"F j, Y" }}</td>
+                    <td>{{ contract.user.get_full_name }}</td>
+                    <td>
+                        {% if contract.is_fully_signed %}
+                        <span class="badge badge-success">Fully Signed</span>
+                        {% elif contract.user_signed %}
+                        <span class="badge badge-primary">Signed by Employee</span>
+                        {% elif contract.admin_signed %}
+                        <span class="badge badge-warning">Signed by Admin</span>
+                        {% elif contract.email_sent %}
+                        <span class="badge badge-warning">Sent to employee</span>
+                        {% else %}
+                        <span class="badge badge-danger">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'hrms:contract_preview' contract.id %}" class="btn btn-info">View Contract</a>
+                        {% if not contract.admin_signed and not contract.is_fully_signed %}
+                        <a href="{% url 'hrms:sign_contract' contract.id %}" class="btn btn-warning">Sign Contract</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No contracts found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+
+        <!-- Pagination for Contracts -->
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if contracts.has_previous %}
+                    <a href="?contract_page=1">&laquo; First</a>
+                    <a href="?contract_page={{ contracts.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ contracts.number }} of {{ contracts.paginator.num_pages }}</span>
+
+                {% if contracts.has_next %}
+                    <a href="?contract_page={{ contracts.next_page_number }}">Next</a>
+                    <a href="?contract_page={{ contracts.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
