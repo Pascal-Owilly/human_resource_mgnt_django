@@ -9,13 +9,13 @@ class Placeholder(models.Model):
         return self.name
 
 class ContractTemplate(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True, blank=True)
     template_content = models.TextField()  # Contract content with placeholders
     placeholders = models.ManyToManyField(Placeholder)  # Selectable placeholders
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return f"Contract for {self.id}"
 
 class Contract(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -24,7 +24,10 @@ class Contract(models.Model):
     user_signed = models.BooleanField(default=False)
     admin_signed = models.BooleanField(default=False)
     email_sent = models.BooleanField(default=False)
+    signature = models.TextField(blank=True, null=True)  # For storing signature data
+    initials = models.CharField(max_length=5, blank=True, null=True)  # For initials
     created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def is_fully_signed(self):
         return self.user_signed and self.admin_signed

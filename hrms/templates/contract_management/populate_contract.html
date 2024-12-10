@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populate and Send Contract</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .contract-preview {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap; /* Preserve newlines in the contract content */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Fill in the Contract Details</h2>
+        
+        <!-- Display the contract template name -->
+        <p><strong>Contract Template: </strong>{{ contract.template.name }}</p>
+        
+        <!-- Form to fill in the placeholders -->
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for placeholder in placeholders %}
+                <div class="form-group">
+                    <label for="{{ placeholder.key }}">{{ placeholder.name }}:</label>
+                    <input type="text" id="{{ placeholder.key }}" name="{{ placeholder.key }}" placeholder="Enter {{ placeholder.name }}" required>
+                </div>
+            {% endfor %}
+            
+            <button type="submit">Populate Contract</button>
+        </form>
+
+        {% if contract.content %}
+            <!-- Display the populated contract -->
+            <div class="contract-preview">
+                <h3>Contract Preview:</h3>
+                <pre>{{ contract.content|safe }}</pre>
+            </div>
+
+            <!-- Button to send the contract via email -->
+            <form method="POST" action="{% url 'hrms:populate_contract' contract.id %}">
+                {% csrf_token %}
+                <button type="submit">Send Contract to Emails</button>
+            </form>
+        {% endif %}
+    </div>
+</body>
+</html>

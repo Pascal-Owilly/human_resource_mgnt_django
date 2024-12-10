@@ -1,7 +1,7 @@
     {% extends 'hrms/layout.html' %}
+    {% load static %}
     {% block title %} Contract Preview | JBL {% endblock title %}
     {% block content %}
-
 
     <style>
         /* Contract Preview Container */
@@ -18,15 +18,14 @@
         .section-title {
             font-size: 24px;
             color: #773697;
-            letter-spacing: 2px;
+            letter-spacing: 2px;    
             opacity: 0.3;
             font-weight: 800;
             margin-bottom: 20px;
-            font-family: 'Arial', sans-serif;
-
+            font-family: 'Arial', sans-serif;   
         }
 
-        .contract-content { 
+        .contract-content {     
             padding: 15px;
             background: #fafafa;
             border-left: 5px solid #773697;
@@ -172,7 +171,6 @@
         width: auto; /* Adjust button width to content */
         margin-top: 15px; /* Space above the button */
         transition: background-color 0.3s ease; /* Smooth transition for background color */
-        
     }
 
     /* Hover effect to change the background color */
@@ -248,80 +246,175 @@
         color: white;
     }
 
+    .contract-letterhead {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 2px solid #773697; /* Dark purple color for the border */
+}
 
-    </style>
+.contract-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 2px solid #773697;
+}
 
-    <div class="contract-preview-container">
-        <h2 class="section-title">Contract Preview</h2>
-        <div class="contract-content">
-            {{ contract.content|safe }}
+.letterhead-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.company-logo {
+    width: 100px;
+    height: auto;
+}
+
+.letterhead-right {
+    flex: 2;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.company-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #773697;
+}
+
+.contract-reference,
+.contract-date {
+    font-size: 14px;
+    color: #555;
+}
+.logo {
+            width: 70px !important;
+            height: 70px !important;
+        }
+</style>
+<div class="container mt-5">
+
+{% if success %}
+    <div class="alert alert-success">
+        <strong>Success!</strong> Email sent successfully to {{ recipient_name }} ({{ recipient_email }}).
+    </div>
+{% elif success is not none %}
+    <div class="alert alert-danger">
+        <strong>Error!</strong> Failed to send email. Please try again.
+    </div>
+{% endif %}
+
+<div class="contract-preview-container mt-2 mb-2 m-auto">
+    <!-- Letterhead Section -->
+    <div class="contract-letterhead">
+        <div class="letterhead-left">
+            <img src="{% static 'hrms/images/logo.png' %}" class="logo" alt="Logo">
         </div>
+        <div class="letterhead-right">
+            <h1 class="company-name">Jawabu Best Limited</h1>
+            <p class="contract-reference">Contract Reference: {{ contract.id }}</p>
+            <p class="contract-date">Date: {{ contract.created_at|date:"F j, Y" }}</p>
+        </div>
+    </div>  
 
-        <!-- Notify User Form -->
-        {% if not contract.email_sent %}
-            <form method="post" class="send-contract-form">
-                {% csrf_token %}
-                <label for="recipient_email">Send To (Email):</label>
-                <input type="text" name="recipient_email" id="recipient_email" placeholder="Search user by email, phone number, or name" autocomplete="off" required>
-                <div id="user-suggestions" class="suggestions-box"></div>
-                <button type="submit" class="btn-notify btn-success text-light">Notify User</button>
-            </form>
-        {% elif contract.email_sent %}
-            <p class="email-sent-notification badge badge-info">
-                Contract has been successfully sent to employee for signature.
-            </p>
-        {% endif %}
+    <!-- Contract Preview Title -->
+    <h2 class="section-title">Contract Preview</h2>
+    <button id="populatePlaceholders" class="btn btn-primary">Populate Placeholders</button>
 
-        <!-- Signature Status -->
-        {% if contract.user_signed and contract.admin_signed %}
-            <!-- Fully Signed Badge -->
-            <p class="badge badge-primary">
-                This contract is fully signed by {{ contract.user.get_full_name|default:contract.user.username }} and Admin.
-            </p>
-        {% else %}
-            <div class="signature-status">
-                <div class="badge-container">
-                    <!-- Employee Signature Status -->
-                    <span class="badge {% if contract.user_signed %}badge-success{% else %}badge-danger{% endif %}">
-                        {% if contract.user_signed %}
-                            Signed by Employee {{ contract.user.get_full_name|default:contract.user.username }}
-                        {% else %}
-                            Awaiting Employee Signature
-                        {% endif %}
-                    </span>
-
-                    <!-- Admin Signature Status -->
-                    <span class="badge {% if contract.admin_signed %}badge-success{% else %}badge-danger{% endif %}">
-                        {% if contract.admin_signed %}
-                            Signed by Admin
-                        {% else %}
-                            Awaiting Admin Signature
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Signature Actions -->
-        {% if not contract.user_signed and not contract.admin_signed %}
-            <!-- Employee signature action -->
-            {% if request.user.role == 'employee' %}
-            <form method="post" action="{% url 'hrms:sign_contract' contract.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-preview-signature">Sign as Employee</button>
-            </form>
-            {% endif %}
-
-            <!-- Admin signature action -->
-            {% if request.user.role == 'superuser' or request.user.role == 'human_resource_manager' %}
-            <form method="post" action="{% url 'hrms:sign_contract' contract.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-preview-signature">Sign as Admin</button>
-            </form>
-            {% endif %}
-        {% endif %}
+    <div class="contract-content">
+        {{ contract.content|safe }}
     </div>
 
+   <!-- Notify User Form -->
+    {% if not contract.email_sent and not contract.user_signed and not contract.admin_signed %}
+    <!-- Show the form only if the email has not been sent -->
+    <form method="post" class="send-contract-form">
+        {% csrf_token %}
+        <label for="recipient_email">Send To (Email):</label>
+        <input type="text" name="recipient_email" id="recipient_email" placeholder="Search user by email, phone number, or name" autocomplete="off" required>
+        <div id="user-suggestions" class="suggestions-box"></div>
+        <button type="submit" class="btn-notify btn-success text-light">Notify User</button>
+    </form>
+    {% else %}
+    <!-- Display success message when email has been sent -->
+    <p class="email-sent-notification badge badge-info">
+        Contract sent to employee for signature.
+    </p>
+    {% endif %}
+
+    <!-- Signature Status -->
+    {% if contract.user_signed and contract.admin_signed %}
+        <!-- Fully Signed Badge -->
+        <p class="badge badge-primary">
+            This contract is fully signed by {{ contract.user.get_full_name|default:contract.user.username }} and Admin.
+        </p>
+    {% else %}
+        <div class="signature-status">
+            <div class="badge-container">
+                <!-- Employee Signature Status -->
+                <span class="badge {% if contract.user_signed %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if contract.user_signed %}
+                        Signed by Employee {{ contract.user.get_full_name|default:contract.user.username }}
+                    {% else %}
+                        Awaiting Employee Signature
+                    {% endif %}
+                </span>
+
+                <!-- Admin Signature Status -->
+                <span class="badge {% if contract.admin_signed %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if contract.admin_signed %}
+                        Signed by JBL
+                    {% else %}
+                        Awaiting JBL Signature
+                    {% endif %}
+                </span>
+
+                <!-- Contract Preview -->
+                <div class="contract-preview">
+                    {% if contract.signature_data %}
+                        <div class="contract-signature">
+                            <h3>Signed Contract:</h3>
+                            <img src="data:image/png;base64,{{ contract.signature_data }}" alt="Contract Signature">
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Signature Actions -->
+    {% if not contract.user_signed and not contract.admin_signed %}
+        <!-- Employee signature action -->
+        {% if request.user.role == 'employee' %}
+            <a href="{% url 'hrms:sign_contract' contract.id %}" class="btn btn-warning mt-2" style="color: black;">
+                <button type="" class="btn-preview-signature">Sign as Employee</button>
+            </a>
+        {% endif %}
+
+        <!-- Admin signature action -->
+        {% if request.user.is_superuser or request.user.is_staff or request.user.role == 'human_resource_manager' %}
+            <a href="{% url 'hrms:sign_contract' contract.id %}" class="btn btn-warning mt-2" style="color: black;">
+                Sign as Admin
+            </a>
+        {% endif %}
+    {% endif %}
+
+        <!-- Footer Section -->
+        <div class="contract-footer">
+        
+            <div class="letterhead-right">
+                <p class="contract-reference">&copy; Jawabu Best Limited</p>
+            </div>
+        </div> 
+</div>
+    
+</div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -390,6 +483,5 @@
             });
         });
     </script>
-
 
     {% endblock %}

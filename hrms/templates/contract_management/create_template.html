@@ -1,6 +1,6 @@
 {% extends 'hrms/layout.html' %}
 {% load static %}
-{% block title %} Create Template | JBL {% endblock title %}
+{% block title %}Create Template | JBL{% endblock title %}
 {% block content %}
 
 <!-- Main Content Section -->
@@ -8,110 +8,239 @@
     <form method="post">
         {% csrf_token %}
         <h2>Create Contract Template</h2>
-        <span class="help-icon" id="help-icon" title="Click for help">?</span>
+        <span class="help-icon" 
+      id="help-icon" 
+      title="Click for help" 
+      style="
+        display: inline-block; 
+        background-color: #ffffff; 
+        color: #007bff; 
+        font-size: 18px; 
+        font-weight: bold; 
+        width: 30px; 
+        height: 30px; 
+        line-height: 30px; 
+        text-align: center; 
+        border-radius: 50%; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        cursor: pointer; 
+        transition: transform 0.2s ease, box-shadow 0.2s ease;">
+    ?
+</span>
 
-        <label for="name">Contract Title:</label>
-        <input type="text" name="name" id="name" placeholder="Enter template name" required>
+        <div class="form-group">
+            <label for="name">Contract Title:</label>
+            <input type="text" name="name" id="name" placeholder="Enter template name" class="form-control" required>
+        </div>
 
-        <label for="template_content">Template Content:</label>
-        <textarea name="template_content" id="template_content" placeholder="Paste or create your contract content here..." required></textarea>
+        <div class="form-group" style="position: relative;">
+            <label for="template_content" style="font-weight: bold; display: block; margin-bottom: 8px;">Template Content:</label>
+            <textarea 
+                name="template_content" 
+                id="template_content" 
+                placeholder="Paste or create your contract content here..." 
+                class="form-control" 
+                style="
+                    width: 100%; 
+                    min-height: 100px; 
+                    max-height: 500px; 
+                    resize: vertical; 
+                    padding: 10px; 
+                    font-size: 14px; 
+                    border: 1px solid #ccc; 
+                    border-radius: 6px; 
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+                " 
+                required
+            ></textarea>
+        </div>
+        
 
-        <button type="submit">Create Template</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Template</button>
+        </div>
     </form>
 </div>
 
 <!-- Help Modal -->
-<div id="help-modal" class="modal">
-    <div class="modal-content">
+<div id="help-modal" class="modal" >
+    <div class="modal-content " >
         <span class="close-btn" id="close-modal">&times;</span>
         <h3>Designing a Contract Document</h3>
-        <p>We have <span class="highlight">20 placeholders</span>  Each placeholder includes a <span class="key-highlight">name</span> and a <span class="key-highlight">key</span>  Here's a list of available placeholders:</p>
+        <p>We have <span class="highlight">20 placeholders</span>. Each placeholder includes a <span class="key-highlight">name</span> and a <span class="key-highlight">key</span>. Here's a list of available placeholders:</p>
         
         <ul class="placeholder-list">
-            <li><span class="placeholder-name">Full Name</span>: <span class="placeholder-key">full_name</span></li>
-            <li><span class="placeholder-name">ID Number</span>: <span class="placeholder-key">id_number</span></li>
-            <li><span class="placeholder-name">Phone Number</span>: <span class="placeholder-key">phone_number</span></li>
-            <li><span class="placeholder-name">Employee Name</span>: <span class="placeholder-key">employee_name</span></li>
-            <li><span class="placeholder-name">Employer Name</span>: <span class="placeholder-key">employer_name</span></li>
-            <li><span class="placeholder-name">Client Name</span>: <span class="placeholder-key">client_name</span></li>
-            <li><span class="placeholder-name">Start Date</span>: <span class="placeholder-key">start_date</span></li>
-            <li><span class="placeholder-name">End Date</span>: <span class="placeholder-key">end_date</span></li>
-            <li><span class="placeholder-name">Position</span>: <span class="placeholder-key">position</span></li>
-            <li><span class="placeholder-name">Salary</span>: <span class="placeholder-key">salary</span></li>
-            <li><span class="placeholder-name">Contract Type</span>: <span class="placeholder-key">contract_type</span></li>
-            <li><span class="placeholder-name">Department</span>: <span class="placeholder-key">department</span></li>
-            <li><span class="placeholder-name">Supervisor</span>: <span class="placeholder-key">supervisor</span></li>
-            <li><span class="placeholder-name">Address</span>: <span class="placeholder-key">address</span></li>
-            <li><span class="placeholder-name">Project Name</span>: <span class="placeholder-key">project_name</span></li>
-            <li><span class="placeholder-name">Payment Terms</span>: <span class="placeholder-key">payment_terms</span></li>
-            <li><span class="placeholder-name">Deliverables</span>: <span class="placeholder-key">deliverables</span></li>
-            <li><span class="placeholder-name">Working Hours</span>: <span class="placeholder-key">working_hours</span></li>
-            <li><span class="placeholder-name">Agreement Date</span>: <span class="placeholder-key">agreement_date</span></li>
-            <li><span class="placeholder-name">Termination Clause</span>: <span class="placeholder-key">termination_clause</span></li>
+            {% for placeholder in placeholders %}
+            <li>
+                <span class="placeholder-name">{{ placeholder.name }}</span>: 
+                <span class="placeholder-key">{{ placeholder.key }}</span>
+            </li>
+            {% endfor %}
         </ul>
     </div>
-    
-    
 </div>
 
-<!-- Letterhead and Footer Styles -->
+<!-- Styles -->
 <style>
-    .letterhead, .footer {
-        text-align: center;
-        background-color: #f5f5f5;
-        padding: 20px;
-    }
-    .letterhead {
-        border-bottom: 3px solid #007BFF;
-    }
-    .footer {
-        margin-top: 40px;
-        border-top: 1px solid #ddd;
-        font-size: 14px;
-        color: #555;
-    }
-    .footer a {
-        color: #007BFF;
-        text-decoration: none;
-    }
-    .footer a:hover {
-        text-decoration: underline;
-    }
-    .logo-img {
-        height: 80px;
-    }
-    .company-name {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        margin: 5px 0;
-    }
-    .company-address, .company-contact {
-        font-size: 14px;
-        color: #555;
-    }
+ 
+
     .create-template-container {
-        max-width: 800px;
-        margin: 30px auto;
+        width: 800px;
+        margin: 40px auto;
         background: #ffffff;
         border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    form {
+
+    h2 {
+        font-size: 24px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
         width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
     }
+
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .form-actions {
+        text-align: center;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
     .help-icon {
         float: right;
         font-size: 18px;
         font-weight: bold;
-        color: #007BFF;
+        color: #007bff;
         cursor: pointer;
     }
+
     .help-icon:hover {
         color: #0056b3;
     }
-    /* Modal Styles (optional) */
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 600px;
+        text-align: left;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .modal-content p {
+        color: #555;
+    }
+
+    .placeholder-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .placeholder-list li {
+        margin: 5px 0;
+    }
+
+    .placeholder-name {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .placeholder-key {
+        font-style: italic;
+        color: #555;
+    }
+
+    .close-btn {
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .close-btn:hover {
+        color: #007bff;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #007bff;
+    }
 </style>
 
-{% endblock %}
+<!-- JavaScript -->
+<script>
+    document.getElementById('help-icon').onclick = function() {
+        document.getElementById('help-modal').style.display = 'flex';
+    };
+
+    document.getElementById('close-modal').onclick = function() {
+        document.getElementById('help-modal').style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('help-modal')) {
+            document.getElementById('help-modal').style.display = 'none';
+        }
+    };
+</script>
+
+{% endblock content %}

@@ -1,0 +1,30 @@
+{% extends 'hrms/layout.html' %}
+{% load static %}
+{% block title %} Contract Signed Successfully | JBL {% endblock title %}
+
+{% block content %}
+<div class="container">
+    <div class="success-container">
+        <div class="card text-center shadow-lg rounded">
+            <div class="card-header text-white" style="background-color: #00FF00;">
+                <h4 class="my-2 text-dark">🎉 Contract Signed Successfully!</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text lead">
+                    The contract for 
+                    <strong>{{ contract.user.get_full_name }}</strong> 
+                    has been successfully signed.
+                </p>
+                <p>
+                    <strong>Template:</strong> {{ contract.template.name }}
+                </p>
+                <hr>
+            </div>
+            <div class="card-footer bg-light">
+                <small class="text-muted">JBL Contract Management System</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

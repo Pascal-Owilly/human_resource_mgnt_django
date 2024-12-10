@@ -222,6 +222,44 @@
     .template-btn{
         font-size: 11px;
     }
+
+    .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    width: 250px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn-primary {
+    padding: 5px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
 </style>
 
 <div class="container">
@@ -241,6 +279,7 @@
                 <h3>{{ template.name }}</h3>
                 <a href="{% url 'hrms:create_contract' template.id %}" class="btn-sm template-btn btn btn-warning text-dark" style="font-size: 11px;">Use Template</a>
                 <a href="{% url 'hrms:bulk_upload_contracts' template.id %}" class="btn-sm btn btn-success text-dark" style="font-size: 11px;">Bulk Upload</a>
+
             </div>
             {% endfor %}
         </div>
@@ -267,14 +306,28 @@
         </div>
         {% endif %}
     </div>
-
     <!-- Contract List Section -->
-    <div>
-        <div class="section-title">Contracts</div>
+       <br><br>
+    <div class="">
+        
+        <div class="section-header">
+            <div class="section-title">
+                <h3 class="">
+                    Contracts
+                </h3>
+            </div>
+
+            <form method="get" class="search-form">
+                <input type="text" name="search" placeholder="Search by name, phone, or email"
+                       value="{{ search_query }}" class="search-input">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        
         <table class="table-responsive">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>#</th>  
                     <th>Contract Template</th>
                     <th>Created At</th>
                     <th>Employee</th>
@@ -295,9 +348,9 @@
                         {% elif contract.user_signed %}
                         <span class="badge badge-primary">Signed by Employee</span>
                         {% elif contract.admin_signed %}
-                        <span class="badge badge-warning">Signed by Admin</span>
+                        <span class="badge badge-secondary text-dark">Signed by JBL</span>
                         {% elif contract.email_sent %}
-                        <span class="badge badge-warning">Sent to employee</span>
+                        <span class="badge badge-warning text-dark">Sent to employee</span>
                         {% else %}
                         <span class="badge badge-danger">Pending</span>
                         {% endif %}
@@ -316,25 +369,10 @@
                 {% endfor %}
             </tbody>
         </table>
-        
+        <a href="{% url 'hrms:upload_bulk_excel' %}">Generate More Contracts</a>
 
-        <!-- Pagination for Contracts -->
-        <div class="pagination-container">
-            <div class="pagination">
-                {% if contracts.has_previous %}
-                    <a href="?contract_page=1">&laquo; First</a>
-                    <a href="?contract_page={{ contracts.previous_page_number }}">Previous</a>
-                {% endif %}
-
-                <span>Page {{ contracts.number }} of {{ contracts.paginator.num_pages }}</span>
-
-                {% if contracts.has_next %}
-                    <a href="?contract_page={{ contracts.next_page_number }}">Next</a>
-                    <a href="?contract_page={{ contracts.paginator.num_pages }}">Last &raquo;</a>
-                {% endif %}
-            </div>
-        </div>
     </div>
+    
 </div>
 
 {% endblock %}

@@ -129,10 +129,10 @@ urlpatterns = [
     path('upload_excel/', views.UploadExcelView.as_view(), name='upload_excel'),
     path('search/', views.SearchResultsView.as_view(), name='search_results'),
     path('contract/<int:contract_id>/', views.contract_detail, name='contract_detail'),
-    path('contract/sign/<int:contract_id>/', views.sign_contract, name='sign_contract'),
+    # path('contract/sign/<int:contract_id>/', views.sign_contract, name='sign_contract'),
     path('download/sample-excel/', views.download_sample_excel, name='download_sample_excel'),
 
-# CONTRACT MANAGEMENT
+# CONTRACT MANAGEMENT   
 
   # Create a contract template
 
@@ -140,17 +140,19 @@ urlpatterns = [
     path('contract_management/create-contract/<int:template_id>/', contract_management_views.create_contract, name='create_contract'),
     path('contract_management/bulk-upload/<int:template_id>/', contract_management_views.bulk_upload_contracts, name='bulk_upload_contracts'),
     path('contract_management/templates/', contract_management_views.combined_contract_and_template_list, name='template_list'),
-    path('contract_management/contracts/', contract_management_views.contract_list, name='contract_list'),
     path('contract_management/contract-preview/<int:contract_id>/', contract_management_views.contract_preview, name='contract_preview'),
     path('user-search/', contract_management_views.user_search, name='user_search'),
-    # path('contract_management/js-signature/<int:contract_id>/', contract_management_views.sign_contract, name='sign_contract'),
-    # path('contract/<int:contract_id>/review/', contract_management_views.contract_preview, name='sign_contract'),
     path('contract/<int:contract_id>/sign/', contract_management_views.sign_contract, name='sign_contract'),
-    path('contract_management/templa/contract-list/', contract_management_views.contract_list, name='contract_list'),
+    path('contract_management/sign-success/<int:contract_id>/', contract_management_views.contract_sign_success, name='contract_sign_success'),
 
-    path('sign/user/<int:contract_id>/', contract_management_views.sign_contract_user, name='sign_contract_user'),
-    path('sign/admin/<int:contract_id>/', contract_management_views.sign_contract_admin, name='sign_contract_admin'),
+    # privacy policy
+    path('privacy-policy/', contract_management_views.privacy_policy, name='privacy_policy'),
 
-
+    # New Contract bulk upload
+    path('upload-bulk-excel/', contract_management_views.upload_contract_excel, name='upload_bulk_excel'),  # Upload Excel
+    path('generate-bulk-contracts/', contract_management_views.generate_contracts, name='generate_contracts'),  # Generate Contracts
+    path('create_bulk_template/', contract_management_views.create_bulk_contract_template, name='create_contract_bulk_template'),
+    path('preview_bulk_contract/<int:template_id>/', contract_management_views.preview_bulk_contract, name='preview_bulk_contract'),
+    # path('bulk_upload_contracts/<int:template_id>/', views.bulk_upload_contracts, name='bulk_upload_contracts'),
 ]   
     
