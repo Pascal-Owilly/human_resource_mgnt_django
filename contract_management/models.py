@@ -17,6 +17,16 @@ class ContractTemplate(models.Model):
     def __str__(self):
         return f"Contract for {self.id}"
 
+    def render_template(self, data):
+        """ 
+        Replace placeholders in template_content with data provided.
+        """
+        content = self.template_content
+        for placeholder in self.placeholders.all():
+            placeholder_key = placeholder.key
+            content = content.replace(f'{{{{ {placeholder_key} }}}}', data.get(placeholder_key, f"[{placeholder_key} not found]"))
+        return content
+
 class Contract(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     template = models.ForeignKey(ContractTemplate, on_delete=models.CASCADE)

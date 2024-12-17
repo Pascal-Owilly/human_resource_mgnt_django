@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Base directory of your Django project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,30 +21,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#=a7f+o=$5#uln!f9$)d)ax225+(tq&5i613&l^cg2h_$pjg_v'
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST = 'smtp.hostinger.com'
-# EMAIL_HOST = 'smtp-relay.gmail.com'
-EMAIL_PORT = 587 
-EMAIL_USE_TLS = True  
-EMAIL_HOST_USER = 'support@jawabubest-wms.com'  # Business email
-EMAIL_HOST_PASSWORD = 'Charlene@2024#' 
-BASE_URL = '127.0.0.1:8000'
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-PROTOCOL = 'http'   
-DOMAIN = '127.0.0.1:8000'
-
-SITE_NAME = '127.0.0.1'
+# Base URLs
+BASE_URL = config('BASE_URL')
+PROTOCOL = config('PROTOCOL')
+DOMAIN = config('DOMAIN')
+SITE_NAME = config('SITE_NAME')
 
 # cross origin
 CORS_ORIGIN_ALLOW_ALL = True 

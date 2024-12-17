@@ -344,21 +344,28 @@
                     <td>{{ contract.user.get_full_name }}</td>
                     <td>
                         {% if contract.is_fully_signed %}
-                        <span class="badge badge-success">Fully Signed</span>
+                            <span class="badge badge-success" style="font-size: 11px;">Fully Signed</span>
                         {% elif contract.user_signed %}
-                        <span class="badge badge-primary">Signed by Employee</span>
+                            <span class="badge badge-primary" style="font-size: 11px;">Signed by Employee</span>
                         {% elif contract.admin_signed %}
-                        <span class="badge badge-secondary text-dark">Signed by JBL</span>
+                            <span class="badge badge-secondary text-dark" style="font-size: 11px;">Signed by JBL</span>
                         {% elif contract.email_sent %}
-                        <span class="badge badge-warning text-dark">Sent to employee</span>
+                            <span class="badge badge-warning text-dark" style="font-size: 11px;">Sent to employee</span>
                         {% else %}
-                        <span class="badge badge-danger">Pending</span>
+                            <span class="badge btn-sm badge-danger"  style="font-size: 11px;">Pending</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'hrms:contract_preview' contract.id %}" class="btn btn-info">View Contract</a>
+                        <a href="{% url 'hrms:contract_preview' contract.id %}" class="btn btn-info btn-sm" style="font-size: 11px;">View </a>
                         {% if not contract.admin_signed and not contract.is_fully_signed %}
-                        <a href="{% url 'hrms:sign_contract' contract.id %}" class="btn btn-warning">Sign Contract</a>
+                            <a href="{% url 'hrms:sign_contract' contract.id %}" class="btn btn-sm btn-warning" style="font-size: 11px;">Sign </a>
+                        {% endif %}
+                        {% if contract.admin_signed and contract.user_signed %}
+                            <!-- Add the button to download the PDF when contract is fully signed -->
+                            <a href="" class="btn btn-sm btn-danger text-light" style="font-size: 11px;">
+                                <i class="fa fa-arrow-down" style="font-size: 11px;color: white;"></i> PDF
+                            </a>
+                            
                         {% endif %}
                     </td>
                 </tr>
@@ -369,7 +376,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <a href="{% url 'hrms:upload_bulk_excel' %}">Generate More Contracts</a>
+        
 
     </div>
     

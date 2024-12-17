@@ -154,5 +154,5 @@ urlpatterns = [
     path('create_bulk_template/', contract_management_views.create_bulk_contract_template, name='create_contract_bulk_template'),
     path('preview_bulk_contract/<int:template_id>/', contract_management_views.preview_bulk_contract, name='preview_bulk_contract'),
     # path('bulk_upload_contracts/<int:template_id>/', views.bulk_upload_contracts, name='bulk_upload_contracts'),
-]   
+]       
     
