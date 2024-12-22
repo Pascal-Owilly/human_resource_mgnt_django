@@ -7,4 +7,4 @@ git add .
 git commit -m "update"
 
 # Push changes to the 'master-6' branch on the remote repository
-git push origin git checkout contract_management
+git push origin contract_management
