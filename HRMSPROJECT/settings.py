@@ -15,8 +15,48 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 
+# LOGGING
+import os
+
+
 # Base directory of your Django project
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',   
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'contract_management': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -193,3 +233,4 @@ TWILIO_PHONE_NUMBER = '+254712154175'  # Replace with your Twilio phone number
 JSIGNATURE_WIDTH = 500
 JSIGNATURE_HEIGHT = 200
 
+LOGO_URL = 'https://www.jawabubest-wms.com/static/hrms/images/logo.png'

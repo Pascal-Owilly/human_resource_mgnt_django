@@ -1,0 +1,137 @@
+{% extends 'hrms/layout.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary">Create Memo</h2>
+    
+    <!-- <form method="get" class="mb-4 d-flex align-items-center" id="searchForm">
+        <input 
+            type="text" 
+            name="search" 
+            id="search-input" 
+            class="form-control me-2" 
+            placeholder="Search Users..." 
+            value="{{ request.GET.search }}"
+            style="max-width: 300px;"
+        >
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form> -->
+    
+    {% if messages %}
+    <div class="alert-section mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="card shadow-sm">
+        <div class="card">
+            <div class="card-header d-flex justify-content-center align-items-center bg-primary text-white">
+                <h5>
+                <a href="{% url 'hrms:list_memo' %}" class="text-white">List of Memos</a>
+            </h5>
+            </div>
+            
+        </div>
+        <div class="card-body p-4">
+            <form method="post" action="{% url 'hrms:create_memo' %}">
+                {% csrf_token %}
+                
+                <!-- Memo Details -->
+                <div class="mb-4">
+                    <h5 class="text-primary">Create New Memo </h5>
+                    <div class="border p-3 rounded">
+                        {{ form.as_p }}
+                    </div>
+                </div>
+        
+                <!-- Select Recipients -->
+                <!-- <div class="mb-4">
+                    <h6 class="text-muted">Select Recipients</h6>
+                    <div id="user-list" 
+                         class="p-3 border rounded bg-light" 
+                         style="max-height: 200px; overflow-y: auto;">
+                        <p class="text-center text-secondary">No users available</p>
+                    </div>
+                </div> -->
+        
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-outline-success w-100">
+                    <i class="bi bi-send"></i> Send Memo
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleFilter = document.getElementById('role-filter');
+        const searchInput = document.getElementById('search-input');
+        const userListContainer = document.getElementById('user-list');
+        const recipientsInput = document.getElementById('id_recipients'); // Input for recipients
+
+        // Fetch users based on category
+        function fetchUsers() {
+            const search = searchInput.value; // Get search query
+
+            // Fetch users from server
+            fetch(`/create_memo/?search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.users;
+                    userListContainer.innerHTML = ''; // Clear previous users
+
+                    if (users.length > 0) {
+                        users.forEach(user => {
+                            const userItem = document.createElement('div');
+                            userItem.classList.add('form-check'); // Add Bootstrap styling
+                            userItem.innerHTML = `
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    name="recipients" 
+                                    value="${user.user__id}" 
+                                    id="user-${user.user__id}"
+                                >
+                                <label class="form-check-label" for="user-${user.user__id}">
+                                    ${user.user__first_name} ${user.user__last_name} (${user.user__email})
+                                </label>
+                            `;
+                            userListContainer.appendChild(userItem);
+                        });
+                    } else {
+                        userListContainer.innerHTML = '<p class="text-muted">No users found.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        // Update recipients input
+        function updateRecipients() {
+            const selectedUsers = [];
+            const checkboxes = userListContainer.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(checkbox => {
+                selectedUsers.push(checkbox.value);
+            });
+            recipientsInput.value = selectedUsers.join(','); // Set recipients value
+        }
+
+        // Event listener for search input changes
+        searchInput.addEventListener('input', fetchUsers);
+
+        // Update recipients when checkboxes are selected
+        userListContainer.addEventListener('change', updateRecipients);
+
+        // Initial load of users
+        fetchUsers();
+    });
+</script>
+{% endblock %}

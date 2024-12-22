@@ -3,7 +3,46 @@
 {% block title %} Create Contract | JBL {% endblock title %}
 {% block content %}
 
+<style>
+    /* Custom Message Styles */
+.messages .alert {
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px;    /* Adjust font size */
+    padding: 15px 20px; /* More padding for better spacing */
+}
+
+.messages .alert-success {
+    background-color: #28a745; /* Green success */
+}
+
+.messages .alert-danger {
+    background-color: #dc3545; /* Red error */
+}
+
+.messages .alert-info {
+    background-color: #17a2b8; /* Blue info */
+}
+
+.messages .alert-warning {
+    background-color: #ffc107; /* Yellow warning */
+}
+
+.messages .alert .close {
+    color: white;  /* White close button for better visibility */
+}
+
+</style>
+
 <div class="create-contract-container">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <form method="post" class="contract-form">
         {% csrf_token %}
         <h3 class="template-name">Template: {{ template.name }}</h3>

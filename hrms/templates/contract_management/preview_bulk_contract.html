@@ -5,126 +5,166 @@
 
 {% block content %}
 <style>
-    /* Global styles for the entire application */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-}
-
-header {
-    background-color: #5c6bc0;
-    padding: 10px 20px;
-}
-
-header nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 20px;
-}
-
-header nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-main {
+ .contract-preview-container {
+    font-family: 'Arial', sans-serif;
+    width: 90%;
+    margin: 20px auto;
     padding: 20px;
-}
-
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px;
-}
-
-.contract-preview-container {
-    width: 80%;
-    max-width: 900px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
-    color: #333;
+.contract-preview-container h2 {
     font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.contract-preview-container p {
+    font-size: 16px;
+    color: #555;
+}
+
+.message-container {
     margin-bottom: 20px;
 }
 
-.contract-preview-form {
-    display: flex;
-    flex-direction: column;
+.message {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    font-size: 14px;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.message.success {
+    background: #e0f7e9;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.message.error {
+    background: #fbeae8;
+    color: #c62828;
+    border: 1px solid #f44336;
+}
+
+.sent-contracts-container {
+    max-height: 200px;
+    margin: 20px 0;
+    padding: 10px;
+    background: #eef5fa;
+    border: 1px solid #cce7f6;
+    border-radius: 5px;
+    overflow: scroll;
+}
+
+.sent-contracts-container h3 {
+    font-size: 18px;
+    color: #0277bd;
+    margin-bottom: 10px;
+}
+
+.sent-contracts-container ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.sent-contracts-container li {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.5;
 }
 
 .contract-content-label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 8px;
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 10px;
     font-weight: bold;
+    font-size: 16px;
 }
 
 .contract-content-textarea {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    resize: vertical;
+    line-height: 1.6;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.contract-content-textarea:focus {
+    outline: none;
+    border-color: #4caf50;
+    background: #fff;
+}
+
+.form-actions {
+    margin-top: 20px;
+    text-align: right;
 }
 
 .submit-btn {
-    padding: 10px 20px;
-    background-color: #5c6bc0;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    background: #4caf50;
+    color: #fff;
     font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.3s ease;
 }
 
 .submit-btn:hover {
-    background-color: #3f51b5;
-}
-
-@media (max-width: 768px) {
-    .contract-preview-container {
-        width: 90%;
-        padding: 15px;
-    }
+    background: #388e3c;
 }
 
 </style>
-    <div class="contract-preview-container">
-        <h2>Contract Preview</h2>
-        <p><strong>Template: </strong>{{ template.name }}</p>
-        
-        <form method="POST" class="contract-preview-form">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="contract_content" class="contract-content-label">Contract Content:</label>
-                <textarea id="contract_content" name="contract_content" rows="15" class="contract-content-textarea" required>{{ contract_content }}</textarea>
+
+<div class="contract-preview-container">
+    {% if messages %}
+    <div class="message-container">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                <p>{{ message }}</p>
             </div>
-            
-            <input type="hidden" name="user_id" value="{{ user.id }}">
-            
-            <div class="form-actions">
-                <button type="submit" class="submit-btn">Create Contract</button>
-            </div>
-        </form>
+        {% endfor %}
     </div>
+{% endif %}
+    <h2>Contract Preview</h2>
+    <p><strong>Template: </strong>{{ template.name }}</p>
+    
+    <form method="POST" class="contract-preview-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <div class="sent-contracts-container">
+                <h5>The following emails will receive contract when you hit sent</h5>
+                {% if sent_contracts %}
+                    <ul>
+                        {% for contract in sent_contracts %}
+                            <li>
+                                <strong></strong> {{ contract.user.get_full_name }}-{{ contract.user.email}}<br>
+                            </li>
+                        {% endfor   %}
+                    </ul>
+                {% else %}
+                    <p>No contracts have been sent for this template yet.</p>
+                {% endif %}
+            </div>
+            <label for="contract_content" class="contract-content-label">Contract Content:</label>
+            <textarea id="contract_content" name="contract_content" rows="15" class="contract-content-textarea" required>{{ contract_content }}</textarea>
+        </div>
+        
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">Send </button>
+        </div>
+    </form>
+</div>
+
 {% endblock %}

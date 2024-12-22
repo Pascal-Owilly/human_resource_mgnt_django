@@ -1,5 +1,5 @@
 from django.db import models
-from hrms.models import User
+from hrms.models import User, Employee, AccountManager, HumanResourceManager
 
 class Placeholder(models.Model):
     name = models.CharField(max_length=255)  # Placeholder name (e.g., 'Full Name')
@@ -29,13 +29,22 @@ class ContractTemplate(models.Model):
 
 class Contract(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    template = models.ForeignKey(ContractTemplate, on_delete=models.CASCADE)
+    template = models.ForeignKey('ContractTemplate', on_delete=models.CASCADE)
     content = models.TextField()
+    
+    # Fields to track the signing status for both user and admin
     user_signed = models.BooleanField(default=False)
     admin_signed = models.BooleanField(default=False)
     email_sent = models.BooleanField(default=False)
-    signature = models.TextField(blank=True, null=True)  # For storing signature data
-    initials = models.CharField(max_length=5, blank=True, null=True)  # For initials
+
+    # Signature fields for both user and admin (storing base64 encoded signatures or image files)
+    user_signature = models.ImageField(upload_to='user_signatures/', blank=True, null=True)
+    admin_signature = models.ImageField(upload_to='admin_signatures/', blank=True, null=True)
+    # Other fields...
+    # Initials fields for both user and admin
+    user_initials = models.CharField(max_length=5, blank=True, null=True)  # For user initials
+    admin_initials = models.CharField(max_length=5, blank=True, null=True)  # For admin initials
+    
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -44,7 +53,7 @@ class Contract(models.Model):
 
     def __str__(self):
         return f"Contract for {self.template.name} ({self.created_at})"
-
+        
 # Contract signature
 from jsignature.fields import JSignatureField
 
@@ -55,3 +64,29 @@ class ContractSignature(models.Model):
 
     def __str__(self):
         return f"Signature for {self.full_name} - ({self.created_at})"
+
+# Memo  
+from django.db import models
+
+class Memo(models.Model):
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    
+    # Dynamically populate choices
+    RECIPIENT_CATEGORIES = [
+        ('all', 'All Users'),
+        ('employee', 'Employees'),
+        ('account_manager', 'Account Managers'),
+        ('human_resource_manager', 'HR Managers'),
+    ]
+    
+    recipients_category = models.CharField(
+        max_length=50,
+        choices=RECIPIENT_CATEGORIES,
+        default='all'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

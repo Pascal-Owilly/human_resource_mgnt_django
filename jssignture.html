@@ -1,0 +1,98 @@
+{% extends 'hrms/layout.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Sign Contract: {{ contract.title }}</h2>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" id="sign-contract-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="signature">Draw your signature:</label>
+            <canvas id="signature-pad" class="signature-pad" width="400" height="200"></canvas>
+            <input type="hidden" name="signature_data" id="signature-data">
+            <button type="button" id="clear-signature">Clear</button>
+        </div>
+
+        <div class="form-group">
+            <label for="initials">Initials:</label>
+            <input type="text" name="initials" id="initials" class="form-control" value="{{ contract.user_initials }}">
+        </div>
+
+        <button type="button" id="preview-signature" class="btn btn-info">Preview Signature</button>
+        <button type="submit" class="btn btn-primary">Sign Contract</button>
+    </form>
+
+    <!-- Signature Preview Modal -->
+    <div id="signature-preview-modal" style="display:none;">
+        <h3>Signature Preview</h3>
+        <img id="signature-preview" src="" alt="Signature Preview" />
+        <button type="button" onclick="closePreview()">Close</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', () => { drawing = true; });
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', draw);
+    document.getElementById('clear-signature').addEventListener('click', clearSignature);
+    document.getElementById('preview-signature').addEventListener('click', previewSignature);
+
+    function draw(event) {
+        if (!drawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+    }
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('signature-data').value = '';
+    }
+
+    function previewSignature() {
+        const dataURL = canvas.toDataURL();
+        document.getElementById('signature-preview').src = dataURL;
+        document.getElementById('signature-data').value = dataURL;
+        document.getElementById('signature-preview-modal').style.display = 'block';
+    }
+
+    function closePreview() {
+        document.getElementById('signature-preview-modal').style.display = 'none';
+    }
+</script>
+
+<style>
+    .signature-pad {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+    #signature-preview-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+</style>
+
+{% endblock %}

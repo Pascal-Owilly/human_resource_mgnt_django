@@ -1,170 +1,113 @@
-{% extends 'hrms/layout.html' %}
-{% block title %} Contracts & Templates List | JBL {% endblock title %}
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Signature</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jSignature/2.1.2/jSignature.min.js"></script>
+    <title>Sign Contract</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <style>
-        /* Styles for signature pad and form elements */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
         .signature-pad {
-            border: 1px solid #ccc;
-            width: 100%;
-            height: 250px;
-            background-color: #fafafa;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
+            border: 2px solid #007bff;
             border-radius: 4px;
+            margin-bottom: 10px;
         }
-        .form-group label {
+
+        #signature-preview-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            margin-top: 10px;
+        }
+
+        .form-label {
             font-weight: bold;
         }
-        .form-group .hint {
-            font-size: 0.9em;
-            color: #666;
-        }
-        .form-group button {
-            padding: 8px 15px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form-group button:disabled {
-            background-color: #ccc;
-        }
-        .form-group .error {
-            color: red;
-            font-size: 0.9em;
-        }
-
-        .success {
-    color: green;
-    font-weight: bold;
-    margin-top: 20px;
-}
-
-.error {
-    color: red;
-    font-weight: bold;
-    margin-top: 20px;
-}
-
-/* Fixed position for mobile devices */
-@media (max-width: 768px) {
-    .signature-pad {
-        position: fixed;
-        bottom: 10%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 95%;
-        height: 200px;
-        z-index: 1000; /* Ensures it stays on top of other content */
-    }
-
-    .container {
-        padding-bottom: 300px; /* Add space to avoid overlapping content */
-    }
-}
-
     </style>
 </head>
 <body>
+    <div class="container mt-5">
+        <h2 class="text-center">Sign Contract: {{ contract.title }}</h2>
 
-<div class="container">
-    <div class="header">
-        <h2>Sign Your Contract</h2>
-        <p>Please review and sign the contract below to proceed.</p>
+        {% if messages %}
+            <div class="alert alert-info">
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="POST" id="sign-contract-form" class="border p-4 rounded bg-light shadow">
+            {% csrf_token %}
+            
+            <div class="form-group mb-4">
+                <label for="signature" class="form-label">Draw your signature:</label>
+                <canvas id="signature-pad" class="signature-pad" width="400" height="200"></canvas>
+                <input type="hidden" name="signature_data" id="signature-data">
+                <button type="button" id="clear-signature" class="btn btn-secondary mt-2">Clear</button>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="initials" class="form-label">Initials:</label>
+                <input type="text" name="initials" id="initials" class="form-control" value="{{ contract.user_initials }}">
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="button" id="preview-signature" class="btn btn-info">Preview Signature</button>
+                <button type="submit" class="btn btn-primary">Sign Contract</button>
+            </div>
+        </form>
+
+        <!-- Signature Preview Div -->
+        <div id="signature-preview-container" class="mt-4" style="display:none;">
+            <h3>Signature Preview</h3>
+            <img id="signature-preview" src="" alt="Signature Preview" class="img-fluid" />
+            <button type="button" class="btn btn-secondary mt-2" onclick="closePreview()">Close</button>
+        </div>
     </div>
 
-    <form method="POST" action="{% url 'hrms:sign_contract' contract.id %}">
-        {% csrf_token %}
-    
-        <!-- Signature Pad -->
-        <div class="form-group">
-            <label for="signaturePad">Draw Your Signature</label>
-            <div id="signaturePad" class="signature-pad"></div>
-            <button type="button" id="clear" class="clear-button">Clear</button>
-        </div>
-        
-        <!-- Initials Field (Optional) -->
-        <div class="form-group">
-            <label for="initials">Enter Your Initials (Optional)</label>
-            <input type="text" id="initials" name="initials" maxlength="5" placeholder="Enter your initials" />
-            <p class="hint">* You can either draw your signature or enter your initials, but not both.</p>
-        </div>
+    <script>
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
 
-        <!-- Agreement Checkbox -->
-        <div class="form-group">
-            <label for="agree_to_contract">
-                <input type="checkbox" id="agree_to_contract" name="agree_to_contract" required>
-                I agree to the terms of this contract.
-            </label>
-        </div>
-    
-        <!-- Hidden Signature Data -->
-        <input type="hidden" name="signature_data" id="signature_data">
-    
-        <!-- Submit Button -->
-        <div class="form-group">
-            <button type="submit" id="submit" class="submit-button">Submit Signature</button>
-        </div>
-    </form>
-        
-</div>
+        canvas.addEventListener('mousedown', () => { drawing = true; });
+        canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+        canvas.addEventListener('mousemove', draw);
+        document.getElementById('clear-signature').addEventListener('click', clearSignature);
+        document.getElementById('preview-signature').addEventListener('click', previewSignature);
 
-<script>
-    $(document).ready(function () {
-        // Initialize the signature pad
-        var $signaturePad = $("#signaturePad").jSignature();
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        }
 
-        // Clear signature pad on button click
-        $("#clear").click(function () {
-            $signaturePad.jSignature("reset");
-            $("#signature_data").val("");
-        });
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('signature-data').value = '';
+        }
 
-        // Save signature data on form submission
-        $("form").submit(function () {
-            var signatureData = $signaturePad.jSignature("getData", "base30");
-            if (signatureData) {
-                $("#signature_data").val(signatureData);
-            }
-        });
-    });
-</script>
+        function previewSignature() {
+            const dataURL = canvas.toDataURL();
+            document.getElementById('signature-preview').src = dataURL;
+            document.getElementById('signature-data').value = dataURL;
+            document.getElementById('signature-preview-container').style.display = 'block';
+        }
 
+        function closePreview() {
+            document.getElementById('signature-preview-container').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
-{% endblock %}

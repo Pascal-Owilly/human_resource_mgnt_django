@@ -149,10 +149,21 @@ urlpatterns = [
     path('privacy-policy/', contract_management_views.privacy_policy, name='privacy_policy'),
 
     # New Contract bulk upload
-    path('upload-bulk-excel/', contract_management_views.upload_contract_excel, name='upload_bulk_excel'),  # Upload Excel
-    path('generate-bulk-contracts/', contract_management_views.generate_contracts, name='generate_contracts'),  # Generate Contracts
+    # path('upload-bulk-excel/', contract_management_views.upload_contract_excel, name='upload_bulk_excel'),  # Upload Excel
+    # path('generate-bulk-contracts/', contract_management_views.generate_contracts, name='generate_contracts'),  # Generate Contracts
     path('create_bulk_template/', contract_management_views.create_bulk_contract_template, name='create_contract_bulk_template'),
     path('preview_bulk_contract/<int:template_id>/', contract_management_views.preview_bulk_contract, name='preview_bulk_contract'),
     # path('bulk_upload_contracts/<int:template_id>/', views.bulk_upload_contracts, name='bulk_upload_contracts'),
+    path('contract/<int:contract_id>/download-pdf/', contract_management_views.generate_contract_pdf, name='contract_pdf'),
+
+    # path('contracts/<int:template_id>/upload_excel/', contract_management_views.process_excel_and_generate_contracts, name='upload_excel_for_template'),
+
+    # Memo
+    path('memo/create', contract_management_views.create_memo, name='create_memo'),
+    path('memo/list', contract_management_views.list_memo, name='list_memo'),
+    path('memo/filter_users/', contract_management_views.filter_users, name='filter_users'),
+
+
 ]       
+
     
